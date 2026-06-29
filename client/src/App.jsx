@@ -6,17 +6,24 @@ import Dashboard from './pages/Dashboard'
 import AskQuestion from './pages/user/AskQuestion'
 import UserQuestions from './pages/user/UserQuestions'
 import QuestionDetail from './pages/user/QuestionDetail'
+import ExpertLayout from './layouts/ExpertLayout'
 import ExpertDashboard from './pages/expert/ExpertDashboard'
 import ExpertQuestions from './pages/expert/ExpertQuestions'
 import ExpertQuestionDetail from './pages/expert/ExpertQuestionDetail'
 import ExpertWallet from './pages/expert/ExpertWallet'
+import AdminLayout from './layouts/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminAnalytics from './pages/admin/AdminAnalytics'
 import AdminQuestions from './pages/admin/AdminQuestions'
 import AdminAnswers from './pages/admin/AdminAnswers'
 import AdminExperts from './pages/admin/AdminExperts'
 import AdminCategories from './pages/admin/AdminCategories'
 import AdminExpertTypes from './pages/admin/AdminExpertTypes'
 import AdminUsers from './pages/admin/AdminUsers'
+import AdminPayments from './pages/admin/AdminPayments'
+import AdminWithdrawals from './pages/admin/AdminWithdrawals'
+import AdminSettings from './pages/admin/AdminSettings'
+import AdminNotifications from './pages/admin/AdminNotifications'
 import { ProtectedRoute, GuestRoute } from './routes/ProtectedRoute'
 import { ROLES } from './constants'
 
@@ -36,20 +43,29 @@ export default function App() {
         </Route>
 
         <Route element={<ProtectedRoute roles={[ROLES.EXPERT]} />}>
-          <Route path="/expert" element={<ExpertDashboard />} />
-          <Route path="/expert/questions" element={<ExpertQuestions />} />
-          <Route path="/expert/questions/:id" element={<ExpertQuestionDetail />} />
-          <Route path="/expert/wallet" element={<ExpertWallet />} />
+          <Route path="/expert" element={<ExpertLayout />}>
+            <Route index element={<ExpertDashboard />} />
+            <Route path="questions" element={<ExpertQuestions />} />
+            <Route path="questions/:id" element={<ExpertQuestionDetail />} />
+            <Route path="wallet" element={<ExpertWallet />} />
+          </Route>
         </Route>
 
         <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/questions" element={<AdminQuestions />} />
-          <Route path="/admin/answers" element={<AdminAnswers />} />
-          <Route path="/admin/experts" element={<AdminExperts />} />
-          <Route path="/admin/categories" element={<AdminCategories />} />
-          <Route path="/admin/expert-types" element={<AdminExpertTypes />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="questions" element={<AdminQuestions />} />
+            <Route path="answers" element={<AdminAnswers />} />
+            <Route path="experts" element={<AdminExperts />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="payments" element={<AdminPayments />} />
+            <Route path="withdrawals" element={<AdminWithdrawals />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="expert-types" element={<AdminExpertTypes />} />
+            <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

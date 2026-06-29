@@ -63,7 +63,7 @@ export default function RecommendedExperts({ experts, loading, categoryName, exp
                       className="h-16 w-16 rounded-2xl object-cover ring-2 ring-surface"
                     />
                     {expert.isVerified && (
-                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-white ring-2 ring-card">
+                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-fg ring-2 ring-card">
                         <BadgeCheck size={11} />
                       </span>
                     )}

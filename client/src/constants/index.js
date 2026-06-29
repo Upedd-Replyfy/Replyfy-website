@@ -1,3 +1,55 @@
+export const PLAN_IDS = ['basic', 'mentor', 'expert_call']
+
+export const PLANS = {
+  basic: {
+    id: 'basic',
+    name: 'Basic',
+    tagline: 'Best expert chosen for you',
+    price: 99,
+    pricePaise: 9900,
+    features: [
+      'We choose the best expert for your query',
+      'Guaranteed email reply',
+      '24–48 hour turnaround',
+    ],
+  },
+  mentor: {
+    id: 'mentor',
+    name: 'Choose Mentor',
+    tagline: 'Pick your preferred expert',
+    price: 199,
+    pricePaise: 19900,
+    popular: true,
+    features: [
+      'You select your preferred expert',
+      'Guaranteed email reply',
+      'Priority routing',
+    ],
+  },
+  expert_call: {
+    id: 'expert_call',
+    name: 'Expert Call',
+    tagline: 'Live 1-on-1 guidance',
+    price: 999,
+    pricePaise: 99900,
+    features: [
+      '20-minute live call with your expert',
+      'Deep personalised guidance',
+      'Choose any mentor',
+    ],
+  },
+}
+
+export function planRequiresExpertSelection(plan) {
+  return plan === 'mentor' || plan === 'expert_call'
+}
+
+export const DASHBOARD_ROUTES = {
+  user: '/dashboard',
+  expert: '/expert',
+  admin: '/admin',
+}
+
 export const ROLES = {
   USER: 'user',
   EXPERT: 'expert',
@@ -13,41 +65,4 @@ export const QUESTION_STATUS = {
   waiting_admin_review: 'Answer Under Review',
   completed: 'Completed',
   cancelled: 'Cancelled',
-}
-
-export const PLANS = {
-  standard: {
-    id: 'standard',
-    name: 'Standard',
-    tagline: 'Affordable · Auto-assigned',
-    price: 499,
-    pricePaise: 49900,
-    features: [
-      'Random available expert by specialization',
-      'Faster automatic assignment',
-      'Affordable pricing',
-      'Ideal for general questions',
-    ],
-    note: 'You cannot choose the expert — we match the best available expert for your category.',
-  },
-  premium: {
-    id: 'premium',
-    name: 'Premium',
-    tagline: 'Choose your expert',
-    price: 999,
-    pricePaise: 99900,
-    features: [
-      'Choose your preferred expert',
-      'View profile, experience & reviews',
-      'See response time & consultation price',
-      'Premium support',
-    ],
-    note: 'Compare experts, select one, review total price, then pay.',
-  },
-}
-
-export const DASHBOARD_ROUTES = {
-  user: '/dashboard',
-  expert: '/expert',
-  admin: '/admin',
 }

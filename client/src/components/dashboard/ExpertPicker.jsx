@@ -92,7 +92,7 @@ export default function ExpertPicker({
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-semibold text-ink">{expert.name}</p>
                       {expert.isVerified && (
-                        <span className="flex items-center gap-0.5 rounded-full bg-ink px-2 py-0.5 text-[10px] font-medium text-white">
+                        <span className="flex items-center gap-0.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-fg">
                           <ShieldCheck size={10} /> Verified
                         </span>
                       )}
@@ -146,7 +146,7 @@ export default function ExpertPicker({
 
                 <span
                   className={`mt-4 block w-full rounded-xl py-2 text-center text-xs font-semibold ${
-                    active ? 'bg-ink text-white' : 'border border-border text-ink'
+                    active ? 'bg-primary text-primary-fg' : 'border border-border text-ink'
                   }`}
                 >
                   {active ? 'Selected' : 'Select'}

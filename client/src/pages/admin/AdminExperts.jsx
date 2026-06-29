@@ -1,129 +1,224 @@
 import { useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { DashboardShell } from '../../components/layouts/DashboardShell'
+import { Pencil, UserPlus, Trash2 } from 'lucide-react'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import AdminModal from '../../components/admin/AdminModal'
+import ProfilePhotoPicker from '../../components/admin/ProfilePhotoPicker'
 import { adminApi } from '../../services/api'
 
-const adminNav = [
-  { to: '/admin', label: 'Dashboard' },
-  { to: '/admin/categories', label: 'Categories' },
-  { to: '/admin/expert-types', label: 'Expert Types' },
-  { to: '/admin/experts', label: 'Experts' },
-  { to: '/admin/questions', label: 'Questions' },
-  { to: '/admin/users', label: 'Users' },
-]
+const inputClass =
+  'w-full rounded-xl border border-white/[0.08] bg-[#090909] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
 
-const emptyForm = {
-  name: '', email: '', password: '', bio: '', experience: '',
-  languages: '', skills: '', category: '', expertType: '',
-  responseTime: 48, questionPrice: 99900, hourlyPrice: 0,
-  isVerified: false, availability: 'available',
+function ExpertAvatar({ expert }) {
+  const src = expert.user?.avatar || expert.profilePhoto
+  const initials = expert.user?.name?.charAt(0)?.toUpperCase() || '?'
+
+  if (src) {
+    return <img src={src} alt="" className="h-10 w-10 rounded-full object-cover" />
+  }
+  return (
+    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/20 text-sm font-semibold text-violet-300">
+      {initials}
+    </span>
+  )
 }
 
 export default function AdminExperts() {
+  const { openRegisterExpert } = useOutletContext() || {}
   const queryClient = useQueryClient()
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState(emptyForm)
-  const [photo, setPhoto] = useState(null)
+  const [editExpert, setEditExpert] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [editPhoto, setEditPhoto] = useState(null)
+  const [deleteExpert, setDeleteExpert] = useState(null)
 
   const { data, isLoading } = useQuery({ queryKey: ['admin-experts'], queryFn: adminApi.getExperts })
-  const { data: categoriesData } = useQuery({ queryKey: ['admin-categories'], queryFn: adminApi.getCategories })
-  const { data: typesData } = useQuery({
-    queryKey: ['admin-expert-types', form.category],
-    queryFn: () => adminApi.getExpertTypes({ category: form.category }),
-    enabled: !!form.category,
-  })
 
-  const categories = categoriesData?.categories || []
-  const expertTypes = typesData?.expertTypes || []
-
-  const createMutation = useMutation({
-    mutationFn: () => {
-      const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
-      if (photo) fd.append('photo', photo)
-      return adminApi.createExpert(fd)
-    },
-    onSuccess: () => {
-      toast.success('Expert created')
-      setShowForm(false)
-      setForm(emptyForm)
-      setPhoto(null)
-      queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
-    },
-    onError: (err) => toast.error(err.message),
-  })
-
-  const deactivateMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id) => adminApi.deleteExpert(id),
     onSuccess: () => {
-      toast.success('Expert deactivated')
+      toast.success('Expert profile deleted')
+      setDeleteExpert(null)
       queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
     },
     onError: (err) => toast.error(err.message),
   })
 
+  const updateMutation = useMutation({
+    mutationFn: () => {
+      const fd = new FormData()
+      Object.entries(editForm).forEach(([k, v]) => {
+        if (k === 'isVerified' || k === 'isActive') fd.append(k, v ? 'true' : 'false')
+        else if (v !== undefined && v !== null) fd.append(k, String(v))
+      })
+      if (editPhoto) fd.append('photo', editPhoto)
+      return adminApi.updateExpert(editExpert._id, fd)
+    },
+    onSuccess: () => {
+      toast.success('Expert updated')
+      queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
+      setEditExpert(null)
+      setEditPhoto(null)
+    },
+    onError: (err) => toast.error(err.message),
+  })
+
+  const openEdit = (e) => {
+    setEditExpert(e)
+    setEditPhoto(null)
+    setEditForm({
+      bio: e.bio || '',
+      experience: e.experience || '',
+      availability: e.availability || 'available',
+      isVerified: e.isVerified || false,
+      status: e.status || 'active',
+      isActive: e.user?.isActive !== false,
+    })
+  }
+
   return (
-    <DashboardShell title="Experts" nav={adminNav}>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-ink">Manage Experts</h1>
-        <button type="button" onClick={() => setShowForm(!showForm)} className="btn-primary rounded-xl px-4 py-2 text-sm font-semibold">
-          Create Expert
-        </button>
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Directory"
+        title="Experts"
+        description="Register, verify, and manage expert accounts"
+        actions={
+          <button
+            type="button"
+            onClick={openRegisterExpert}
+            className="admin-btn-gradient flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
+          >
+            <UserPlus size={16} /> Register Expert
+          </button>
+        }
+      />
+
+      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#111111]">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="bg-[#141414]">
+              <tr className="border-b border-white/[0.08] text-xs uppercase tracking-wider text-muted-light">
+                <th className="px-5 py-3">Expert</th>
+                <th className="px-5 py-3">Category</th>
+                <th className="px-5 py-3">Rating</th>
+                <th className="px-5 py-3">Status</th>
+                <th className="px-5 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-muted">Loading...</td></tr>
+              ) : (data?.experts || []).length === 0 ? (
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-muted">No experts yet. Register one to get started.</td></tr>
+              ) : (
+                data.experts.map((e) => (
+                  <tr key={e._id} className="border-b border-white/[0.06] hover:bg-white/[0.02]">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <ExpertAvatar expert={e} />
+                        <div>
+                          <p className="font-medium text-ink">
+                            {e.user?.name}
+                            {e.isVerified && <span className="ml-1 text-[10px] text-sky-400">✓</span>}
+                          </p>
+                          <p className="text-xs text-muted">{e.user?.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-muted">{e.category?.name} · {e.expertType?.name}</td>
+                    <td className="px-5 py-4 text-ink">★ {e.averageRating || 0}</td>
+                    <td className="px-5 py-4">
+                      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold capitalize ${
+                        e.availability === 'available'
+                          ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                          : 'border-white/[0.08] text-muted'
+                      }`}>
+                        {e.availability}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex gap-1">
+                        <button type="button" onClick={() => openEdit(e)} className="rounded-lg border border-white/[0.08] p-2 text-muted hover:text-ink" title="Edit">
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteExpert(e)}
+                          className="rounded-lg border border-white/[0.08] p-2 text-muted hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
+                          title="Delete profile"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {showForm && (
-        <div className="luxury-card mt-6 grid gap-3 p-6 sm:grid-cols-2">
-          {['name', 'email', 'password', 'experience', 'bio'].map((field) => (
-            <input key={field} value={form[field]} onChange={(e) => setForm((p) => ({ ...p, [field]: e.target.value }))} placeholder={field} type={field === 'password' ? 'password' : 'text'} className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
-          ))}
-          <select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value, expertType: '' }))} className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm">
-            <option value="">Category</option>
-            {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+      <AdminModal open={!!editExpert} onClose={() => { setEditExpert(null); setEditPhoto(null) }} title="Edit Expert" size="md">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            updateMutation.mutate()
+          }}
+          className="space-y-3"
+        >
+          <ProfilePhotoPicker
+            value={editPhoto}
+            onChange={setEditPhoto}
+            label={editPhoto ? 'New profile photo' : 'Update profile photo'}
+          />
+          <input value={editForm.experience} onChange={(ev) => setEditForm((p) => ({ ...p, experience: ev.target.value }))} placeholder="Experience" className={inputClass} />
+          <textarea value={editForm.bio} onChange={(ev) => setEditForm((p) => ({ ...p, bio: ev.target.value }))} placeholder="Bio" rows={3} className={inputClass} />
+          <select value={editForm.availability} onChange={(ev) => setEditForm((p) => ({ ...p, availability: ev.target.value }))} className={inputClass}>
+            <option value="available">Available</option>
+            <option value="busy">Busy</option>
+            <option value="unavailable">Unavailable</option>
           </select>
-          <select value={form.expertType} onChange={(e) => setForm((p) => ({ ...p, expertType: e.target.value }))} className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" disabled={!form.category}>
-            <option value="">Expert type</option>
-            {expertTypes.map((t) => <option key={t._id} value={t._id}>{t.name}</option>)}
-          </select>
-          <input value={form.languages} onChange={(e) => setForm((p) => ({ ...p, languages: e.target.value }))} placeholder="Languages (comma separated)" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
-          <input value={form.skills} onChange={(e) => setForm((p) => ({ ...p, skills: e.target.value }))} placeholder="Skills (comma separated)" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
-          <input value={form.responseTime} onChange={(e) => setForm((p) => ({ ...p, responseTime: e.target.value }))} placeholder="Response time (hours)" type="number" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
-          <input value={form.questionPrice} onChange={(e) => setForm((p) => ({ ...p, questionPrice: e.target.value }))} placeholder="Question price (paise)" type="number" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
-          <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] || null)} className="text-sm sm:col-span-2" />
-          <label className="flex items-center gap-2 text-sm sm:col-span-2">
-            <input type="checkbox" checked={form.isVerified} onChange={(e) => setForm((p) => ({ ...p, isVerified: e.target.checked }))} />
-            Mark as verified
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={editForm.isVerified} onChange={(ev) => setEditForm((p) => ({ ...p, isVerified: ev.target.checked }))} />
+            Verified expert
           </label>
-          <button type="button" onClick={() => createMutation.mutate()} disabled={createMutation.isPending} className="btn-primary rounded-xl px-4 py-2 text-sm font-semibold sm:col-span-2">
-            Create Expert Account
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={editForm.isActive} onChange={(ev) => setEditForm((p) => ({ ...p, isActive: ev.target.checked }))} />
+            Account active
+          </label>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={() => setEditExpert(null)} className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm">Cancel</button>
+            <button type="submit" disabled={updateMutation.isPending} className="admin-btn-gradient rounded-xl px-4 py-2 text-sm font-semibold">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </AdminModal>
+
+      <AdminModal
+        open={!!deleteExpert}
+        onClose={() => setDeleteExpert(null)}
+        title="Delete Expert Profile"
+        description={`Permanently delete ${deleteExpert?.user?.name}'s profile and account? This cannot be undone.`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-2">
+          <button type="button" onClick={() => setDeleteExpert(null)} className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm">
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteMutation.mutate(deleteExpert._id)}
+            disabled={deleteMutation.isPending}
+            className="admin-btn-danger rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
+          >
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete Profile'}
           </button>
         </div>
-      )}
-
-      <div className="mt-6 space-y-3">
-        {isLoading ? <div className="luxury-card h-20 animate-pulse bg-surface" /> : (data?.experts || []).map((e) => (
-          <div key={e._id} className="luxury-card flex items-center justify-between p-5">
-            <div>
-              <p className="font-semibold text-ink">{e.user?.name} {e.isVerified && <span className="text-xs text-muted">✓ Verified</span>}</p>
-              <p className="text-sm text-muted">{e.user?.email}</p>
-              <p className="mt-1 text-xs text-muted-light">
-                {e.category?.name} · {e.expertType?.name} · {e.experience} · ★ {e.averageRating}
-              </p>
-              <p className="text-xs text-muted-light">
-                {(e.skills || []).join(', ')} · {e.availability} · ₹{(e.questionPrice || 0) / 100}
-              </p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className={`rounded-full px-2.5 py-0.5 text-center text-xs font-semibold ${e.status === 'active' && e.availability === 'available' ? 'bg-ink text-white' : 'bg-surface text-muted'}`}>
-                {e.availability}
-              </span>
-              {e.status === 'active' && (
-                <button type="button" onClick={() => deactivateMutation.mutate(e._id)} className="rounded-lg border border-border px-3 py-1 text-xs">Deactivate</button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </DashboardShell>
+      </AdminModal>
+    </div>
   )
 }

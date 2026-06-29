@@ -1,17 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { DashboardShell } from '../../components/layouts/DashboardShell'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import { adminApi } from '../../services/api'
-
-const adminNav = [
-  { to: '/admin', label: 'Dashboard' },
-  { to: '/admin/categories', label: 'Categories' },
-  { to: '/admin/expert-types', label: 'Expert Types' },
-  { to: '/admin/experts', label: 'Experts' },
-  { to: '/admin/questions', label: 'Questions' },
-  { to: '/admin/users', label: 'Users' },
-]
 
 export default function AdminCategories() {
   const queryClient = useQueryClient()
@@ -67,19 +58,23 @@ export default function AdminCategories() {
   }
 
   return (
-    <DashboardShell title="Categories" nav={adminNav}>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-ink">Manage Categories</h1>
-        <button
-          type="button"
-          onClick={() => { setEditing(null); setForm({ name: '', description: '', placeholder: '', suggestions: '', sortOrder: 0 }) }}
-          className="btn-primary rounded-xl px-4 py-2 text-sm font-semibold"
-        >
-          New Category
-        </button>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Catalog"
+        title="Categories"
+        description="Manage question categories and suggestions"
+        actions={
+          <button
+            type="button"
+            onClick={() => { setEditing(null); setForm({ name: '', description: '', placeholder: '', suggestions: '', sortOrder: 0 }) }}
+            className="admin-btn-gradient rounded-xl px-4 py-2 text-sm font-semibold"
+          >
+            New Category
+          </button>
+        }
+      />
 
-      <div className="luxury-card mt-6 grid gap-3 p-6 sm:grid-cols-2">
+      <div className="admin-panel grid gap-3 rounded-[20px] border border-white/[0.08] bg-[#111111] p-6 sm:grid-cols-2">
         <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Name" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
         <input value={form.sortOrder} onChange={(e) => setForm((p) => ({ ...p, sortOrder: e.target.value }))} placeholder="Sort order" type="number" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
         <input value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} placeholder="Description" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm sm:col-span-2" />
@@ -92,7 +87,7 @@ export default function AdminCategories() {
 
       <div className="mt-6 space-y-3">
         {isLoading ? <div className="luxury-card h-20 animate-pulse bg-surface" /> : (data?.categories || []).map((cat) => (
-          <div key={cat._id} className="luxury-card flex items-center justify-between p-5">
+          <div key={cat._id} className="admin-panel flex items-center justify-between rounded-[20px] border border-white/[0.08] bg-[#111111] p-5">
             <div>
               <p className="font-semibold text-ink">{cat.name} <span className="text-xs text-muted">({cat.slug})</span></p>
               <p className="text-sm text-muted">{cat.description}</p>
@@ -107,6 +102,6 @@ export default function AdminCategories() {
           </div>
         ))}
       </div>
-    </DashboardShell>
+    </div>
   )
 }

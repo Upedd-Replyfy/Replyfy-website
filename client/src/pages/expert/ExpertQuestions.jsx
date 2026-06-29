@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { DashboardShell, StatusBadge } from '../../components/layouts/DashboardShell'
+import ExpertPageHeader from '../../components/expert/ExpertPageHeader'
+import ExpertPanel from '../../components/expert/ExpertPanel'
+import { StatusBadge } from '../../components/layouts/DashboardShell'
 import { expertApi } from '../../services/api'
 
 export default function ExpertQuestions() {
@@ -9,40 +11,52 @@ export default function ExpertQuestions() {
     queryFn: () => expertApi.getQuestions({ limit: 50 }),
   })
 
-  const nav = [
-    { to: '/expert', label: 'Dashboard' },
-    { to: '/expert/questions', label: 'Questions' },
-    { to: '/expert/wallet', label: 'Wallet' },
-  ]
+  const questions = data?.questions || []
 
   return (
-    <DashboardShell title="Questions" nav={nav}>
-      <h1 className="text-2xl font-semibold text-ink">Assigned Questions</h1>
+    <div className="space-y-8">
+      <ExpertPageHeader
+        title="Assigned Questions"
+        description={`${questions.length} active assignment${questions.length !== 1 ? 's' : ''} requiring your attention.`}
+        badge={
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-ink">
+            {questions.length} total
+          </span>
+        }
+      />
 
       {isLoading ? (
-        <div className="mt-6 space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="luxury-card h-20 animate-pulse bg-surface" />)}
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-white/[0.04]" />
+          ))}
         </div>
-      ) : (
-        <div className="mt-6 space-y-3">
-          {(data?.questions || []).map((q) => (
-            <Link key={q._id} to={`/expert/questions/${q._id}`} className="luxury-card luxury-card-hover block p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-semibold text-ink">{q.title}</p>
-                  <p className="mt-1 text-xs text-muted">
-                    {q.category?.name} · Deadline: {q.deadline ? new Date(q.deadline).toLocaleDateString() : '—'}
+      ) : questions.length ? (
+        <ExpertPanel title="Your assignments" subtitle="Click a question to view details and submit your answer" noPadding>
+          <div className="divide-y divide-white/[0.06]">
+            {questions.map((q) => (
+              <Link
+                key={q._id}
+                to={`/expert/questions/${q._id}`}
+                className="flex items-center justify-between gap-6 px-6 py-5 transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold text-ink">{q.title}</p>
+                  <p className="mt-1.5 text-sm text-muted">
+                    {q.category?.name} · {q.user?.name || 'User'}
+                    {q.deadline ? ` · Due ${new Date(q.deadline).toLocaleDateString()}` : ''}
                   </p>
                 </div>
                 <StatusBadge status={q.status} />
-              </div>
-            </Link>
-          ))}
-          {!data?.questions?.length && (
-            <div className="luxury-card py-12 text-center text-muted">No assigned questions</div>
-          )}
-        </div>
+              </Link>
+            ))}
+          </div>
+        </ExpertPanel>
+      ) : (
+        <ExpertPanel>
+          <p className="py-12 text-center text-base text-muted">No assigned questions right now. Check back later.</p>
+        </ExpertPanel>
       )}
-    </DashboardShell>
+    </div>
   )
 }

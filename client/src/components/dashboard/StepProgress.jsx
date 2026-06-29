@@ -1,3 +1,5 @@
+import { planRequiresExpertSelection } from '../../constants'
+
 const STEPS = [
   { id: 'compose', label: 'Question' },
   { id: 'plan', label: 'Plan' },
@@ -6,7 +8,7 @@ const STEPS = [
 ]
 
 export default function StepProgress({ current, plan }) {
-  const visible = plan === 'premium'
+  const visible = planRequiresExpertSelection(plan)
     ? STEPS
     : STEPS.filter((s) => s.id !== 'expert')
 
@@ -22,7 +24,7 @@ export default function StepProgress({ current, plan }) {
             <div className="flex flex-1 flex-col items-center gap-1.5">
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold transition-colors ${
-                  done || active ? 'bg-ink text-white' : 'bg-surface text-muted-light'
+                  done || active ? 'bg-primary text-primary-fg' : 'bg-surface text-muted-light'
                 }`}
               >
                 {done ? '✓' : i + 1}
@@ -37,7 +39,7 @@ export default function StepProgress({ current, plan }) {
             </div>
             {i < visible.length - 1 && (
               <div
-                className={`mb-5 h-px flex-1 ${done ? 'bg-ink' : 'bg-border'}`}
+                className={`mb-5 h-px flex-1 ${done ? 'bg-primary' : 'bg-border'}`}
               />
             )}
           </div>

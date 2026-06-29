@@ -16,7 +16,7 @@ const TRUST_STATS = [
 const transition = { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
 
 const inputClass =
-  'rounded-2xl px-5 py-4 text-base shadow-[var(--shadow-luxury-sm)] bg-card border-border focus:border-charcoal focus:ring-charcoal/10'
+  'rounded-2xl px-5 py-4 text-base bg-card border-border text-ink shadow-[var(--shadow-luxury-sm)] placeholder:text-muted-light focus:border-charcoal focus:ring-charcoal/10'
 
 function AuthVisual() {
   return (
@@ -30,13 +30,13 @@ function AuthVisual() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
 
       <svg
-        className="absolute -right-px top-0 h-full w-24 text-white"
-        viewBox="0 0 96 800"
+        className="pointer-events-none absolute -right-px top-0 z-20 h-full w-28 text-black xl:w-36"
+        viewBox="0 0 120 800"
         preserveAspectRatio="none"
         aria-hidden="true"
       >
         <path
-          d="M0,0 C60,120 20,280 70,400 C110,500 30,640 96,800 L96,0 Z"
+          d="M0,0 C70,80 25,220 85,380 C120,520 35,660 120,800 L120,0 Z"
           fill="currentColor"
         />
       </svg>
@@ -180,7 +180,7 @@ export default function Auth({ initialMode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface">
+    <div className="flex min-h-screen bg-black">
       <div className="relative w-full lg:w-[45%]">
         <AuthVisual />
 
@@ -200,10 +200,10 @@ export default function Auth({ initialMode }) {
         </div>
       </div>
 
-      <div className="relative flex w-full flex-col justify-center bg-card px-5 py-12 sm:px-10 lg:w-[55%] lg:px-14 xl:px-20">
+      <div className="relative flex w-full flex-col justify-center bg-black px-5 py-12 sm:px-10 lg:w-[55%] lg:px-14 xl:px-20 [&_label]:text-white/80 [&_input]:border-border [&_input]:bg-card [&_input]:text-ink [&_p.text-xs]:text-red-400">
         <Link
           to="/"
-          className="relative mb-8 inline-flex w-fit items-center gap-2 text-sm text-muted transition-colors hover:text-ink lg:absolute lg:left-14 lg:top-8"
+          className="relative mb-8 inline-flex w-fit items-center gap-2 text-sm text-white/50 transition-colors hover:text-white lg:absolute lg:left-14 lg:top-8"
         >
           <ArrowLeft size={16} />
           Back to home
@@ -224,10 +224,10 @@ export default function Auth({ initialMode }) {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h1 className="text-4xl font-semibold tracking-tight text-ink md:text-5xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
                 {isSignup ? 'Create your account' : 'Welcome back'}
               </h1>
-              <p className="mt-3 text-base text-muted">
+              <p className="mt-3 text-base text-white/50">
                 {isSignup
                   ? 'Start asking questions in under a minute.'
                   : 'Sign in to view your questions and expert responses.'}
@@ -239,7 +239,7 @@ export default function Auth({ initialMode }) {
             <motion.p
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-charcoal shadow-[var(--shadow-luxury-sm)]"
+              className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
             >
               {formError}
             </motion.p>
@@ -348,7 +348,7 @@ export default function Auth({ initialMode }) {
                 >
                   <Link
                     to="/forgot-password"
-                    className="text-sm text-muted transition-colors hover:text-ink"
+                    className="text-sm text-white/50 transition-colors hover:text-white"
                   >
                     Forgot Password
                   </Link>
@@ -384,14 +384,14 @@ export default function Auth({ initialMode }) {
             </motion.button>
           </motion.form>
 
-          <motion.p layout className="mt-8 text-center text-sm text-muted" transition={transition}>
+          <motion.p layout className="mt-8 text-center text-sm text-white/50" transition={transition}>
             {isSignup ? (
               <>
                 Already have an account?{' '}
                 <button
                   type="button"
                   onClick={() => switchMode('login')}
-                  className="font-semibold text-ink underline-offset-2 hover:underline"
+                  className="font-semibold text-white underline-offset-2 hover:underline"
                 >
                   Sign In
                 </button>
@@ -402,7 +402,7 @@ export default function Auth({ initialMode }) {
                 <button
                   type="button"
                   onClick={() => switchMode('signup')}
-                  className="font-semibold text-ink underline-offset-2 hover:underline"
+                  className="font-semibold text-white underline-offset-2 hover:underline"
                 >
                   Sign Up
                 </button>
@@ -417,14 +417,14 @@ export default function Auth({ initialMode }) {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.4 }}
-                className="mt-4 overflow-hidden text-center text-xs leading-relaxed text-muted"
+                className="mt-4 overflow-hidden text-center text-xs leading-relaxed text-white/40"
               >
                 By creating an account, you agree to our{' '}
-                <a href="#" className="underline hover:text-ink">
+                <a href="#" className="underline hover:text-white">
                   Terms
                 </a>{' '}
                 and{' '}
-                <a href="#" className="underline hover:text-ink">
+                <a href="#" className="underline hover:text-white">
                   Privacy Policy
                 </a>
                 .

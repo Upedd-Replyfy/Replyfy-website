@@ -34,14 +34,14 @@ const faqs = [
 
 function FAQItem({ question, answer, isOpen, onToggle }) {
   return (
-    <div className="border-b border-border last:border-0">
+    <div className="border-b border-white/10 last:border-0">
       <button
         type="button"
         onClick={onToggle}
         className="flex w-full items-center justify-between gap-4 py-4 text-left"
       >
-        <span className="text-sm font-semibold text-ink">{question}</span>
-        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl border border-border bg-surface text-muted">
+        <span className="text-sm font-semibold text-white">{question}</span>
+        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60">
           {isOpen ? <Minus size={14} /> : <Plus size={14} />}
         </span>
       </button>
@@ -54,7 +54,7 @@ function FAQItem({ question, answer, isOpen, onToggle }) {
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="pb-4 text-sm text-muted leading-relaxed pr-10">{answer}</p>
+            <p className="pb-4 text-sm text-white/55 leading-relaxed pr-10">{answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -66,7 +66,7 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(0)
 
   return (
-    <section id="faq" className="section-spacing relative w-full bg-card">
+    <section id="faq" className="section-spacing relative w-full border-t border-white/10 bg-black">
       <div className="page-container">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <SectionHeader
@@ -75,6 +75,7 @@ export default function FAQ() {
             highlight="answered"
             description="Everything you need to know before asking your first question."
             align="left"
+            dark
           />
 
           <motion.div
@@ -82,7 +83,7 @@ export default function FAQ() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="luxury-card px-6 md:px-8"
+            className="rounded-[20px] border border-white/10 bg-neutral-900/90 px-6 md:px-8"
           >
             {faqs.map((faq, index) => (
               <FAQItem

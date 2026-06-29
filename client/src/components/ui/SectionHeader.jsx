@@ -8,6 +8,7 @@ export default function SectionHeader({
   description,
   align = 'center',
   className = '',
+  dark = false,
 }) {
   const alignClass =
     align === 'left' ? 'text-left items-start' : 'text-center items-center'
@@ -21,21 +22,41 @@ export default function SectionHeader({
       className={`flex flex-col gap-3 max-w-3xl ${alignClass} ${className}`}
     >
       {eyebrow && (
-        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-light">
+        <span
+          className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${
+            dark ? 'text-white/45' : 'text-muted-light'
+          }`}
+        >
           {eyebrow}
         </span>
       )}
-      <h2 className="text-4xl md:text-5xl lg:text-[3.25rem] font-semibold text-ink text-balance leading-[1.08] tracking-tight">
+      <h2
+        className={`text-4xl md:text-5xl lg:text-[3.25rem] font-semibold text-balance leading-[1.08] tracking-tight ${
+          dark ? 'text-white' : 'text-ink'
+        }`}
+      >
         {title}
         {highlight && (
           <>
             {' '}
-            <span className="text-gradient">{highlight}</span>
+            <span
+              className={
+                dark
+                  ? 'bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent'
+                  : 'text-gradient'
+              }
+            >
+              {highlight}
+            </span>
           </>
         )}
       </h2>
       {description && (
-        <p className="text-base md:text-lg text-muted leading-relaxed max-w-2xl mt-1">
+        <p
+          className={`text-base md:text-lg leading-relaxed max-w-2xl mt-1 ${
+            dark ? 'text-white/55' : 'text-muted'
+          }`}
+        >
           {description}
         </p>
       )}

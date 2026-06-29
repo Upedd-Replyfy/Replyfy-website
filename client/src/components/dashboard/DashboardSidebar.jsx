@@ -54,7 +54,7 @@ function NavItem({ item, collapsed, onNavigate, onReset }) {
           onNavigate?.()
         }}
         title={collapsed ? item.label : undefined}
-        className="group mb-4 flex items-center justify-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white shadow-[var(--shadow-luxury-md)] transition-all hover:bg-charcoal"
+        className="group mb-4 flex items-center justify-center gap-3 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-fg shadow-[var(--shadow-luxury-md)] transition-all hover:bg-white/90"
       >
         <Icon size={18} strokeWidth={2} />
         {!collapsed && item.label}
@@ -84,7 +84,7 @@ function NavItem({ item, collapsed, onNavigate, onReset }) {
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               />
               {!collapsed && (
-                <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-ink" />
+                <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
               )}
             </>
           )}
@@ -108,7 +108,7 @@ function WorkspaceSwitcher({ collapsed }) {
         }`}
         title={collapsed ? name : undefined}
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-xs font-bold text-white">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-xs font-bold text-primary-fg">
           {name.charAt(0)}
         </span>
         {!collapsed && (
@@ -151,11 +151,11 @@ export default function DashboardSidebar({ open, collapsed, onClose, onToggleCol
     >
       <div className={`mb-6 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
         {!collapsed ? (
-          <Logo to="/dashboard" />
+          <Logo to="/dashboard" light={false} />
         ) : (
           <NavLink
             to="/dashboard"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-sm font-bold text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-fg"
           >
             R
           </NavLink>
@@ -252,7 +252,7 @@ export default function DashboardSidebar({ open, collapsed, onClose, onToggleCol
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-ink/20 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
               onClick={onClose}
             />
             <motion.div

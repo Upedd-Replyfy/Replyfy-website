@@ -21,43 +21,48 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="relative w-full border-t border-border bg-surface">
-      <div className="page-container py-12 md:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2">
-            <Logo />
-            <p className="mt-4 max-w-sm text-sm text-muted leading-relaxed">
-              Expert answers to your hardest questions. Pay once, get a
-              thoughtful response from a verified professional.
+    <footer className="relative w-full bg-black">
+      <div className="gutter-left gutter-right w-full border-t border-white/[0.06] py-16 md:py-20">
+        <div className="flex w-full flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
+          <div className="shrink-0">
+            <Logo light />
+            <p
+              className="mt-5 text-sm text-white/50 leading-relaxed"
+              style={{ maxWidth: '36ch' }}
+            >
+              Expert answers to your hardest questions. Pay once, get a thoughtful response from a
+              verified professional.
             </p>
           </div>
 
-          {Object.entries(footerLinks).map(([group, links]) => (
-            <div key={group}>
-              <h4 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-ink mb-3">
-                {group}
-              </h4>
-              <ul className="space-y-2.5">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      to={link.href}
-                      className="text-sm text-muted transition-colors hover:text-ink"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="grid w-full grid-cols-2 gap-10 sm:grid-cols-3 lg:w-auto lg:gap-16 xl:gap-24">
+            {Object.entries(footerLinks).map(([group, links]) => (
+              <div key={group}>
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40 mb-4">
+                  {group}
+                </h4>
+                <ul className="space-y-3">
+                  {links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        to={link.href}
+                        className="text-sm text-white/50 transition-colors hover:text-white"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-light">
+        <div className="mt-14 flex w-full flex-col gap-3 border-t border-white/[0.06] pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-white/35">
             &copy; {new Date().getFullYear()} Replyfy. All rights reserved.
           </p>
-          <p className="text-xs text-muted-light">Built for people who need real answers.</p>
+          <p className="text-xs text-white/35">Built for people who need real answers.</p>
         </div>
       </div>
     </footer>

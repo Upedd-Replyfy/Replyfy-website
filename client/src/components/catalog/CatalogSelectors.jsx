@@ -29,7 +29,7 @@ export function CategoryPills({ categories, selectedId, onSelect, loading }) {
             onClick={() => onSelect(cat)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
               active
-                ? 'bg-ink text-white shadow-sm'
+                ? 'bg-primary text-primary-fg shadow-sm'
                 : 'border border-border bg-card text-ink hover:border-charcoal/30'
             }`}
           >

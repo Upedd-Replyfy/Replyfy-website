@@ -11,6 +11,13 @@ import {
 } from 'lucide-react'
 import { fadeUp, staggerContainer } from '../../utils/animations'
 
+const stepAccents = [
+  'from-sky-400 to-blue-500',
+  'from-violet-400 to-purple-500',
+  'from-blue-400 to-indigo-500',
+  'from-sky-400 to-violet-500',
+]
+
 const steps = [
   {
     icon: MessageSquare,
@@ -66,6 +73,13 @@ function ProcessPath() {
       preserveAspectRatio="xMidYMid meet"
       aria-hidden="true"
     >
+      <defs>
+        <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.55" />
+          <stop offset="50%" stopColor="#818cf8" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.55" />
+        </linearGradient>
+      </defs>
       <motion.path
         d="M 120 70 C 220 70, 260 200, 380 210 S 580 80, 680 90 S 860 240, 920 260"
         stroke="url(#pathGrad)"
@@ -78,21 +92,14 @@ function ProcessPath() {
         viewport={{ once: true }}
         transition={{ duration: 1.4, ease: 'easeInOut' }}
       />
-      <defs>
-        <linearGradient id="pathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#a3a3a3" stopOpacity="0.5" />
-          <stop offset="50%" stopColor="#737373" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#d4d4d4" stopOpacity="0.5" />
-        </linearGradient>
-      </defs>
       {[
-        { cx: 250, cy: 140, color: '#525252' },
-        { cx: 480, cy: 145, color: '#737373' },
-        { cx: 720, cy: 170, color: '#a3a3a3' },
+        { cx: 250, cy: 140, color: '#38bdf8' },
+        { cx: 480, cy: 145, color: '#818cf8' },
+        { cx: 720, cy: 170, color: '#a78bfa' },
       ].map((node, i) => (
         <g key={i}>
-          <circle cx={node.cx} cy={node.cy} r="14" fill={node.color} fillOpacity="0.12" />
-          <circle cx={node.cx} cy={node.cy} r="5" fill={node.color} fillOpacity="0.7" />
+          <circle cx={node.cx} cy={node.cy} r="14" fill={node.color} fillOpacity="0.15" />
+          <circle cx={node.cx} cy={node.cy} r="5" fill={node.color} fillOpacity="0.85" />
         </g>
       ))}
     </svg>
@@ -101,6 +108,7 @@ function ProcessPath() {
 
 function StepCard({ step, index }) {
   const Icon = step.icon
+  const accent = stepAccents[index]
 
   return (
     <motion.article
@@ -108,20 +116,22 @@ function StepCard({ step, index }) {
       custom={step.delay}
       className={`relative w-full max-w-[260px] ${step.position}`}
     >
-      <div className="relative rounded-[20px] border border-border bg-card p-6 shadow-[var(--shadow-luxury-md)]">
-        <span className="absolute -left-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-ink text-[11px] font-bold text-white shadow-md shadow-black/10">
+      <div className="relative rounded-[20px] border border-white/10 bg-neutral-900/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+        <span
+          className={`absolute -left-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${accent} text-[11px] font-bold text-white shadow-md`}
+        >
           {index + 1}
         </span>
 
         <div className="flex flex-col items-center text-center">
-          <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-ink ring-1 ring-border">
+          <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/10">
             <Icon size={22} strokeWidth={1.6} />
           </div>
-          <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45">
             {step.label}
           </span>
-          <h3 className="mt-1.5 text-base font-semibold tracking-tight text-ink">{step.title}</h3>
-          <p className="mt-2 text-xs leading-relaxed text-muted">{step.description}</p>
+          <h3 className="mt-1.5 text-base font-semibold tracking-tight text-white">{step.title}</h3>
+          <p className="mt-2 text-xs leading-relaxed text-white/55">{step.description}</p>
         </div>
       </div>
     </motion.article>
@@ -130,7 +140,7 @@ function StepCard({ step, index }) {
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="section-spacing relative w-full overflow-hidden">
+    <section id="how-it-works" className="section-spacing relative w-full overflow-hidden bg-black">
       <div className="page-container relative z-10">
         <motion.div
           initial="hidden"
@@ -139,14 +149,16 @@ export default function HowItWorks() {
           variants={fadeUp}
           className="mb-12 md:mb-16 max-w-lg"
         >
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-light">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">
             How it works
           </span>
-          <h2 className="mt-3 text-4xl md:text-5xl font-semibold tracking-tight text-ink leading-[1.08]">
+          <h2 className="mt-3 text-4xl md:text-5xl font-semibold tracking-tight text-white leading-[1.08]">
             From question to clarity in{' '}
-            <span className="text-gradient">four steps</span>
+            <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">
+              four steps
+            </span>
           </h2>
-          <p className="mt-4 text-base text-muted leading-relaxed">
+          <p className="mt-4 text-base text-white/55 leading-relaxed">
             No forums. No AI slop. A direct line to someone who&apos;s been there.
           </p>
         </motion.div>
@@ -178,17 +190,21 @@ export default function HowItWorks() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="mx-auto mt-12 max-w-6xl luxury-card px-6 py-6 md:px-8"
+          className="mt-16 w-full rounded-[24px] border border-white/10 bg-white/5 px-8 py-8 md:px-10 md:py-10 lg:px-12 lg:py-12"
         >
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
             {features.map((feature) => (
-              <div key={feature.title} className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface text-ink">
-                  <feature.icon size={17} strokeWidth={1.6} />
+              <div key={feature.title} className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white md:h-14 md:w-14">
+                  <feature.icon size={24} strokeWidth={1.6} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-ink">{feature.title}</h4>
-                  <p className="mt-0.5 text-[11px] leading-snug text-muted">{feature.description}</p>
+                  <h4 className="text-sm font-semibold text-white md:text-base lg:text-lg">
+                    {feature.title}
+                  </h4>
+                  <p className="mt-1.5 text-sm leading-relaxed text-white/50 md:text-base">
+                    {feature.description}
+                  </p>
                 </div>
               </div>
             ))}

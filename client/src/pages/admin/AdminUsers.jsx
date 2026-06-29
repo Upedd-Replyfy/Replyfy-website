@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { DashboardShell, DataTable } from '../../components/layouts/DashboardShell'
+import AdminPageHeader from '../../components/admin/AdminPageHeader'
+import { DataTable } from '../../components/layouts/DashboardShell'
 import { adminApi } from '../../services/api'
 
 export default function AdminUsers() {
   const queryClient = useQueryClient()
-  const { data, isLoading } = useQuery({
+  const { data: usersData, isLoading } = useQuery({
     queryKey: ['admin-users'],
-    queryFn: () => adminApi.getUsers({ limit: 50 }),
+    queryFn: () => adminApi.getUsers({ limit: 50, role: 'user' }),
   })
 
   const toggleMutation = useMutation({
@@ -18,14 +19,6 @@ export default function AdminUsers() {
     },
   })
 
-  const nav = [
-    { to: '/admin', label: 'Dashboard' },
-    { to: '/admin/questions', label: 'Questions' },
-    { to: '/admin/answers', label: 'Answers' },
-    { to: '/admin/experts', label: 'Experts' },
-    { to: '/admin/users', label: 'Users' },
-  ]
-
   const columns = [
     { key: 'name', label: 'Name' },
     { key: 'email', label: 'Email' },
@@ -33,7 +26,13 @@ export default function AdminUsers() {
       key: 'isActive',
       label: 'Status',
       render: (row) => (
-        <span className={row.isActive ? 'text-ink' : 'text-muted'}>
+        <span
+          className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+            row.isActive
+              ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+              : 'border-white/[0.08] bg-white/[0.04] text-muted'
+          }`}
+        >
           {row.isActive ? 'Active' : 'Inactive'}
         </span>
       ),
@@ -45,7 +44,7 @@ export default function AdminUsers() {
         <button
           type="button"
           onClick={() => toggleMutation.mutate(row._id)}
-          className="text-xs font-semibold text-ink underline"
+          className="text-xs font-semibold text-sky-400 hover:text-sky-300"
         >
           {row.isActive ? 'Deactivate' : 'Activate'}
         </button>
@@ -54,15 +53,17 @@ export default function AdminUsers() {
   ]
 
   return (
-    <DashboardShell title="Users" nav={nav}>
-      <h1 className="text-2xl font-semibold text-ink">Manage Users</h1>
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Directory"
+        title="Users"
+        description="Manage platform user accounts"
+      />
       {isLoading ? (
-        <div className="mt-6 luxury-card h-40 animate-pulse bg-surface" />
+        <div className="admin-panel h-40 animate-pulse rounded-[20px] bg-[#111111]" />
       ) : (
-        <div className="mt-6">
-          <DataTable columns={columns} rows={data?.users || []} emptyMessage="No users found" />
-        </div>
+        <DataTable columns={columns} rows={usersData?.users || []} emptyMessage="No users found" />
       )}
-    </DashboardShell>
+    </div>
   )
 }

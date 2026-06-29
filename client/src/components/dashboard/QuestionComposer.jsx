@@ -101,7 +101,7 @@ export default function QuestionComposer({
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="w-full"
     >
-      <div className="mb-6 text-center">
+      <div className="mb-9 mt-8 text-center md:mt-16">
         <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-ink md:text-4xl lg:text-5xl">
           Your question,
           <br />
@@ -112,8 +112,8 @@ export default function QuestionComposer({
         </p>
       </div>
 
-      <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink text-white">
+      <div className="mb-4 mt-10 flex items-start gap-3 md:mt-14">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-fg">
           <Sparkles size={16} strokeWidth={2} />
         </span>
         <div>
@@ -228,7 +228,7 @@ export default function QuestionComposer({
                   <button
                     type="button"
                     onClick={addLink}
-                    className="rounded-lg bg-ink px-3 py-2 text-xs font-medium text-white"
+                    className="rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-fg"
                   >
                     Add
                   </button>
@@ -280,7 +280,7 @@ export default function QuestionComposer({
               whileTap={{ scale: canSubmit && !loading ? 0.99 : 1 }}
               onClick={onSubmit}
               disabled={!canSubmit || loading}
-              className="flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-charcoal px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-ink disabled:opacity-40"
+              className="flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition-colors hover:bg-white/90 disabled:opacity-40"
             >
               {loading ? (
                 <>

@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')).render(
           position="top-right"
           toastOptions={{
             className: 'text-sm',
-            style: { background: '#111', color: '#fff', borderRadius: '12px' },
+            style: { background: '#141414', color: '#fafafa', border: '1px solid #27272a', borderRadius: '12px' },
           }}
         />
       </AuthProvider>

@@ -36,40 +36,50 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? 'border-b border-border bg-card/90 shadow-[var(--shadow-luxury-sm)] backdrop-blur-xl' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
+        scrolled
+          ? 'border-b border-white/[0.06] bg-[#050505]/85 backdrop-blur-2xl'
+          : 'bg-transparent'
       }`}
     >
-      <nav className="page-container relative flex items-center justify-between py-4">
-        <Logo />
+      <nav className="flex w-full items-center justify-between gap-6 gutter-left gutter-right py-5">
+        <div className="flex min-w-0 items-center gap-8 lg:gap-10">
+          <Logo light />
 
-        <ul className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:flex items-center gap-10">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              {isHome ? (
-                <button
-                  type="button"
-                  onClick={() => handleNavClick(link.href)}
-                  className="text-sm font-medium text-muted transition-colors hover:text-ink"
-                >
-                  {link.label}
-                </button>
-              ) : (
-                <Link to={link.href} className="text-sm font-medium text-muted transition-colors hover:text-ink">
-                  {link.label}
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
+          <ul className="hidden lg:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                {isHome ? (
+                  <button
+                    type="button"
+                    onClick={() => handleNavClick(link.href)}
+                    className="text-sm font-medium text-white/60 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </button>
+                ) : (
+                  <Link
+                    to={link.href}
+                    className="text-sm font-medium text-white/60 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Link to="/login" className="text-sm font-medium text-muted transition-colors hover:text-ink">
+          <Link
+            to="/login"
+            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+          >
             Log in
           </Link>
           <Link
             to="/signup"
-            className="btn-primary group inline-flex items-center gap-1.5 rounded-2xl px-5 py-2.5 text-sm font-semibold"
+            className="group inline-flex items-center gap-1.5 rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
           >
             Get started
             <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
@@ -78,7 +88,7 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="lg:hidden p-2 -mr-2 text-ink"
+          className="lg:hidden p-2 -mr-2 text-white"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         >
@@ -92,32 +102,39 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden mx-5 mb-4 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-luxury-md)]"
+            className="lg:hidden w-full border-t border-white/[0.06] bg-[#050505]/95 backdrop-blur-2xl"
           >
-            <div className="flex flex-col gap-1 p-4">
+            <div className="gutter-left gutter-right flex flex-col gap-1 py-4">
               {navLinks.map((link) =>
                 isHome ? (
                   <button
                     key={link.href}
                     type="button"
                     onClick={() => handleNavClick(link.href)}
-                    className="py-3 text-left text-sm text-muted hover:text-ink"
+                    className="py-3 text-left text-sm text-white/70 hover:text-white"
                   >
                     {link.label}
                   </button>
                 ) : (
-                  <Link key={link.href} to={link.href} className="py-3 text-sm text-muted hover:text-ink">
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="py-3 text-left text-sm text-white/70 hover:text-white"
+                  >
                     {link.label}
                   </Link>
                 )
               )}
-              <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-border">
-                <Link to="/login" className="btn-secondary rounded-2xl py-2.5 text-center text-sm">
+              <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-white/10">
+                <Link
+                  to="/login"
+                  className="rounded-2xl border border-white/15 py-2.5 text-center text-sm text-white"
+                >
                   Log in
                 </Link>
                 <Link
                   to="/signup"
-                  className="btn-primary rounded-2xl py-2.5 text-center text-sm font-semibold"
+                  className="rounded-2xl bg-white py-2.5 text-center text-sm font-semibold text-black"
                 >
                   Get started
                 </Link>

@@ -1,0 +1,11 @@
+# Local environment (secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Uploaded files (if stored locally during dev)
+uploads/

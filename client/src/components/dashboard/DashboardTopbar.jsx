@@ -145,7 +145,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
           >
             <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ink text-[9px] font-bold text-white ring-2 ring-card">
+              <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-fg ring-2 ring-card">
                 {unreadCount}
               </span>
             )}

@@ -12,7 +12,7 @@ import StepProgress from './StepProgress'
 import RecommendedExperts from './RecommendedExperts'
 import RecentQuestions from './RecentQuestions'
 import { userApi } from '../../services/api'
-import { PLANS } from '../../constants'
+import { PLANS, planRequiresExpertSelection } from '../../constants'
 import { useCategories, useExpertTypes, useExperts, usePlatformStats } from '../../hooks/useCatalog'
 import { fadeUp } from '../../utils/animations'
 
@@ -65,9 +65,10 @@ export default function UserDashboard() {
   const [query, setQuery] = useState('')
   const [files, setFiles] = useState([])
   const [links, setLinks] = useState([])
-  const [plan, setPlan] = useState('standard')
+  const [plan, setPlan] = useState('basic')
   const [selectedExpert, setSelectedExpert] = useState(null)
   const [paying, setPaying] = useState(false)
+  const [appliedCoupon, setAppliedCoupon] = useState(null)
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
   const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(categoryId)
@@ -100,7 +101,7 @@ export default function UserDashboard() {
     isLoading: premiumExpertsLoading,
     error: premiumExpertsError,
     refetch: refetchPremiumExperts,
-  } = useExperts(premiumExpertParams, step === 'expert' && plan === 'premium' && !!premiumExpertParams)
+  } = useExperts(premiumExpertParams, step === 'expert' && planRequiresExpertSelection(plan) && !!premiumExpertParams)
 
   const recommendedParams = useMemo(
     () =>
@@ -149,12 +150,17 @@ export default function UserDashboard() {
       setQuery('')
       setFiles([])
       setLinks([])
-      setPlan('standard')
+      setPlan('basic')
       setSelectedExpert(null)
+      setAppliedCoupon(null)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       navigate('/dashboard', { replace: true, state: {} })
     }
   }, [location.state?.reset, navigate])
+
+  useEffect(() => {
+    setAppliedCoupon(null)
+  }, [plan])
 
   const handleCategoryChange = (cat) => {
     setCategoryId(cat._id)
@@ -171,7 +177,7 @@ export default function UserDashboard() {
   }
 
   const handlePlanContinue = () => {
-    setStep(plan === 'premium' ? 'expert' : 'payment')
+    setStep(planRequiresExpertSelection(plan) ? 'expert' : 'payment')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -184,7 +190,7 @@ export default function UserDashboard() {
   const handleBack = () => {
     if (step === 'plan') setStep('compose')
     else if (step === 'expert') setStep('plan')
-    else if (step === 'payment') setStep(plan === 'premium' ? 'expert' : 'plan')
+    else if (step === 'payment') setStep(planRequiresExpertSelection(plan) ? 'expert' : 'plan')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -201,13 +207,13 @@ export default function UserDashboard() {
       formData.append('expertType', expertTypeId)
       formData.append('priority', 'standard')
       formData.append('plan', plan)
-      if (plan === 'premium' && selectedExpert) {
+      if (planRequiresExpertSelection(plan) && selectedExpert) {
         formData.append('selectedExpert', selectedExpert.userId)
       }
       files.forEach((f) => formData.append('files', f))
 
       const { question } = await userApi.createQuestion(formData)
-      const order = await userApi.createPaymentOrder(question._id)
+      const order = await userApi.createPaymentOrder(question._id, appliedCoupon?.code)
 
       if (order.devMode) {
         await userApi.verifyPayment({
@@ -301,6 +307,8 @@ export default function UserDashboard() {
               expertType={selectedExpertType}
               selectedExpert={selectedExpert}
               paying={paying}
+              appliedCoupon={appliedCoupon}
+              onCouponChange={setAppliedCoupon}
               onPay={handlePayment}
             />
           )}

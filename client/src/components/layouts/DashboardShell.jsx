@@ -43,7 +43,7 @@ export function DashboardShell({ title, nav, children, onMenuOpen }) {
             <button type="button" className="relative rounded-lg p-2 text-muted hover:bg-surface">
               <Bell size={18} />
               {unread > 0 && (
-                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-ink text-[9px] font-bold text-white">
+                <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-fg">
                   {unread}
                 </span>
               )}
@@ -116,21 +116,6 @@ export function DataTable({ columns, rows, emptyMessage = 'No data found' }) {
   )
 }
 
-export function StatusBadge({ status }) {
-  const styles = {
-    pending_payment: 'bg-surface text-muted',
-    pending_admin_review: 'bg-surface text-ink',
-    assigned: 'bg-ink/10 text-ink',
-    in_progress: 'bg-ink/10 text-ink',
-    waiting_admin_review: 'bg-surface text-muted',
-    completed: 'bg-ink text-white',
-    rejected: 'bg-charcoal/10 text-charcoal',
-    pending_review: 'bg-surface text-muted',
-    approved: 'bg-ink text-white',
-  }
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ${styles[status] || 'bg-surface text-muted'}`}>
-      {status?.replace(/_/g, ' ')}
-    </span>
-  )
-}
+import StatusBadge from '../ui/StatusBadge'
+
+export { StatusBadge }

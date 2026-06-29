@@ -50,7 +50,7 @@ function getLayout(offset, isMobile) {
   }
 }
 
-function CarouselCard({ expert, layout, isCenter, onSelect, reduceMotion }) {
+function CarouselCard({ expert, layout, isCenter, onSelect, reduceMotion, dark }) {
   return (
     <motion.div
       className="absolute left-1/2 top-1/2 gpu-layer"
@@ -73,17 +73,21 @@ function CarouselCard({ expert, layout, isCenter, onSelect, reduceMotion }) {
         className={`rounded-3xl ${!isCenter ? 'cursor-pointer' : ''}`}
         style={{
           boxShadow: isCenter
-            ? '0 24px 60px rgba(0, 0, 0, 0.14)'
-            : '0 10px 30px rgba(0, 0, 0, 0.06)',
+            ? dark
+              ? '0 24px 60px rgba(0, 0, 0, 0.5)'
+              : '0 24px 60px rgba(0, 0, 0, 0.14)'
+            : dark
+              ? '0 10px 30px rgba(0, 0, 0, 0.35)'
+              : '0 10px 30px rgba(0, 0, 0, 0.06)',
         }}
       >
-        <ExpertCard expert={expert} isCenter={isCenter} />
+        <ExpertCard expert={expert} isCenter={isCenter} dark={dark} />
       </div>
     </motion.div>
   )
 }
 
-export default function ExpertCarousel() {
+export default function ExpertCarousel({ dark = false }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -131,11 +135,11 @@ export default function ExpertCarousel() {
 
   return (
     <div ref={containerRef} className="relative mx-auto w-full max-w-[1400px]">
-      <button type="button" onClick={prev} disabled={isAnimating} className="absolute left-2 md:left-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full glass-strong shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95" aria-label="Previous expert">
-        <ChevronLeft size={20} className="text-ink" />
+      <button type="button" onClick={prev} disabled={isAnimating} className={`absolute left-2 md:left-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95 ${dark ? 'border border-white/15 bg-white/10 backdrop-blur-xl' : 'glass-strong'}`} aria-label="Previous expert">
+        <ChevronLeft size={20} className={dark ? 'text-white' : 'text-ink'} />
       </button>
-      <button type="button" onClick={next} disabled={isAnimating} className="absolute right-2 md:right-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full glass-strong shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95" aria-label="Next expert">
-        <ChevronRight size={20} className="text-ink" />
+      <button type="button" onClick={next} disabled={isAnimating} className={`absolute right-2 md:right-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95 ${dark ? 'border border-white/15 bg-white/10 backdrop-blur-xl' : 'glass-strong'}`} aria-label="Next expert">
+        <ChevronRight size={20} className={dark ? 'text-white' : 'text-ink'} />
       </button>
       <div className="relative mx-auto overflow-hidden" style={{ width: '100%', maxWidth: '1400px', height: isMobile ? '400px' : '460px' }}>
         <div className="absolute inset-0">
@@ -152,6 +156,7 @@ export default function ExpertCarousel() {
                 isCenter={isCenter}
                 reduceMotion={!isInView}
                 onSelect={() => !isCenter && !isAnimating && goTo(index)}
+                dark={dark}
               />
             )
           })}
@@ -160,7 +165,7 @@ export default function ExpertCarousel() {
       <div className="mt-4 flex items-center justify-center gap-2">
         {experts.map((expert, index) => (
           <button key={expert.id} type="button" onClick={() => goTo(index)} aria-label={`View ${expert.name}`} className="p-1">
-            <span className={`block rounded-full transition-all duration-300 ${index === activeIndex ? 'h-2 w-8 bg-ink' : 'h-2 w-2 bg-neutral-300 hover:bg-neutral-400'}`} />
+            <span className={`block rounded-full transition-all duration-300 ${index === activeIndex ? 'h-2 w-8 bg-primary' : 'h-2 w-2 bg-white/25 hover:bg-white/40'}`} />
           </button>
         ))}
       </div>

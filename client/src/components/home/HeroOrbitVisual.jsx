@@ -1,5 +1,31 @@
-import { motion } from 'framer-motion'
+import { useEffect } from 'react'
+import { motion, useSpring } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+
+const VIEW_W = 600
+const VIEW_H = 520
+
+// Anchor points (% of viewBox) for sequential path 1 → 2 → 3 → 4
+const anchors = [
+  { x: 16, y: 18 }, // 1 top-left
+  { x: 84, y: 26 }, // 2 top-right
+  { x: 14, y: 68 }, // 3 bottom-left
+  { x: 82, y: 88 }, // 4 bottom-right
+]
+
+const toCoord = (p) => ({
+  x: (p.x / 100) * VIEW_W,
+  y: (p.y / 100) * VIEW_H,
+})
+
+const [a1, a2, a3, a4] = anchors.map(toCoord)
+
+const sequencePath = `
+  M ${a1.x} ${a1.y}
+  C ${a1.x + 120} ${a1.y - 20}, ${a2.x - 100} ${a2.y - 10}, ${a2.x} ${a2.y}
+  C ${a2.x - 40} ${a2.y + 100}, ${a3.x + 80} ${a3.y - 60}, ${a3.x} ${a3.y}
+  C ${a3.x + 100} ${a3.y + 30}, ${a4.x - 80} ${a4.y - 10}, ${a4.x} ${a4.y}
+`
 
 const steps = [
   {
@@ -7,144 +33,184 @@ const steps = [
     title: 'You ask',
     body: 'How can I validate my startup idea?',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face',
-    className: 'left-[10%] top-[12%] w-[190px] md:w-[230px]',
+    className: 'left-[3%] top-[6%] lg:left-[5%] lg:top-[8%]',
+    parallax: 8,
+    accent: 'from-sky-400 to-blue-500',
+    ring: 'ring-sky-400/50',
+    delay: 0.35,
   },
   {
     number: '2',
     title: 'We match you with an expert',
-    body: 'Our AI + human team finds the perfect expert for you.',
+    body: 'Our AI + human team finds the perfect expert.',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face',
-    className: 'right-[6%] top-[21%] w-[210px] md:w-[245px]',
+    className: 'right-[2%] top-[18%] lg:right-[4%] lg:top-[20%]',
+    parallax: 10,
+    accent: 'from-violet-400 to-purple-500',
+    ring: 'ring-violet-400/50',
+    delay: 0.45,
   },
   {
     number: '3',
     title: 'You get a human reply',
     body: 'Real advice. Real experience. Real impact.',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face',
-    className: 'left-[1%] top-[50%] w-[210px] md:w-[245px]',
+    className: 'left-[1%] bottom-[26%] lg:left-[3%] lg:bottom-[28%]',
+    parallax: 9,
+    accent: 'from-blue-400 to-violet-500',
+    ring: 'ring-blue-400/50',
+    delay: 0.55,
+  },
+  {
+    number: '4',
+    title: 'Expert Reply',
+    body: 'There are 3 key things to validate before you build anything...',
+    isReply: true,
+    className: 'right-[2%] bottom-[4%] lg:right-[4%] lg:bottom-[6%]',
+    parallax: 11,
+    accent: 'from-sky-400 to-violet-500',
+    delay: 0.65,
   },
 ]
 
-function StepCard({ step, delay }) {
+function Float({ children, mouse, strength, delay, className, style }) {
+  const x = useSpring(0, { stiffness: 90, damping: 24 })
+  const y = useSpring(0, { stiffness: 90, damping: 24 })
+
+  useEffect(() => {
+    x.set(mouse.x * strength)
+    y.set(mouse.y * strength)
+  }, [mouse.x, mouse.y, strength, x, y])
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`absolute z-20 rounded-2xl border border-black/6 bg-white/90 p-3 shadow-[0_16px_48px_rgba(0,0,0,0.08)] backdrop-blur-xl ${step.className}`}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      style={{ x, y, ...style }}
+      className={`absolute z-20 ${className}`}
     >
-      <div className="flex items-center gap-3">
-        <img
-          src={step.image}
-          alt=""
-          className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white grayscale"
-          draggable={false}
-        />
-        <div className="min-w-0">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">
-              {step.number}
-            </span>
-            <p className="text-xs font-semibold leading-tight text-ink">{step.title}</p>
-          </div>
-          <p className="text-[10px] leading-snug text-muted">{step.body}</p>
-        </div>
-      </div>
+      {children}
     </motion.div>
   )
 }
 
-export default function HeroOrbitVisual() {
-  return (
-    <div className="relative h-full min-h-[430px] w-full overflow-hidden lg:min-h-[640px]">
-      <div className="pointer-events-none absolute right-[8%] top-[-12%] h-52 w-52 rounded-full bg-neutral-200/40 blur-[70px]" />
-      <div className="pointer-events-none absolute bottom-[5%] left-[4%] h-56 w-56 rounded-full bg-neutral-300/30 blur-[80px]" />
-
-      <svg
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        viewBox="0 0 620 560"
-        fill="none"
-        preserveAspectRatio="xMidYMid meet"
+function StepNode({ step, mouse }) {
+  if (step.isReply) {
+    return (
+      <Float
+        mouse={mouse}
+        strength={step.parallax}
+        delay={step.delay}
+        className={`max-w-[195px] sm:max-w-[210px] ${step.className}`}
       >
-        <motion.circle
-          cx="322"
-          cy="228"
-          r="170"
-          stroke="#a3a3a3"
-          strokeOpacity="0.2"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.6, ease: 'easeOut' }}
-        />
-        <motion.circle
-          cx="322"
-          cy="228"
-          r="118"
-          stroke="#d4d4d4"
-          strokeOpacity="0.15"
-          strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 1.4, delay: 0.15, ease: 'easeOut' }}
-        />
-        <motion.path
-          d="M170 82 C 300 54, 432 80, 500 190 C 575 312, 488 452, 335 452"
-          stroke="#a3a3a3"
-          strokeOpacity="0.35"
-          strokeWidth="1.5"
-          strokeDasharray="5 9"
-          fill="none"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 1.8, delay: 0.25, ease: 'easeOut' }}
-        />
-        <circle cx="180" cy="92" r="4" fill="#525252" opacity="0.5" />
-        <circle cx="505" cy="196" r="3.5" fill="#737373" opacity="0.5" />
-        <circle cx="340" cy="452" r="4" fill="#a3a3a3" opacity="0.6" />
-      </svg>
-
-      {steps.map((step, index) => (
-        <StepCard key={step.number} step={step} delay={0.22 + index * 0.1} />
-      ))}
-
-      <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, delay: 0.58, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute bottom-[9%] right-[2%] z-30 w-[260px] rounded-2xl border border-black/6 bg-white/90 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.1)] backdrop-blur-xl md:right-[9%] md:w-[310px]"
-      >
-        <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Expert Reply</p>
-        <p className="mt-3 text-xs leading-relaxed text-ink/75">
-          There are 3 key things to validate before you build anything...
-        </p>
-        <button
-          type="button"
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-[11px] font-semibold text-white"
-        >
-          View full answer
-          <ArrowRight size={13} />
-        </button>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, x: 20, rotate: -8 }}
-        animate={{ opacity: 1, x: 0, rotate: -8, y: [0, -8, 0] }}
-        transition={{
-          opacity: { duration: 0.6, delay: 0.85 },
-          x: { duration: 0.6, delay: 0.85 },
-          y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-        }}
-        className="absolute right-[2%] top-[45%] z-10 hidden h-24 w-24 md:block"
-      >
-        <div className="absolute inset-0 rounded-full bg-neutral-300/20 blur-2xl" />
-        <div className="relative h-full w-full">
-          <div className="absolute left-8 top-1 h-20 w-11 rounded-t-full rounded-b-[28px] bg-gradient-to-b from-white via-neutral-200 to-neutral-400 shadow-xl shadow-black/10" />
-          <div className="absolute left-[47px] top-8 h-5 w-5 rounded-full bg-white/90 ring-4 ring-neutral-300" />
-          <div className="absolute left-4 top-12 h-8 w-7 -rotate-12 rounded-tl-full bg-neutral-300" />
-          <div className="absolute right-3 top-12 h-8 w-7 rotate-12 rounded-tr-full bg-neutral-400" />
+        <div className="relative pl-1">
+          <span
+            className={`absolute -left-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br ${step.accent} text-[9px] font-bold text-white`}
+          >
+            {step.number}
+          </span>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-400/80">
+            {step.title}
+          </p>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-white/50">{step.body}</p>
+          <button
+            type="button"
+            className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-violet-500 px-3.5 py-2 text-[11px] font-semibold text-white"
+          >
+            View full answer
+            <ArrowRight size={12} />
+          </button>
         </div>
+      </Float>
+    )
+  }
+
+  return (
+    <Float
+      mouse={mouse}
+      strength={step.parallax}
+      delay={step.delay}
+      className={`max-w-[185px] sm:max-w-[200px] ${step.className}`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="relative shrink-0">
+          <img
+            src={step.image}
+            alt=""
+            className={`h-9 w-9 rounded-full object-cover ring-2 ${step.ring} sm:h-10 sm:w-10`}
+            draggable={false}
+          />
+          <span
+            className={`absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br ${step.accent} text-[9px] font-bold text-white`}
+          >
+            {step.number}
+          </span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold leading-snug text-white/90">{step.title}</p>
+          <p className="mt-0.5 text-[10px] leading-relaxed text-white/40 sm:text-[11px]">{step.body}</p>
+        </div>
+      </div>
+    </Float>
+  )
+}
+
+export default function HeroOrbitVisual({ mouse = { x: 0, y: 0 } }) {
+  const orbitX = useSpring(0, { stiffness: 70, damping: 22 })
+  const orbitY = useSpring(0, { stiffness: 70, damping: 22 })
+
+  useEffect(() => {
+    orbitX.set(mouse.x * 4)
+    orbitY.set(mouse.y * 4)
+  }, [mouse.x, mouse.y, orbitX, orbitY])
+
+  return (
+    <div className="relative mx-auto h-full w-full max-w-[580px] lg:max-w-[620px]">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/[0.07] blur-[50px]" />
+
+      <motion.div
+        style={{ x: orbitX, y: orbitY }}
+        className="pointer-events-none absolute inset-[8%] lg:inset-[10%]"
+      >
+        <svg
+          className="h-full w-full"
+          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+          fill="none"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            <linearGradient id="seqPath" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.7" />
+              <stop offset="50%" stopColor="#818cf8" stopOpacity="0.6" />
+              <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.7" />
+            </linearGradient>
+          </defs>
+
+          <motion.path
+            d={sequencePath}
+            stroke="url(#seqPath)"
+            strokeWidth="2"
+            strokeDasharray="6 8"
+            strokeLinecap="round"
+            fill="none"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 2, delay: 0.15, ease: 'easeInOut' }}
+          />
+
+          {[a1, a2, a3, a4].map((pt, i) => (
+            <motion.g key={i} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 + i * 0.2 }}>
+              <circle cx={pt.x} cy={pt.y} r="6" fill="#818cf8" fillOpacity="0.2" />
+              <circle cx={pt.x} cy={pt.y} r="3" fill="#a78bfa" fillOpacity="0.9" />
+            </motion.g>
+          ))}
+        </svg>
       </motion.div>
+
+      {steps.map((step) => (
+        <StepNode key={step.number} step={step} mouse={mouse} />
+      ))}
     </div>
   )
 }

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 
 const variants = {
-  primary: 'btn-primary border border-ink text-white',
-  secondary: 'btn-secondary text-ink',
+  primary: 'btn-primary',
+  secondary: 'btn-secondary',
   ghost: 'bg-transparent text-ink hover:bg-surface border border-transparent',
 }
 
@@ -20,7 +20,7 @@ export default function Button({
   className = '',
   ...props
 }) {
-  const classes = `inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-charcoal focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ${variants[variant]} ${sizes[size]} ${className}`
+  const classes = `inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:opacity-50 disabled:pointer-events-none ${variants[variant]} ${sizes[size]} ${className}`
 
   if (to) {
     return (

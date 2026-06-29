@@ -1,13 +1,32 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { DashboardShell, StatCard } from '../../components/layouts/DashboardShell'
+import { IndianRupee, TrendingUp, Wallet } from 'lucide-react'
+import ExpertStatCard from '../../components/expert/ExpertStatCard'
+import ExpertPageHeader from '../../components/expert/ExpertPageHeader'
+import ExpertPanel from '../../components/expert/ExpertPanel'
 import { expertApi } from '../../services/api'
+import { formatRupeeFixed } from '../../utils/currency'
+
+const bankFields = [
+  { key: 'accountName', label: 'Account name' },
+  { key: 'accountNumber', label: 'Account number' },
+  { key: 'ifsc', label: 'IFSC code' },
+  { key: 'bankName', label: 'Bank name' },
+]
+
+const inputClass =
+  'w-full rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-3.5 text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-sky-500/30'
 
 export default function ExpertWallet() {
   const queryClient = useQueryClient()
   const [amount, setAmount] = useState('')
-  const [bankDetails, setBankDetails] = useState({ accountName: '', accountNumber: '', ifsc: '', bankName: '' })
+  const [bankDetails, setBankDetails] = useState({
+    accountName: '',
+    accountNumber: '',
+    ifsc: '',
+    bankName: '',
+  })
 
   const { data, isLoading } = useQuery({
     queryKey: ['expert-wallet'],
@@ -24,77 +43,78 @@ export default function ExpertWallet() {
       toast.success('Withdrawal request submitted')
       setAmount('')
       queryClient.invalidateQueries({ queryKey: ['expert-wallet'] })
+      queryClient.invalidateQueries({ queryKey: ['expert-dashboard'] })
     },
     onError: (err) => toast.error(err.message),
   })
 
-  const nav = [
-    { to: '/expert', label: 'Dashboard' },
-    { to: '/expert/questions', label: 'Questions' },
-    { to: '/expert/wallet', label: 'Wallet' },
-  ]
-
   const wallet = data?.wallet
+  const transactions = data?.transactions || []
 
   return (
-    <DashboardShell title="Wallet" nav={nav}>
-      <h1 className="text-2xl font-semibold text-ink">Wallet & Earnings</h1>
+    <div className="space-y-8">
+      <ExpertPageHeader
+        title="Wallet & Earnings"
+        description="View your balance, request withdrawals, and track transaction history."
+      />
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {isLoading ? (
-          [...Array(3)].map((_, i) => <div key={i} className="luxury-card h-24 animate-pulse bg-surface" />)
-        ) : (
-          <>
-            <StatCard label="Balance" value={`₹${((wallet?.balance ?? 0) / 100).toFixed(2)}`} />
-            <StatCard label="Total Earned" value={`₹${((wallet?.totalEarned ?? 0) / 100).toFixed(2)}`} />
-            <StatCard label="Withdrawn" value={`₹${((wallet?.totalWithdrawn ?? 0) / 100).toFixed(2)}`} />
-          </>
-        )}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <ExpertStatCard label="Available Balance" value={formatRupeeFixed(wallet?.balance)} icon={Wallet} accent="emerald" loading={isLoading} />
+        <ExpertStatCard label="Total Earned" value={formatRupeeFixed(wallet?.totalEarned)} icon={TrendingUp} accent="sky" loading={isLoading} />
+        <ExpertStatCard label="Total Withdrawn" value={formatRupeeFixed(wallet?.totalWithdrawn)} icon={IndianRupee} accent="violet" loading={isLoading} />
       </div>
 
-      <div className="luxury-card mt-8 p-6">
-        <h2 className="font-semibold text-ink">Request Withdrawal</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {Object.entries(bankDetails).map(([key, val]) => (
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ExpertPanel title="Request Withdrawal" subtitle="Funds are processed after admin approval">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {bankFields.map(({ key, label }) => (
+              <input
+                key={key}
+                value={bankDetails[key]}
+                onChange={(e) => setBankDetails((p) => ({ ...p, [key]: e.target.value }))}
+                placeholder={label}
+                className={inputClass}
+              />
+            ))}
             <input
-              key={key}
-              value={val}
-              onChange={(e) => setBankDetails((p) => ({ ...p, [key]: e.target.value }))}
-              placeholder={key.replace(/([A-Z])/g, ' $1')}
-              className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Withdrawal amount (₹)"
+              className={`${inputClass} sm:col-span-2`}
             />
-          ))}
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount (₹)"
-            className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm focus:outline-none"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => withdrawMutation.mutate()}
-          disabled={withdrawMutation.isPending}
-          className="btn-primary mt-4 rounded-xl px-5 py-2 text-sm font-semibold"
-        >
-          Request Withdrawal
-        </button>
-      </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => withdrawMutation.mutate()}
+            disabled={withdrawMutation.isPending || !amount || !bankDetails.accountNumber}
+            className="mt-5 rounded-xl bg-white px-6 py-3.5 text-base font-semibold text-black transition-opacity disabled:opacity-50"
+          >
+            {withdrawMutation.isPending ? 'Submitting…' : 'Submit withdrawal request'}
+          </button>
+        </ExpertPanel>
 
-      <div className="luxury-card mt-6 p-6">
-        <h2 className="font-semibold text-ink">Recent Transactions</h2>
-        <div className="mt-4 space-y-2">
-          {(data?.transactions || []).map((t) => (
-            <div key={t._id} className="flex justify-between border-b border-border py-2 text-sm last:border-0">
-              <span className="text-muted">{t.description}</span>
-              <span className={t.type === 'credit' ? 'text-ink font-medium' : 'text-muted'}>
-                {t.type === 'credit' ? '+' : '-'}₹{(t.amount / 100).toFixed(2)}
-              </span>
+        <ExpertPanel title="Recent Transactions" subtitle="Latest credits and debits">
+          {transactions.length ? (
+            <div className="max-h-80 space-y-2 overflow-y-auto">
+              {transactions.map((t) => (
+                <div
+                  key={t._id}
+                  className="flex items-center justify-between rounded-xl border border-white/[0.06] px-4 py-3.5 hover:bg-white/[0.03]"
+                >
+                  <span className="truncate pr-4 text-sm text-muted">{t.description}</span>
+                  <span className={`shrink-0 text-base font-semibold ${t.type === 'credit' ? 'text-emerald-400' : 'text-muted'}`}>
+                    {t.type === 'credit' ? '+' : '-'}
+                    {formatRupeeFixed(t.amount)}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : (
+            <p className="py-8 text-center text-base text-muted">No transactions yet</p>
+          )}
+        </ExpertPanel>
       </div>
-    </DashboardShell>
+    </div>
   )
 }

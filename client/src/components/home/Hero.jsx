@@ -1,109 +1,134 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, CirclePlay, Clock, Smile, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, CirclePlay } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import GradientBlobs from '../ui/GradientBlobs'
 import HeroOrbitVisual from './HeroOrbitVisual'
 import ScrollLink from '../ui/ScrollLink'
-import { fadeUp } from '../../utils/animations'
 
-const stats = [
-  { value: '48h', label: 'Avg. response time', icon: Clock },
-  { value: '98%', label: 'Satisfaction rate', icon: Smile },
-  { value: '120+', label: 'Verified experts', icon: ShieldCheck },
+const avatars = [
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
 ]
 
-export default function Hero() {
-  return (
-    <section className="relative min-h-[560px] w-full overflow-hidden bg-canvas lg:min-h-[520px]">
-      <GradientBlobs />
+const stats = [
+  { value: '48h', label: 'Avg. response time' },
+  { value: '98%', label: 'Satisfaction rate' },
+  { value: '120+', label: 'Verified experts' },
+]
 
-      <div className="page-container relative z-10 flex min-h-[560px] w-full flex-col lg:min-h-[520px] lg:flex-row">
-        <div className="flex flex-1 flex-col justify-center pb-8 pt-24 lg:pb-12 lg:pt-28">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            custom={0}
-            variants={fadeUp}
-            className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-[var(--shadow-luxury-sm)]"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-light opacity-50" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-ink" />
-            </span>
-            <span className="text-xs font-medium text-muted">
-              2,400+ questions answered this month
-            </span>
+const ease = [0.22, 1, 0.36, 1]
+
+const reveal = (delay = 0) => ({
+  initial: { opacity: 0, y: 28 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.75, delay, ease },
+})
+
+export default function Hero() {
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    const onMove = (e) => {
+      setMouse({
+        x: (e.clientX / window.innerWidth - 0.5) * 2,
+        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      })
+    }
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  return (
+    <section className="relative min-h-[100svh] w-full overflow-hidden bg-[#050505]">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 70% 55% at 82% 45%, rgba(99,102,241,0.14) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 90%, rgba(56,189,248,0.08) 0%, transparent 55%)',
+        }}
+      />
+
+      <div className="relative z-10 grid min-h-[100svh] w-full grid-cols-1 items-center gap-12 gutter-left pb-16 pt-24 lg:grid-cols-[minmax(0,44fr)_minmax(0,56fr)] lg:gap-10 lg:pb-20 lg:pt-28 lg:pr-0">
+        <div className="flex w-full flex-col items-start justify-center text-left">
+          <motion.div {...reveal(0.05)} className="mb-7 flex items-center gap-3">
+            <div className="flex -space-x-2">
+              {avatars.map((src) => (
+                <img
+                  key={src}
+                  src={src}
+                  alt=""
+                  className="h-8 w-8 rounded-full object-cover ring-2 ring-[#050505]"
+                  draggable={false}
+                />
+              ))}
+            </div>
+            <span className="text-[13px] text-white/45">2,400+ questions answered this month</span>
           </motion.div>
 
           <motion.h1
-            initial="hidden"
-            animate="visible"
-            custom={0.08}
-            variants={fadeUp}
-            className="max-w-[600px] text-5xl font-semibold leading-[1.04] tracking-tight text-ink sm:text-6xl lg:text-[4rem]"
+            {...reveal(0.1)}
+            className="font-semibold leading-[1.08] tracking-[-0.025em] text-white"
+            style={{ fontSize: 'clamp(2.25rem, 4.2vw, 4rem)', maxWidth: '14ch' }}
           >
-            Ask better questions.
+            Ask anything.
             <br />
-            Get answers from{' '}
-            <span className="text-gradient">real experts.</span>
+            Get real answers
+            <br />
+            <span className="text-white/65">from real experts.</span>
           </motion.h1>
 
           <motion.p
-            initial="hidden"
-            animate="visible"
-            custom={0.16}
-            variants={fadeUp}
-            className="mt-6 max-w-lg text-base leading-relaxed text-muted md:text-lg"
+            {...reveal(0.16)}
+            className="mt-6 leading-relaxed text-white/50"
+            style={{ fontSize: 'clamp(1rem, 1.15vw, 1.25rem)', maxWidth: '42ch' }}
           >
-            No AI. No templates. Just real humans with real experience.
+            Submit your question and get personalized answers from verified founders, mentors, and
+            professionals.
           </motion.p>
 
           <motion.div
-            initial="hidden"
-            animate="visible"
-            custom={0.24}
-            variants={fadeUp}
-            className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center"
+            {...reveal(0.22)}
+            className="mt-8 flex flex-wrap items-center justify-start gap-3 sm:gap-4"
           >
             <Link
               to="/signup"
-              className="btn-primary group inline-flex items-center justify-center rounded-2xl px-7 py-3.5 text-sm font-semibold"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#050505] transition hover:bg-white/90"
             >
               Ask your first question
-              <ArrowRight size={15} className="ml-2 transition-transform group-hover:translate-x-0.5" />
+              <ArrowUpRight
+                size={15}
+                className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              />
             </Link>
             <ScrollLink
               to="/#how-it-works"
-              className="btn-secondary inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-3.5 text-sm font-semibold"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-white/60 transition hover:text-white"
             >
               See how it works
-              <CirclePlay size={14} className="text-muted" />
+              <CirclePlay size={14} className="text-white/35" />
             </ScrollLink>
           </motion.div>
 
           <motion.div
-            initial="hidden"
-            animate="visible"
-            custom={0.32}
-            variants={fadeUp}
-            className="mt-10 flex flex-wrap gap-8"
+            {...reveal(0.28)}
+            className="mt-10 flex w-full max-w-md justify-start gap-8 border-t border-white/[0.07] pt-8 sm:gap-10"
           >
             {stats.map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-ink shadow-[var(--shadow-luxury-sm)]">
-                  <stat.icon size={16} strokeWidth={1.7} />
-                </div>
-                <div>
-                  <p className="text-xl font-semibold tracking-tight text-ink">{stat.value}</p>
-                  <p className="text-xs text-muted-light">{stat.label}</p>
-                </div>
+              <div key={stat.label} className="min-w-0">
+                <p className="text-xl font-semibold tracking-tight text-white lg:text-2xl">
+                  {stat.value}
+                </p>
+                <p className="mt-1 text-[11px] leading-snug text-white/40 lg:text-xs">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </motion.div>
         </div>
 
-        <div className="relative min-h-[340px] flex-1 lg:min-h-0">
-          <HeroOrbitVisual />
+        <div className="relative h-[340px] w-full sm:h-[380px] lg:h-[min(66vh,580px)] lg:-mr-[4vw]">
+          <HeroOrbitVisual mouse={mouse} />
         </div>
       </div>
     </section>

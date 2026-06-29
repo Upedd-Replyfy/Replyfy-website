@@ -22,7 +22,9 @@ export const userApi = {
     api.post('/users/questions', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
-  createPaymentOrder: (questionId) => api.post('/users/payments/create-order', { questionId }),
+  createPaymentOrder: (questionId, couponCode) =>
+    api.post('/users/payments/create-order', { questionId, couponCode }),
+  validateCoupon: (data) => api.post('/users/payments/validate-coupon', data),
   verifyPayment: (data) => api.post('/users/payments/verify', data),
   getQuestions: (params) => api.get('/users/questions', { params }),
   getQuestion: (id) => api.get(`/users/questions/${id}`),
@@ -65,7 +67,8 @@ export const adminApi = {
   deleteExpertType: (id) => api.delete(`/admin/expert-types/${id}`),
   getPendingQuestions: () => api.get('/admin/questions/pending'),
   getQuestions: (params) => api.get('/admin/questions', { params }),
-  approveQuestion: (id) => api.post(`/admin/questions/${id}/approve`),
+  approveQuestion: (id, expertId) =>
+    api.post(`/admin/questions/${id}/approve`, expertId ? { expertId } : {}),
   rejectQuestion: (id, reason) => api.post(`/admin/questions/${id}/reject`, { reason }),
   assignExpert: (id, expertId) => api.post(`/admin/questions/${id}/assign`, { expertId }),
   getPendingAnswers: () => api.get('/admin/answers/pending'),
@@ -75,6 +78,7 @@ export const adminApi = {
   getWithdrawals: () => api.get('/admin/withdrawals'),
   approveWithdrawal: (id) => api.post(`/admin/withdrawals/${id}/approve`),
   rejectWithdrawal: (id, reason) => api.post(`/admin/withdrawals/${id}/reject`, { reason }),
+  sendNotification: (data) => api.post('/admin/notifications', data),
 }
 
 export const notificationApi = {

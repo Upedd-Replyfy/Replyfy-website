@@ -9,7 +9,7 @@ const testimonials = [
     name: 'Ananya R.',
     role: 'Founder, pre-seed startup',
     initials: 'AR',
-    tone: 'bg-charcoal',
+    tone: 'bg-gradient-to-br from-sky-500 to-blue-600',
   },
   {
     quote:
@@ -17,7 +17,7 @@ const testimonials = [
     name: 'Rahul M.',
     role: 'Product Manager',
     initials: 'RM',
-    tone: 'bg-muted',
+    tone: 'bg-gradient-to-br from-violet-500 to-purple-600',
   },
   {
     quote:
@@ -25,13 +25,13 @@ const testimonials = [
     name: 'Sarah K.',
     role: 'COO, Series A startup',
     initials: 'SK',
-    tone: 'bg-ink',
+    tone: 'bg-gradient-to-br from-indigo-500 to-violet-600',
   },
 ]
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="section-spacing relative w-full overflow-hidden bg-canvas">
+    <section id="testimonials" className="section-spacing relative w-full overflow-hidden border-t border-white/10 bg-black">
       <div className="page-container">
         <SectionHeader
           eyebrow="Testimonials"
@@ -39,6 +39,7 @@ export default function Testimonials() {
           highlight="real answers"
           description="Thousands of professionals use Replyfy when they need clarity, not more noise."
           className="mx-auto mb-12 md:mb-16"
+          dark
         />
 
         <motion.div
@@ -54,20 +55,20 @@ export default function Testimonials() {
               variants={fadeUp}
               custom={index * 0.1}
               whileHover={{ y: -4 }}
-              className="luxury-card luxury-card-hover flex flex-col p-6 md:p-7"
+              className="flex flex-col rounded-[20px] border border-white/10 bg-neutral-900/90 p-6 md:p-7 transition-all hover:border-white/20"
             >
-              <p className="text-sm md:text-base leading-relaxed text-ink flex-1">
+              <p className="text-sm md:text-base leading-relaxed text-white/85 flex-1">
                 &ldquo;{item.quote}&rdquo;
               </p>
-              <footer className="mt-6 flex items-center gap-3 pt-5 border-t border-border">
+              <footer className="mt-6 flex items-center gap-3 pt-5 border-t border-white/10">
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-xl ${item.tone} text-[10px] font-bold text-white`}
                 >
                   {item.initials}
                 </div>
                 <div>
-                  <cite className="not-italic text-sm font-semibold text-ink">{item.name}</cite>
-                  <p className="text-xs text-muted-light">{item.role}</p>
+                  <cite className="not-italic text-sm font-semibold text-white">{item.name}</cite>
+                  <p className="text-xs text-white/45">{item.role}</p>
                 </div>
               </footer>
             </motion.blockquote>
