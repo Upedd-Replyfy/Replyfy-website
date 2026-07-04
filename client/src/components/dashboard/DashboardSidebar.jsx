@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -54,7 +54,7 @@ function NavItem({ item, collapsed, onNavigate, onReset }) {
           onNavigate?.()
         }}
         title={collapsed ? item.label : undefined}
-        className="group mb-4 flex items-center justify-center gap-3 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-fg shadow-[var(--shadow-luxury-md)] transition-all hover:bg-white/90"
+        className="group mb-4 flex items-center justify-center gap-3 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-fg shadow-[var(--shadow-luxury-md)] transition-all hover:opacity-90"
       >
         <Icon size={18} strokeWidth={2} />
         {!collapsed && item.label}
@@ -151,14 +151,14 @@ export default function DashboardSidebar({ open, collapsed, onClose, onToggleCol
     >
       <div className={`mb-6 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
         {!collapsed ? (
-          <Logo to="/dashboard" light={false} />
+          <Logo dashboard light={false} />
         ) : (
-          <NavLink
+          <Link
             to="/dashboard"
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-fg"
           >
             R
-          </NavLink>
+          </Link>
         )}
         <button
           type="button"

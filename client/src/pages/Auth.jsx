@@ -5,6 +5,7 @@ import { ArrowLeft, Users, MessageSquare, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Logo from '../components/ui/Logo'
 import Input from '../components/ui/Input'
+import GoogleSignInButton from '../components/auth/GoogleSignInButton'
 import { useAuth } from '../context/AuthContext'
 
 const TRUST_STATS = [
@@ -16,7 +17,7 @@ const TRUST_STATS = [
 const transition = { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
 
 const inputClass =
-  'rounded-2xl px-5 py-4 text-base bg-card border-border text-ink shadow-[var(--shadow-luxury-sm)] placeholder:text-muted-light focus:border-charcoal focus:ring-charcoal/10'
+  '!rounded-xl !bg-[#fafafa] !border-black/20 !text-black !shadow-none placeholder:!text-black/45 focus:!border-black/40 focus:!bg-white focus:!ring-2 focus:!ring-black/10'
 
 function AuthVisual() {
   return (
@@ -30,7 +31,7 @@ function AuthVisual() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
 
       <svg
-        className="pointer-events-none absolute -right-px top-0 z-20 h-full w-28 text-black xl:w-36"
+        className="pointer-events-none absolute -right-1 top-0 z-20 h-full w-28 text-[#f5f5f5] xl:w-36"
         viewBox="0 0 120 800"
         preserveAspectRatio="none"
         aria-hidden="true"
@@ -42,7 +43,7 @@ function AuthVisual() {
       </svg>
 
       <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
-        <Logo className="[&_span:last-child]:text-white [&_span:first-child]:bg-white [&_span:first-child]:text-ink" />
+        <Logo />
 
         <div className="max-w-md">
           <motion.h1
@@ -88,7 +89,7 @@ function AuthVisual() {
 export default function Auth({ initialMode }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { login, register, getDashboardPath } = useAuth()
+  const { login, register, loginWithGoogle, getDashboardPath } = useAuth()
   const defaultMode =
     initialMode ||
     (location.pathname === '/signup' ? 'signup' : 'login')
@@ -104,6 +105,7 @@ export default function Auth({ initialMode }) {
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const isSignup = mode === 'signup'
   const form = isSignup ? signupForm : loginForm
@@ -145,6 +147,12 @@ export default function Auth({ initialMode }) {
     return next
   }
 
+  const finishAuth = (message) => {
+    toast.success(message)
+    const from = location.state?.from?.pathname
+    navigate(from || getDashboardPath(), { replace: true })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     const next = isSignup ? validateSignup() : validateLogin()
@@ -162,13 +170,11 @@ export default function Auth({ initialMode }) {
           email: signupForm.email,
           password: signupForm.password,
         })
-        toast.success('Account created successfully')
+        finishAuth('Account created successfully')
       } else {
         await login(loginForm)
-        toast.success('Welcome back')
+        finishAuth('Welcome back')
       }
-      const from = location.state?.from?.pathname
-      navigate(from || getDashboardPath(), { replace: true })
     } catch (err) {
       setFormError(
         err.message ||
@@ -179,8 +185,27 @@ export default function Auth({ initialMode }) {
     }
   }
 
+  const handleGoogleSuccess = async (payload) => {
+    setGoogleLoading(true)
+    setFormError('')
+    try {
+      await loginWithGoogle(payload)
+      finishAuth(isSignup ? 'Account created successfully' : 'Welcome back')
+    } catch (err) {
+      setFormError(err.message || 'Google sign-in failed. Please try again.')
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
+
+  const handleGoogleError = (message) => {
+    setFormError(message || 'Google sign-in was cancelled or failed.')
+  }
+
+  const authBusy = loading || googleLoading
+
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex min-h-screen bg-[#f5f5f5]">
       <div className="relative w-full lg:w-[45%]">
         <AuthVisual />
 
@@ -192,7 +217,7 @@ export default function Auth({ initialMode }) {
             className="h-44 w-full object-cover opacity-30 grayscale"
           />
           <div className="relative px-5 py-6">
-            <Logo className="[&_span:last-child]:text-white [&_span:first-child]:bg-white [&_span:first-child]:text-ink" />
+            <Logo />
             <p className="mt-3 text-lg font-semibold text-white leading-snug">
               Ask better questions. Get real answers.
             </p>
@@ -200,237 +225,233 @@ export default function Auth({ initialMode }) {
         </div>
       </div>
 
-      <div className="relative flex w-full flex-col justify-center bg-black px-5 py-12 sm:px-10 lg:w-[55%] lg:px-14 xl:px-20 [&_label]:text-white/80 [&_input]:border-border [&_input]:bg-card [&_input]:text-ink [&_p.text-xs]:text-red-400">
+      <div className="auth-shell relative flex w-full flex-col justify-center bg-[#f5f5f5] px-5 py-10 sm:px-8 lg:w-[55%] lg:px-12 xl:px-16">
         <Link
           to="/"
-          className="relative mb-8 inline-flex w-fit items-center gap-2 text-sm text-white/50 transition-colors hover:text-white lg:absolute lg:left-14 lg:top-8"
+          className="relative mb-6 inline-flex w-fit items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-black/70 transition-colors hover:bg-black/[0.06] hover:text-black lg:absolute lg:left-12 lg:top-8 xl:left-16"
         >
           <ArrowLeft size={16} />
           Back to home
         </Link>
 
         <motion.div
-          layout
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={transition}
-          className="relative mx-auto w-full max-w-md"
+          className="relative mx-auto w-full max-w-[440px]"
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={mode}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-5xl">
+          <div className="overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-[0_12px_48px_rgba(0,0,0,0.07)]">
+            <div className="border-b border-black/10 px-8 pb-6 pt-8 md:px-10 md:pt-10">
+              <Logo light={false} className="mb-6 lg:hidden" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/60">
+                {isSignup ? 'Get started' : 'Sign in'}
+              </p>
+              <h1 className="mt-3 text-[1.75rem] font-semibold tracking-tight text-black md:text-3xl">
                 {isSignup ? 'Create your account' : 'Welcome back'}
               </h1>
-              <p className="mt-3 text-base text-white/50">
+              <p className="mt-2 text-sm leading-relaxed text-black/65">
                 {isSignup
                   ? 'Start asking questions in under a minute.'
                   : 'Sign in to view your questions and expert responses.'}
               </p>
-            </motion.div>
-          </AnimatePresence>
+            </div>
 
-          {formError && (
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
-            >
-              {formError}
-            </motion.p>
-          )}
-
-          <motion.form
-            layout
-            onSubmit={handleSubmit}
-            className="mt-8 space-y-4"
-            noValidate
-            transition={transition}
-          >
-            <AnimatePresence mode="popLayout">
-              {isSignup && (
-                <motion.div
-                  key="name-field"
-                  layout
-                  initial={{ opacity: 0, height: 0, y: 12 }}
-                  animate={{ opacity: 1, height: 'auto', y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -8 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden"
-                >
-                  <Input
-                    label="Full Name"
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="Your full name"
-                    value={signupForm.name}
-                    onChange={handleChange}
-                    error={errors.name}
-                    autoComplete="name"
-                    className={inputClass}
-                  />
-                </motion.div>
+            <div className="px-8 py-6 md:px-10 md:py-8">
+              {formError && (
+                <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {formError}
+                </p>
               )}
-            </AnimatePresence>
 
-            <motion.div layout transition={transition}>
-              <Input
-                label="Email"
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@company.com"
-                value={form.email}
-                onChange={handleChange}
-                error={errors.email}
-                autoComplete="email"
-                className={inputClass}
-              />
-            </motion.div>
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                <AnimatePresence initial={false}>
+                  {isSignup && (
+                    <motion.div
+                      key="name-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <Input
+                        label="Full Name"
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Your full name"
+                        value={signupForm.name}
+                        onChange={handleChange}
+                        error={errors.name}
+                        autoComplete="name"
+                        className={inputClass}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-            <motion.div layout transition={transition}>
-              <Input
-                label="Password"
-                id="password"
-                name="password"
-                type="password"
-                placeholder={isSignup ? 'Min. 6 characters' : '••••••••'}
-                value={form.password}
-                onChange={handleChange}
-                error={errors.password}
-                autoComplete={isSignup ? 'new-password' : 'current-password'}
-                className={inputClass}
-              />
-            </motion.div>
+                <Input
+                  label="Email"
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  error={errors.email}
+                  autoComplete="email"
+                  className={inputClass}
+                />
 
-            <AnimatePresence mode="popLayout">
-              {isSignup && (
-                <motion.div
-                  key="confirm-field"
-                  layout
-                  initial={{ opacity: 0, height: 0, y: 12 }}
-                  animate={{ opacity: 1, height: 'auto', y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -8 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden"
+                <Input
+                  label="Password"
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder={isSignup ? 'Min. 6 characters' : '••••••••'}
+                  value={form.password}
+                  onChange={handleChange}
+                  error={errors.password}
+                  autoComplete={isSignup ? 'new-password' : 'current-password'}
+                  className={inputClass}
+                />
+
+                <AnimatePresence initial={false}>
+                  {isSignup && (
+                    <motion.div
+                      key="confirm-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <Input
+                        label="Confirm Password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Repeat your password"
+                        value={signupForm.confirmPassword}
+                        onChange={handleChange}
+                        error={errors.confirmPassword}
+                        autoComplete="new-password"
+                        className={inputClass}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {!isSignup && (
+                  <div className="flex justify-end">
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm font-medium text-black/70 transition-colors hover:text-black"
+                    >
+                      Forgot Password
+                    </Link>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={authBusy}
+                  className="mt-1 w-full rounded-xl bg-black px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all hover:bg-black/90 hover:shadow-[0_6px_20px_rgba(0,0,0,0.22)] disabled:opacity-50"
                 >
-                  <Input
-                    label="Confirm Password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="Repeat your password"
-                    value={signupForm.confirmPassword}
-                    onChange={handleChange}
-                    error={errors.confirmPassword}
-                    autoComplete="new-password"
-                    className={inputClass}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {!isSignup && (
-                <motion.div
-                  key="forgot"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex justify-end"
-                >
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-white/50 transition-colors hover:text-white"
-                  >
-                    Forgot Password
-                  </Link>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <motion.button
-              layout
-              type="submit"
-              disabled={loading}
-              className="btn-primary mt-2 w-full rounded-2xl px-6 py-4 text-sm font-semibold disabled:opacity-50"
-              transition={transition}
-            >
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={loading ? 'loading' : mode}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.35 }}
-                  className="block"
-                >
-                  {loading
+                  {authBusy
                     ? isSignup
                       ? 'Creating account...'
                       : 'Signing in...'
                     : isSignup
                       ? 'Create Account'
                       : 'Sign In'}
-                </motion.span>
-              </AnimatePresence>
-            </motion.button>
-          </motion.form>
-
-          <motion.p layout className="mt-8 text-center text-sm text-white/50" transition={transition}>
-            {isSignup ? (
-              <>
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => switchMode('login')}
-                  className="font-semibold text-white underline-offset-2 hover:underline"
-                >
-                  Sign In
                 </button>
-              </>
-            ) : (
-              <>
-                Don&apos;t have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => switchMode('signup')}
-                  className="font-semibold text-white underline-offset-2 hover:underline"
-                >
-                  Sign Up
-                </button>
-              </>
-            )}
-          </motion.p>
+              </form>
 
-          <AnimatePresence>
-            {isSignup && (
-              <motion.p
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.4 }}
-                className="mt-4 overflow-hidden text-center text-xs leading-relaxed text-white/40"
-              >
-                By creating an account, you agree to our{' '}
-                <a href="#" className="underline hover:text-white">
-                  Terms
-                </a>{' '}
-                and{' '}
-                <a href="#" className="underline hover:text-white">
-                  Privacy Policy
-                </a>
-                .
-              </motion.p>
-            )}
-          </AnimatePresence>
+              <div className="mt-5">
+                <div className="mb-5 flex items-center gap-3" aria-hidden="true">
+                  <svg
+                    className="h-3 flex-1 text-black/30"
+                    viewBox="0 0 120 12"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0 6 C20 6 30 2 45 2 C60 2 60 10 75 10 C90 10 100 6 120 6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-black/55">
+                    or
+                  </span>
+                  <svg
+                    className="h-3 flex-1 text-black/30"
+                    viewBox="0 0 120 12"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0 6 C20 6 30 10 45 10 C60 10 60 2 75 2 C90 2 100 6 120 6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <GoogleSignInButton
+                  label={isSignup ? 'Sign up with Google' : 'Continue with Google'}
+                  loading={googleLoading}
+                  disabled={authBusy}
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-black/10 bg-[#fafafa] px-8 py-5 md:px-10">
+              <p className="text-center text-sm text-black/70">
+                {isSignup ? (
+                  <>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchMode('login')}
+                      className="font-semibold text-black underline-offset-2 hover:underline"
+                    >
+                      Sign In
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Don&apos;t have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchMode('signup')}
+                      className="font-semibold text-black underline-offset-2 hover:underline"
+                    >
+                      Sign Up
+                    </button>
+                  </>
+                )}
+              </p>
+
+              {isSignup && (
+                <p className="mt-3 text-center text-xs leading-relaxed text-black/55">
+                  By creating an account, you agree to our{' '}
+                  <a href="#" className="font-medium text-black/75 underline hover:text-black">
+                    Terms
+                  </a>{' '}
+                  and{' '}
+                  <a href="#" className="font-medium text-black/75 underline hover:text-black">
+                    Privacy Policy
+                  </a>
+                  .
+                </p>
+              )}
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

@@ -1,15 +1,9 @@
-import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, CirclePlay } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import HeroOrbitVisual from './HeroOrbitVisual'
+import HeroDashboardPreview from './HeroDashboardPreview'
+import TrustBanner from './TrustBanner'
 import ScrollLink from '../ui/ScrollLink'
-
-const avatars = [
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
-]
 
 const stats = [
   { value: '48h', label: 'Avg. response time' },
@@ -26,21 +20,8 @@ const reveal = (delay = 0) => ({
 })
 
 export default function Hero() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 })
-
-  useEffect(() => {
-    const onMove = (e) => {
-      setMouse({
-        x: (e.clientX / window.innerWidth - 0.5) * 2,
-        y: (e.clientY / window.innerHeight - 0.5) * 2,
-      })
-    }
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
-
   return (
-    <section className="relative min-h-[100svh] w-full overflow-hidden bg-[#050505]">
+    <section className="relative flex min-h-svh w-full flex-col overflow-x-hidden bg-[#050505]">
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -49,27 +30,12 @@ export default function Hero() {
         }}
       />
 
-      <div className="relative z-10 grid min-h-[100svh] w-full grid-cols-1 items-center gap-12 gutter-left pb-16 pt-24 lg:grid-cols-[minmax(0,44fr)_minmax(0,56fr)] lg:gap-10 lg:pb-20 lg:pt-28 lg:pr-0">
-        <div className="flex w-full flex-col items-start justify-center text-left">
-          <motion.div {...reveal(0.05)} className="mb-7 flex items-center gap-3">
-            <div className="flex -space-x-2">
-              {avatars.map((src) => (
-                <img
-                  key={src}
-                  src={src}
-                  alt=""
-                  className="h-8 w-8 rounded-full object-cover ring-2 ring-[#050505]"
-                  draggable={false}
-                />
-              ))}
-            </div>
-            <span className="text-[13px] text-white/45">2,400+ questions answered this month</span>
-          </motion.div>
-
+      <div className="relative z-10 grid min-h-0 flex-1 w-full grid-cols-1 items-center gap-8 gutter-left pb-4 pt-20 lg:grid-cols-[minmax(0,40fr)_minmax(0,60fr)] lg:gap-10 lg:pb-6 lg:pt-24 lg:pr-8">
+        <div className="flex w-full flex-col items-start justify-center text-left lg:-translate-y-5">
           <motion.h1
             {...reveal(0.1)}
-            className="font-semibold leading-[1.08] tracking-[-0.025em] text-white"
-            style={{ fontSize: 'clamp(2.25rem, 4.2vw, 4rem)', maxWidth: '14ch' }}
+            className="font-semibold leading-[1.1] tracking-[-0.025em] text-white"
+            style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.125rem)', maxWidth: '14ch' }}
           >
             Ask anything.
             <br />
@@ -80,8 +46,8 @@ export default function Hero() {
 
           <motion.p
             {...reveal(0.16)}
-            className="mt-6 leading-relaxed text-white/50"
-            style={{ fontSize: 'clamp(1rem, 1.15vw, 1.25rem)', maxWidth: '42ch' }}
+            className="mt-5 leading-relaxed text-white/50"
+            style={{ fontSize: 'clamp(0.8125rem, 0.9vw, 0.9375rem)', maxWidth: '42ch' }}
           >
             Submit your question and get personalized answers from verified founders, mentors, and
             professionals.
@@ -112,11 +78,11 @@ export default function Hero() {
 
           <motion.div
             {...reveal(0.28)}
-            className="mt-10 flex w-full max-w-md justify-start gap-8 border-t border-white/[0.07] pt-8 sm:gap-10"
+            className="mt-10 flex w-full max-w-md justify-start gap-8 border-t border-white/20 pt-8 sm:gap-10"
           >
             {stats.map((stat) => (
               <div key={stat.label} className="min-w-0">
-                <p className="text-xl font-semibold tracking-tight text-white lg:text-2xl">
+                <p className="text-lg font-semibold tracking-tight text-white lg:text-xl">
                   {stat.value}
                 </p>
                 <p className="mt-1 text-[11px] leading-snug text-white/40 lg:text-xs">
@@ -127,10 +93,12 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        <div className="relative h-[340px] w-full sm:h-[380px] lg:h-[min(66vh,580px)] lg:-mr-[4vw]">
-          <HeroOrbitVisual mouse={mouse} />
+        <div className="relative flex h-[min(70vh,560px)] w-full min-h-[360px] items-center justify-center overflow-visible sm:min-h-[400px] lg:h-[min(68vh,620px)] lg:min-h-0">
+          <HeroDashboardPreview />
         </div>
       </div>
+
+      <TrustBanner className="relative z-20 shrink-0" />
     </section>
   )
 }

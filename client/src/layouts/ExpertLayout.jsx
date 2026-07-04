@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import ExpertSidebar from '../components/expert/ExpertSidebar'
 import ExpertTopbar from '../components/expert/ExpertTopbar'
+import { ShellThemeProvider, useShellTheme } from '../context/ShellThemeContext'
 
-export default function ExpertLayout() {
+function ExpertLayoutInner() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { theme } = useShellTheme()
 
   return (
-    <div className="min-h-screen bg-[#090909] text-ink">
+    <div className="expert-shell min-h-screen bg-canvas text-ink" data-theme={theme}>
       <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:block">
         <ExpertSidebar />
       </div>
@@ -26,10 +28,18 @@ export default function ExpertLayout() {
 
       <div className="lg:pl-[248px]">
         <ExpertTopbar onMenuOpen={() => setMobileOpen(true)} />
-        <main className="mx-auto max-w-7xl p-6 lg:p-8">
+        <main className="mx-auto max-w-7xl bg-canvas p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
     </div>
+  )
+}
+
+export default function ExpertLayout() {
+  return (
+    <ShellThemeProvider storageKey="expert-theme">
+      <ExpertLayoutInner />
+    </ShellThemeProvider>
   )
 }

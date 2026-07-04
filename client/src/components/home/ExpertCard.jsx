@@ -45,7 +45,7 @@ export default function ExpertCard({ expert, isCenter, dark = false }) {
       </div>
 
       <div className={`p-4 md:p-5 transition-all duration-500 ${isCenter ? 'opacity-100' : 'opacity-90'}`}>
-        <h3 className={`text-xl md:text-2xl font-semibold tracking-tight leading-tight ${dark ? 'text-white' : 'text-ink'}`}>
+        <h3 className={`text-lg md:text-xl font-semibold tracking-tight leading-tight ${dark ? 'text-white' : 'text-ink'}`}>
           {expert.name}
         </h3>
         <p className={`mt-1 text-sm ${dark ? 'text-white/55' : 'text-muted'}`}>{expert.role}</p>

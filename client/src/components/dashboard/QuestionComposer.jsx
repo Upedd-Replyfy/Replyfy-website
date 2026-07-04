@@ -112,28 +112,29 @@ export default function QuestionComposer({
         </p>
       </div>
 
-      <div className="mb-4 mt-10 flex items-start gap-3 md:mt-14">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-fg">
-          <Sparkles size={16} strokeWidth={2} />
-        </span>
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-ink md:text-2xl">
-            What would you like help with today?
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            Describe your question. A verified human expert — not AI — will respond.
-          </p>
+      <div className="mx-auto w-full max-w-4xl">
+        <div className="mb-4 flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-fg">
+            <Sparkles size={16} strokeWidth={2} />
+          </span>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-ink md:text-2xl">
+              What would you like help with today?
+            </h1>
+            <p className="mt-1 text-sm text-muted">
+              Describe your question. A verified human expert — not AI — will respond.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <CategoryPills
-        categories={categories}
-        selectedId={categoryId}
-        onSelect={onCategoryChange}
-        loading={categoriesLoading}
-      />
+        <CategoryPills
+          categories={categories}
+          selectedId={categoryId}
+          onSelect={onCategoryChange}
+          loading={categoriesLoading}
+        />
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
         <div className="p-3 md:p-4">
           <ExpertTypeTabs
             expertTypes={expertTypes}
@@ -280,7 +281,7 @@ export default function QuestionComposer({
               whileTap={{ scale: canSubmit && !loading ? 0.99 : 1 }}
               onClick={onSubmit}
               disabled={!canSubmit || loading}
-              className="flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition-colors hover:bg-white/90 disabled:opacity-40"
+              className="flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition-colors hover:opacity-90 disabled:opacity-40"
             >
               {loading ? (
                 <>
@@ -297,9 +298,10 @@ export default function QuestionComposer({
             </motion.button>
           </div>
         </div>
-      </div>
+        </div>
 
-      <SuggestionCarousel category={selectedCategory} onSelect={onQueryChange} />
+        <SuggestionCarousel category={selectedCategory} onSelect={onQueryChange} />
+      </div>
     </motion.div>
   )
 }

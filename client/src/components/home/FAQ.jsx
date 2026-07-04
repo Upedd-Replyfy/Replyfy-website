@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Minus } from 'lucide-react'
-import SectionHeader from '../ui/SectionHeader'
 import { fadeUp } from '../../utils/animations'
 
 const faqs = [
@@ -34,27 +33,45 @@ const faqs = [
 
 function FAQItem({ question, answer, isOpen, onToggle }) {
   return (
-    <div className="border-b border-white/10 last:border-0">
+    <div className={`border-b border-black/[0.08] last:border-0 ${isOpen ? 'bg-black/[0.02]' : ''}`}>
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 py-4 text-left"
+        className="group flex w-full items-center justify-between gap-4 py-5 text-left transition-colors"
       >
-        <span className="text-sm font-semibold text-white">{question}</span>
-        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60">
-          {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+        <span
+          className={`pr-4 text-[15px] font-semibold leading-snug transition-colors md:text-base ${
+            isOpen ? 'text-black' : 'text-black/85 group-hover:text-black'
+          }`}
+        >
+          {question}
         </span>
+        <motion.span
+          animate={{
+            backgroundColor: isOpen ? '#000000' : 'rgba(0,0,0,0.05)',
+            color: isOpen ? '#ffffff' : 'rgba(0,0,0,0.55)',
+          }}
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.94 }}
+          transition={{ duration: 0.2 }}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/[0.08]"
+        >
+          {isOpen ? <Minus size={15} strokeWidth={2} /> : <Plus size={15} strokeWidth={2} />}
+        </motion.span>
       </button>
+
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="pb-4 text-sm text-white/55 leading-relaxed pr-10">{answer}</p>
+            <p className="pb-5 pr-12 text-sm leading-relaxed text-black/55 md:text-[15px]">
+              {answer}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -66,24 +83,37 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(0)
 
   return (
-    <section id="faq" className="section-spacing relative w-full border-t border-white/10 bg-black">
+    <section
+      id="faq"
+      className="relative w-full border-t border-black/[0.06] bg-[#f5f5f5] py-14 md:py-16 lg:py-20"
+    >
       <div className="page-container">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-          <SectionHeader
-            eyebrow="FAQ"
-            title="Questions,"
-            highlight="answered"
-            description="Everything you need to know before asking your first question."
-            align="left"
-            dark
-          />
-
+        <div className="mx-auto grid max-w-[1200px] gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-16 lg:items-start">
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-40px' }}
             variants={fadeUp}
-            className="rounded-[20px] border border-white/10 bg-neutral-900/90 px-6 md:px-8"
+            className="lg:sticky lg:top-24"
+          >
+            <span className="inline-flex rounded-full border border-black/10 bg-white px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-black/55">
+              FAQ
+            </span>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-black leading-[1.12] md:text-3xl lg:text-[2.125rem]">
+              Questions,{' '}
+              <span className="text-black">answered</span>
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-black/50 md:text-base">
+              Everything you need to know before asking your first question.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="rounded-[20px] border border-black/[0.08] bg-white px-6 py-2 shadow-[0_12px_48px_rgba(0,0,0,0.07)] md:px-8"
           >
             {faqs.map((faq, index) => (
               <FAQItem

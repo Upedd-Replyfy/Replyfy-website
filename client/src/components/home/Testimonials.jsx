@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import SectionHeader from '../ui/SectionHeader'
-import { fadeUp, staggerContainer } from '../../utils/animations'
+import { staggerContainer } from '../../utils/animations'
 
 const testimonials = [
   {
@@ -8,30 +8,43 @@ const testimonials = [
       'I spent weeks researching incorporation options. One answer from Replyfy gave me more clarity than 20 blog posts.',
     name: 'Ananya R.',
     role: 'Founder, pre-seed startup',
-    initials: 'AR',
-    tone: 'bg-gradient-to-br from-sky-500 to-blue-600',
+    image:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=1000&fit=crop&crop=faces',
   },
   {
     quote:
       'The expert actually read my full question and addressed my specific situation. Felt like a $500 consultation for a fraction of the price.',
     name: 'Rahul M.',
     role: 'Product Manager',
-    initials: 'RM',
-    tone: 'bg-gradient-to-br from-violet-500 to-purple-600',
+    image:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop&crop=faces',
   },
   {
     quote:
       'We used Replyfy before our Series A to sanity-check our cap table. The response was detailed, practical, and actionable.',
     name: 'Sarah K.',
     role: 'COO, Series A startup',
-    initials: 'SK',
-    tone: 'bg-gradient-to-br from-indigo-500 to-violet-600',
+    image:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=1000&fit=crop&crop=faces',
   },
 ]
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 36, scale: 0.96 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] },
+  }),
+}
+
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="section-spacing relative w-full overflow-hidden border-t border-white/10 bg-black">
+    <section
+      id="testimonials"
+      className="section-spacing relative w-full overflow-hidden border-t border-white/10 bg-black"
+    >
       <div className="page-container">
         <SectionHeader
           eyebrow="Testimonials"
@@ -45,32 +58,59 @@ export default function Testimonials() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: '-60px' }}
           variants={staggerContainer}
-          className="grid gap-6 md:grid-cols-3"
+          className="mx-auto grid max-w-[920px] gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-5"
         >
           {testimonials.map((item, index) => (
             <motion.blockquote
               key={item.name}
-              variants={fadeUp}
-              custom={index * 0.1}
-              whileHover={{ y: -4 }}
-              className="flex flex-col rounded-[20px] border border-white/10 bg-neutral-900/90 p-6 md:p-7 transition-all hover:border-white/20"
+              variants={cardVariants}
+              custom={index * 0.12}
+              whileHover={{ y: -6, scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+              className="group relative min-h-[280px] overflow-hidden rounded-[18px] border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.4)] md:min-h-[300px]"
             >
-              <p className="text-sm md:text-base leading-relaxed text-white/85 flex-1">
-                &ldquo;{item.quote}&rdquo;
-              </p>
-              <footer className="mt-6 flex items-center gap-3 pt-5 border-t border-white/10">
-                <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${item.tone} text-[10px] font-bold text-white`}
+              <img
+                src={item.image}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover grayscale transition-all duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0"
+                draggable={false}
+              />
+
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/15"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/10"
+              />
+
+              <div className="relative z-10 flex h-full min-h-[280px] flex-col justify-end p-4 md:min-h-[300px] md:p-5">
+                <motion.p
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.15 + index * 0.1, duration: 0.5 }}
+                  className="text-xs leading-relaxed text-white md:text-[13px]"
                 >
-                  {item.initials}
-                </div>
-                <div>
-                  <cite className="not-italic text-sm font-semibold text-white">{item.name}</cite>
-                  <p className="text-xs text-white/45">{item.role}</p>
-                </div>
-              </footer>
+                  &ldquo;{item.quote}&rdquo;
+                </motion.p>
+
+                <motion.footer
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.25 + index * 0.1, duration: 0.5 }}
+                  className="mt-3 border-t border-white/20 pt-3"
+                >
+                  <cite className="not-italic text-xs font-semibold text-white md:text-sm">
+                    {item.name}
+                  </cite>
+                  <p className="mt-0.5 text-[11px] text-white/65">{item.role}</p>
+                </motion.footer>
+              </div>
             </motion.blockquote>
           ))}
         </motion.div>

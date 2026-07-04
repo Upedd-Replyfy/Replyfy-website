@@ -285,6 +285,134 @@
   }
 }
 
-html[data-admin-theme='dim'] .admin-shell {
-  --color-canvas: #0f0f12;
+/* Shared light theme for dashboard, admin, and expert shells */
+.dashboard-shell[data-theme='light'],
+.admin-shell[data-theme='light'],
+.expert-shell[data-theme='light'] {
+  --color-ink: #09090b;
+  --color-ink-secondary: #18181b;
+  --color-charcoal: #52525b;
+  --color-muted: #71717a;
+  --color-muted-light: #a1a1aa;
+  --color-border: #e4e4e7;
+  --color-canvas: #f8f8f8;
+  --color-canvas-2: #f4f4f5;
+  --color-surface: #f4f4f5;
+  --color-card: #ffffff;
+  --color-line: #e4e4e7;
+  --color-accent: #09090b;
+  --color-accent-light: #3f3f46;
+  --color-accent-glow: rgba(0, 0, 0, 0.04);
+  --color-primary: #09090b;
+  --color-primary-fg: #fafafa;
+
+  --shadow-luxury-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-luxury-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.05);
+  --shadow-luxury-lg: 0 8px 20px rgba(0, 0, 0, 0.08), 0 16px 48px rgba(0, 0, 0, 0.06);
+  --shadow-luxury-hover: 0 12px 28px rgba(0, 0, 0, 0.1), 0 24px 64px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-shell[data-theme='light'] .luxury-card-hover:hover,
+.admin-shell[data-theme='light'] .luxury-card-hover:hover,
+.expert-shell[data-theme='light'] .luxury-card-hover:hover {
+  border-color: #d4d4d8;
+}
+
+.dashboard-shell[data-theme='light'] .btn-primary:hover,
+.dashboard-shell[data-theme='light'] .btn-accent:hover,
+.admin-shell[data-theme='light'] .btn-primary:hover,
+.admin-shell[data-theme='light'] .btn-accent:hover,
+.expert-shell[data-theme='light'] .btn-primary:hover,
+.expert-shell[data-theme='light'] .btn-accent:hover {
+  background: #27272a;
+}
+
+.dashboard-shell[data-theme='light'] .btn-secondary:hover,
+.admin-shell[data-theme='light'] .btn-secondary:hover,
+.expert-shell[data-theme='light'] .btn-secondary:hover {
+  border-color: #d4d4d8;
+}
+
+.dashboard-shell[data-theme='light'] ::selection,
+.admin-shell[data-theme='light'] ::selection,
+.expert-shell[data-theme='light'] ::selection {
+  background: rgba(0, 0, 0, 0.1);
+  color: #09090b;
+}
+
+.dashboard-shell[data-theme='light'] .glass,
+.admin-shell[data-theme='light'] .glass,
+.expert-shell[data-theme='light'] .glass {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dashboard-shell[data-theme='light'] .glass-strong,
+.admin-shell[data-theme='light'] .glass-strong,
+.expert-shell[data-theme='light'] .glass-strong {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.admin-shell[data-theme='light'] .admin-sidebar,
+.admin-shell[data-theme='light'] .admin-topbar,
+.admin-shell[data-theme='light'] .admin-panel,
+.admin-shell[data-theme='light'] .admin-stat-card,
+.admin-shell[data-theme='light'] .admin-search,
+.admin-shell[data-theme='light'] .admin-profile-chip {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-card) !important;
+}
+
+.admin-shell[data-theme='light'] .admin-topbar,
+.admin-shell[data-theme='light'] .admin-sidebar {
+  background-color: color-mix(in srgb, var(--color-card) 92%, transparent) !important;
+}
+
+.admin-shell[data-theme='light'] .admin-search {
+  background-color: var(--color-surface) !important;
+}
+
+.admin-shell[data-theme='light'] .admin-nav-active {
+  color: var(--color-ink) !important;
+}
+
+.expert-shell[data-theme='light'] .expert-sidebar,
+.expert-shell[data-theme='light'] .expert-topbar,
+.expert-shell[data-theme='light'] .expert-panel,
+.expert-shell[data-theme='light'] .expert-stat-card {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-card) !important;
+}
+
+.expert-shell[data-theme='light'] .expert-sidebar,
+.expert-shell[data-theme='light'] .expert-topbar {
+  background-color: color-mix(in srgb, var(--color-card) 92%, transparent) !important;
+}
+
+/* Auth page — force light form controls over the global dark palette */
+.auth-shell label {
+  color: rgba(0, 0, 0, 0.78) !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-shell input {
+  background-color: #fafafa !important;
+  color: #000 !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
+}
+
+.auth-shell input::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.auth-shell input:focus {
+  background-color: #fff !important;
+  border-color: rgba(0, 0, 0, 0.4) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.auth-shell .space-y-2 > p.text-xs {
+  color: #b91c1c !important;
 }

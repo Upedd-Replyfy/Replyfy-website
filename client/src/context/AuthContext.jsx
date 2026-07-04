@@ -49,6 +49,15 @@ export function AuthProvider({ children }) {
     return res
   }
 
+  const loginWithGoogle = async (payload) => {
+    const res = await authApi.googleLogin(payload)
+    localStorage.setItem('token', res.token)
+    localStorage.setItem('refreshToken', res.refreshToken)
+    setUser(res.user)
+    setExpertProfile(res.expertProfile || null)
+    return res
+  }
+
   const logout = async () => {
     try {
       await authApi.logout()
@@ -72,6 +81,7 @@ export function AuthProvider({ children }) {
         isAuthenticated: !!user,
         login,
         register,
+        loginWithGoogle,
         logout,
         loadProfile,
         getDashboardPath,

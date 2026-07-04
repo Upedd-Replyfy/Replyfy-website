@@ -6,6 +6,10 @@ import Dashboard from './pages/Dashboard'
 import AskQuestion from './pages/user/AskQuestion'
 import UserQuestions from './pages/user/UserQuestions'
 import QuestionDetail from './pages/user/QuestionDetail'
+import UserExperts from './pages/user/UserExperts'
+import UserSaved from './pages/user/UserSaved'
+import UserBilling from './pages/user/UserBilling'
+import UserSettings from './pages/user/UserSettings'
 import ExpertLayout from './layouts/ExpertLayout'
 import ExpertDashboard from './pages/expert/ExpertDashboard'
 import ExpertQuestions from './pages/expert/ExpertQuestions'
@@ -40,6 +44,10 @@ export default function App() {
           <Route path="/dashboard/ask" element={<AskQuestion />} />
           <Route path="/dashboard/questions" element={<UserQuestions />} />
           <Route path="/dashboard/questions/:id" element={<QuestionDetail />} />
+          <Route path="/dashboard/experts" element={<UserExperts />} />
+          <Route path="/dashboard/saved" element={<UserSaved />} />
+          <Route path="/dashboard/billing" element={<UserBilling />} />
+          <Route path="/dashboard/settings" element={<UserSettings />} />
         </Route>
 
         <Route element={<ProtectedRoute roles={[ROLES.EXPERT]} />}>

@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -13,24 +14,40 @@ import {
   Settings,
   LogOut,
   CreditCard,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-
-const notifications = [
-  { id: 1, text: 'Dr. Priya replied to your tax question', time: '2m ago', unread: true },
-  { id: 2, text: 'Marcus Chen is reviewing your product question', time: '1h ago', unread: true },
-  { id: 3, text: 'Your Priority question was matched', time: '3h ago', unread: false },
-]
+import { useDashboardTheme } from '../../context/DashboardThemeContext'
+import { notificationApi } from '../../services/api'
+import { formatDistanceToNow } from '../../utils/date'
 
 export default function DashboardTopbar({ onMenuOpen }) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useDashboardTheme()
   const [notifOpen, setNotifOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const notifRef = useRef(null)
   const profileRef = useRef(null)
   const quickRef = useRef(null)
+
+  const { data: notificationsData } = useQuery({
+    queryKey: ['dashboard-notifications'],
+    queryFn: () => notificationApi.getAll({ limit: 10 }),
+    refetchInterval: 60000,
+  })
+
+  const markReadMutation = useMutation({
+    mutationFn: (id) => notificationApi.markRead(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dashboard-notifications'] }),
+  })
+
+  const notifications = notificationsData?.notifications || []
+  const unreadCount = notificationsData?.unreadCount || 0
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -42,12 +59,27 @@ export default function DashboardTopbar({ onMenuOpen }) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  const unreadCount = notifications.filter((n) => n.unread).length
-
   const handleSignOut = async () => {
     setProfileOpen(false)
     await logout()
     navigate('/login', { replace: true })
+  }
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    const query = searchQuery.trim()
+    if (!query) return
+    navigate(`/dashboard/experts?search=${encodeURIComponent(query)}`)
+  }
+
+  const handleNotificationClick = (notification) => {
+    if (!notification.isRead) {
+      markReadMutation.mutate(notification._id)
+    }
+    setNotifOpen(false)
+    if (notification.link) {
+      navigate(notification.link)
+    }
   }
 
   const avatarSrc =
@@ -62,7 +94,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
   ]
 
   return (
-    <header className="sticky top-0 z-30 flex w-full items-center gap-4 border-b border-border bg-card/90 px-5 py-3.5 backdrop-blur-xl md:px-8">
+    <header className="sticky top-0 z-40 flex w-full items-center gap-4 overflow-visible border-b border-border bg-card/90 px-5 py-3.5 backdrop-blur-xl md:px-8">
       <button
         type="button"
         onClick={onMenuOpen}
@@ -72,24 +104,23 @@ export default function DashboardTopbar({ onMenuOpen }) {
         <Menu size={20} />
       </button>
 
-      <div className="relative min-w-0 flex-1 max-w-2xl">
+      <form onSubmit={handleSearch} className="relative min-w-0 flex-1 max-w-2xl">
         <div className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center gap-2">
           <Sparkles size={15} className="text-muted-light" />
         </div>
         <input
           type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Ask or search anything — questions, experts, answers..."
           className="w-full rounded-2xl border border-border bg-surface py-3 pl-11 pr-20 text-sm text-ink shadow-[var(--shadow-luxury-sm)] placeholder:text-muted-light transition-all focus:border-charcoal focus:bg-card focus:outline-none focus:ring-2 focus:ring-charcoal/10"
         />
         <div className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-1.5 sm:flex">
           <kbd className="rounded-md border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-light">
-            ⌘
-          </kbd>
-          <kbd className="rounded-md border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-light">
-            K
+            Enter
           </kbd>
         </div>
-      </div>
+      </form>
 
       <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
         <div className="relative" ref={quickRef}>
@@ -114,7 +145,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
                 {[
                   { icon: MessageSquarePlus, label: 'New question', action: () => navigate('/dashboard', { state: { reset: true } }) },
                   { icon: Search, label: 'Find expert', action: () => navigate('/dashboard/experts') },
-                  { icon: Sparkles, label: 'AI suggestions', action: () => navigate('/dashboard') },
+                  { icon: Sparkles, label: 'Go to workspace', action: () => navigate('/dashboard') },
                 ].map((action) => (
                   <button
                     key={action.label}
@@ -134,6 +165,17 @@ export default function DashboardTopbar({ onMenuOpen }) {
           </AnimatePresence>
         </div>
 
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={toggleTheme}
+          className="rounded-xl border border-border p-2.5 text-muted transition-colors hover:bg-surface hover:text-ink"
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </motion.button>
+
         <div className="relative" ref={notifRef}>
           <motion.button
             type="button"
@@ -146,7 +188,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
             <Bell size={18} />
             {unreadCount > 0 && (
               <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-fg ring-2 ring-card">
-                {unreadCount}
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </motion.button>
@@ -162,36 +204,38 @@ export default function DashboardTopbar({ onMenuOpen }) {
                   <p className="text-sm font-semibold text-ink">Notifications</p>
                 </div>
                 <div className="max-h-72 overflow-y-auto p-2">
-                  {notifications.map((n) => (
-                    <button
-                      key={n.id}
-                      type="button"
-                      className={`w-full rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-surface ${
-                        n.unread ? 'bg-surface' : ''
-                      }`}
-                    >
-                      <p className="text-xs leading-relaxed text-ink">{n.text}</p>
-                      <p className="mt-1 text-[10px] text-muted-light">{n.time}</p>
-                    </button>
-                  ))}
+                  {notifications.length === 0 ? (
+                    <p className="px-3 py-6 text-center text-xs text-muted-light">No notifications yet</p>
+                  ) : (
+                    notifications.map((n) => (
+                      <button
+                        key={n._id}
+                        type="button"
+                        onClick={() => handleNotificationClick(n)}
+                        className={`w-full rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-surface ${
+                          !n.isRead ? 'bg-surface' : ''
+                        }`}
+                      >
+                        <p className="text-xs font-medium text-ink">{n.title}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted">{n.message}</p>
+                        <p className="mt-1 text-[10px] text-muted-light">{formatDistanceToNow(n.createdAt)}</p>
+                      </button>
+                    ))
+                  )}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <div className="relative" ref={profileRef}>
+        <div className="relative shrink-0" ref={profileRef}>
           <motion.button
             type="button"
             whileHover={{ scale: 1.02 }}
             onClick={() => setProfileOpen(!profileOpen)}
             className="flex items-center gap-2 rounded-xl border border-border bg-card py-1.5 pl-1.5 pr-3 shadow-[var(--shadow-luxury-sm)] transition-colors hover:bg-surface"
           >
-            <img
-              src={avatarSrc}
-              alt=""
-              className="h-8 w-8 rounded-lg object-cover"
-            />
+            <img src={avatarSrc} alt="" className="h-8 w-8 rounded-lg object-cover" />
             <span className="hidden text-sm font-medium text-ink sm:inline">
               {user?.name?.split(' ')[0] || 'Account'}
             </span>
@@ -203,11 +247,11 @@ export default function DashboardTopbar({ onMenuOpen }) {
                 initial={{ opacity: 0, y: 8, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-border bg-card p-1.5 shadow-[var(--shadow-luxury-lg)]"
+                className="absolute right-0 top-[calc(100%+8px)] z-50 w-56 origin-top-right overflow-hidden rounded-2xl border border-border bg-card p-1.5 shadow-[var(--shadow-luxury-lg)]"
               >
                 <div className="border-b border-border px-3 py-2.5">
-                  <p className="text-sm font-semibold text-ink">{user?.name}</p>
-                  <p className="text-xs text-muted-light">{user?.email}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{user?.name}</p>
+                  <p className="truncate text-xs text-muted-light">{user?.email}</p>
                 </div>
                 {profileMenu.map((item) => (
                   <button

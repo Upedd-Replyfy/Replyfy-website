@@ -1,18 +1,20 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Menu } from 'lucide-react'
+import { LogOut, Menu, Moon, Sun } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useShellTheme } from '../../context/ShellThemeContext'
 
 export default function ExpertTopbar({ onMenuOpen }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useShellTheme()
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/[0.08] bg-[#090909]/90 px-6 backdrop-blur-xl">
+    <header className="expert-topbar sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-card/90 px-6 backdrop-blur-xl">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onMenuOpen}
-          className="rounded-xl p-2.5 text-muted hover:bg-white/[0.06] hover:text-ink lg:hidden"
+          className="rounded-xl p-2.5 text-muted hover:bg-surface hover:text-ink lg:hidden"
           aria-label="Open menu"
         >
           <Menu size={20} />
@@ -21,17 +23,27 @@ export default function ExpertTopbar({ onMenuOpen }) {
           Welcome back, <span className="text-ink">{user?.name}</span>
         </p>
       </div>
-      <button
-        type="button"
-        onClick={async () => {
-          await logout()
-          navigate('/login', { replace: true })
-        }}
-        className="flex items-center gap-2 rounded-xl border border-white/[0.08] px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-white/[0.04] hover:text-ink"
-      >
-        <LogOut size={16} />
-        Sign out
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="rounded-xl border border-border p-2.5 text-muted transition-colors hover:bg-surface hover:text-ink"
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            await logout()
+            navigate('/login', { replace: true })
+          }}
+          className="flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-ink"
+        >
+          <LogOut size={16} />
+          Sign out
+        </button>
+      </div>
     </header>
   )
 }

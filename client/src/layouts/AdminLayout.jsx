@@ -4,18 +4,14 @@ import { AnimatePresence, motion } from 'framer-motion'
 import AdminSidebar from '../components/admin/AdminSidebar'
 import AdminTopbar from '../components/admin/AdminTopbar'
 import RegisterExpertModal from '../components/admin/RegisterExpertModal'
+import { ShellThemeProvider, useShellTheme } from '../context/ShellThemeContext'
 
-export default function AdminLayout() {
+function AdminLayoutInner() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [registerOpen, setRegisterOpen] = useState(false)
-  const [theme, setTheme] = useState(() => localStorage.getItem('admin-theme') || 'dark')
+  const { theme } = useShellTheme()
   const [searchParams, setSearchParams] = useSearchParams()
-
-  useEffect(() => {
-    localStorage.setItem('admin-theme', theme)
-    document.documentElement.setAttribute('data-admin-theme', theme)
-  }, [theme])
 
   useEffect(() => {
     if (searchParams.get('register') === '1') {
@@ -35,7 +31,7 @@ export default function AdminLayout() {
   }, [])
 
   return (
-    <div className="admin-shell min-h-screen bg-[#090909] text-ink">
+    <div className="admin-shell min-h-screen bg-canvas text-ink" data-theme={theme}>
       <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
 
       <AnimatePresence>
@@ -70,17 +66,23 @@ export default function AdminLayout() {
           sidebarCollapsed={collapsed}
           onMenuOpen={() => setMobileOpen(true)}
           onSidebarToggle={() => setCollapsed((v) => !v)}
-          theme={theme}
-          onThemeToggle={() => setTheme((t) => (t === 'dark' ? 'dim' : 'dark'))}
           onRegisterExpert={() => setRegisterOpen(true)}
         />
 
-        <main className="flex-1 p-4 lg:p-6 xl:p-8">
+        <main className="flex-1 bg-canvas p-4 lg:p-6 xl:p-8">
           <Outlet context={{ openRegisterExpert: () => setRegisterOpen(true) }} />
         </main>
       </div>
 
       <RegisterExpertModal open={registerOpen} onClose={() => setRegisterOpen(false)} />
     </div>
+  )
+}
+
+export default function AdminLayout() {
+  return (
+    <ShellThemeProvider storageKey="admin-theme">
+      <AdminLayoutInner />
+    </ShellThemeProvider>
   )
 }

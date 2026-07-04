@@ -29,7 +29,7 @@ export default function ExpertStatCard({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border bg-[#111111] p-5 transition-transform hover:-translate-y-0.5 ${accents[accent]}`}
+      className={`expert-stat-card relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-transform hover:-translate-y-0.5 ${accents[accent]}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconColors[accent]}`}>
@@ -38,7 +38,7 @@ export default function ExpertStatCard({
       </div>
       <p className="mt-4 text-sm font-medium text-muted">{label}</p>
       {loading ? (
-        <div className="mt-2 h-8 w-28 animate-pulse rounded-lg bg-white/[0.06]" />
+        <div className="mt-2 h-8 w-28 animate-pulse rounded-lg bg-surface" />
       ) : (
         <p className="mt-1 text-2xl font-bold tracking-tight text-ink">{value}</p>
       )}

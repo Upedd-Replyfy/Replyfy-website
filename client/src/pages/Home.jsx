@@ -9,7 +9,7 @@ import FAQ from '../components/home/FAQ'
 
 export default function Home() {
   return (
-    <>
+    <div className="px-[1cm]">
       <Navbar />
       <main className="bg-black">
         <Hero />
@@ -20,6 +20,6 @@ export default function Home() {
         <FAQ />
       </main>
       <Footer />
-    </>
+    </div>
   )
 }

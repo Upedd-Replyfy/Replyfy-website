@@ -21,8 +21,8 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="relative w-full bg-black">
-      <div className="gutter-left gutter-right w-full border-t border-white/[0.06] py-16 md:py-20">
+    <footer className="relative w-full border-t border-white/25 bg-black">
+      <div className="gutter-left gutter-right w-full py-16 md:py-20">
         <div className="flex w-full flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div className="shrink-0">
             <Logo light />
@@ -58,7 +58,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 flex w-full flex-col gap-3 border-t border-white/[0.06] pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex w-full flex-col gap-3 border-t border-white/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-white/35">
             &copy; {new Date().getFullYear()} Replyfy. All rights reserved.
           </p>

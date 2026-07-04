@@ -31,7 +31,7 @@ export default function SectionHeader({
         </span>
       )}
       <h2
-        className={`text-4xl md:text-5xl lg:text-[3.25rem] font-semibold text-balance leading-[1.08] tracking-tight ${
+        className={`text-2xl md:text-3xl lg:text-[2.125rem] font-semibold text-balance leading-[1.12] tracking-tight ${
           dark ? 'text-white' : 'text-ink'
         }`}
       >
@@ -53,7 +53,7 @@ export default function SectionHeader({
       </h2>
       {description && (
         <p
-          className={`text-base md:text-lg leading-relaxed max-w-2xl mt-1 ${
+          className={`text-sm md:text-base leading-relaxed max-w-2xl mt-1 ${
             dark ? 'text-white/55' : 'text-muted'
           }`}
         >

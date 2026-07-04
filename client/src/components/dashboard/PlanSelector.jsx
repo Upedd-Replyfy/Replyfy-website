@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion'
 import { PLANS } from '../../constants'
 import PlanCard from '../pricing/PlanCard'
+import { useDashboardTheme } from '../../context/DashboardThemeContext'
 
 export default function PlanSelector({ plan, onSelect, onContinue }) {
+  const { isDark } = useDashboardTheme()
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -19,7 +22,7 @@ export default function PlanSelector({ plan, onSelect, onContinue }) {
           <PlanCard
             key={p.id}
             plan={p}
-            dark
+            dark={isDark}
             active={plan === p.id}
             onClick={() => onSelect(p.id)}
           />

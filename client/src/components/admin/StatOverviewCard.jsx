@@ -30,14 +30,14 @@ export default function StatOverviewCard({
         : 'text-muted'
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-[#111111] px-3 py-2.5">
+    <div className="admin-stat-card flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
       <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconColors[accent]}`}>
         {Icon && <Icon size={15} />}
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[11px] text-muted">{label}</p>
         {loading ? (
-          <div className="mt-1 h-5 w-16 animate-pulse rounded bg-white/[0.06]" />
+          <div className="mt-1 h-5 w-16 animate-pulse rounded bg-surface" />
         ) : (
           <p className="text-base font-semibold leading-tight text-ink">{value}</p>
         )}

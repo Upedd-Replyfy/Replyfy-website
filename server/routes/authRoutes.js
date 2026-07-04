@@ -13,12 +13,15 @@ import {
   changePassword,
   registerValidation,
   loginValidation,
+  googleLogin,
+  googleLoginValidation,
 } from '../controllers/authController.js'
 
 const router = Router()
 
 router.post('/register', loginRegisterLimiter, registerValidation, validate, register)
 router.post('/login', loginRegisterLimiter, loginValidation, validate, login)
+router.post('/google', loginRegisterLimiter, googleLoginValidation, validate, googleLogin)
 router.post('/refresh', refresh)
 router.post('/logout', protect, logout)
 router.get('/profile', protect, getProfile)

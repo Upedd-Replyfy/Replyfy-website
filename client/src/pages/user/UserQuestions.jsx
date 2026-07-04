@@ -16,7 +16,7 @@ export default function UserQuestions() {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-4xl px-6 py-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-ink">My Questions</h1>

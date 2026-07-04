@@ -1,17 +1,23 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import { userApi } from '../../services/api'
 import { StatusBadge } from '../../components/layouts/DashboardShell'
-import { Star } from 'lucide-react'
+import { Bookmark, Star } from 'lucide-react'
+import { isQuestionSaved, toggleSavedQuestion } from '../../utils/savedAnswers'
 
 export default function QuestionDetail() {
   const { id } = useParams()
   const queryClient = useQueryClient()
   const [stars, setStars] = useState(5)
   const [comment, setComment] = useState('')
+  const [saved, setSaved] = useState(() => isQuestionSaved(id))
+
+  useEffect(() => {
+    setSaved(isQuestionSaved(id))
+  }, [id])
 
   const { data, isLoading } = useQuery({
     queryKey: ['question', id],
@@ -71,7 +77,25 @@ export default function QuestionDetail() {
 
         {answer && question.status === 'completed' && (
           <div className="luxury-card mt-6 p-6">
-            <h2 className="text-lg font-semibold text-ink">Expert Answer</h2>
+            <div className="flex items-start justify-between gap-4">
+              <h2 className="text-lg font-semibold text-ink">Expert Answer</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  const isSaved = toggleSavedQuestion(question._id)
+                  setSaved(isSaved)
+                  toast.success(isSaved ? 'Answer saved' : 'Removed from saved')
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  saved
+                    ? 'border-primary bg-primary text-primary-fg'
+                    : 'border-border text-muted hover:bg-surface hover:text-ink'
+                }`}
+              >
+                <Bookmark size={14} className={saved ? 'fill-current' : ''} />
+                {saved ? 'Saved' : 'Save answer'}
+              </button>
+            </div>
             <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ink">{answer.content}</p>
             {answer.attachments?.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
