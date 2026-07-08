@@ -155,9 +155,10 @@ export default function DashboardSidebar({ open, collapsed, onClose, onToggleCol
         ) : (
           <Link
             to="/dashboard"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-fg"
+            className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-primary"
+            aria-label="Replyfy"
           >
-            R
+            <img src="/logo-mark.png" alt="" className="h-8 w-8 object-contain" />
           </Link>
         )}
         <button

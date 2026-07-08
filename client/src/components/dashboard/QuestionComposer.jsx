@@ -12,12 +12,11 @@ import {
 } from 'lucide-react'
 import { CategoryPills, ExpertTypeTabs } from '../catalog/CatalogSelectors'
 import SuggestionCarousel from './SuggestionCarousel'
+import { useAuth } from '../../context/AuthContext'
 
 const FILE_TYPES = [
   { id: 'pdf', label: 'PDF', accept: '.pdf' },
-  { id: 'resume', label: 'Resume', accept: '.pdf,.doc,.docx' },
-  { id: 'pitch', label: 'Pitch Deck', accept: '.pdf,.ppt,.pptx' },
-  { id: 'financial', label: 'Financial Docs', accept: '.pdf,.xls,.xlsx,.csv' },
+  { id: 'files', label: 'Files', accept: '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.zip,.png,.jpg,.jpeg' },
 ]
 
 const MAX_QUESTION_LENGTH = 2000
@@ -41,6 +40,7 @@ export default function QuestionComposer({
   onSubmit,
   loading,
 }) {
+  const { user } = useAuth()
   const fileInputRef = useRef(null)
   const linkInputRef = useRef(null)
   const [activeFileType, setActiveFileType] = useState(null)
@@ -93,6 +93,7 @@ export default function QuestionComposer({
   const removeLink = (index) => onLinksChange?.(links.filter((_, i) => i !== index))
 
   const canSubmit = query.trim() && categoryId && expertTypeId
+  const firstName = user?.name?.split(' ')[0] || 'there'
 
   return (
     <motion.div
@@ -101,30 +102,26 @@ export default function QuestionComposer({
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="w-full"
     >
-      <div className="mb-9 mt-8 text-center md:mt-16">
+      <div className="mb-9 mt-12 text-center md:mt-20">
         <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-ink md:text-4xl lg:text-5xl">
           Your question,
           <br />
           <span className="font-light text-muted">answered by a human.</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-muted md:text-base">
-          Real experts — founders, CAs, mentors — read your question and reply personally. Within 24–48 hours.
+        <p className="mx-auto mt-4 max-w-2xl text-balance text-sm leading-relaxed text-muted md:text-base">
+          Real experts — founders, CAs, mentors — read your question and reply personally.
+          <span className="mt-1 block">Within 12 hrs.</span>
         </p>
       </div>
 
       <div className="mx-auto w-full max-w-4xl">
-        <div className="mb-4 flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-fg">
-            <Sparkles size={16} strokeWidth={2} />
-          </span>
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight text-ink md:text-2xl">
-              What would you like help with today?
-            </h1>
-            <p className="mt-1 text-sm text-muted">
-              Describe your question. A verified human expert — not AI — will respond.
-            </p>
-          </div>
+        <div className="mb-5">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl lg:text-4xl">
+            Hey! {firstName}
+          </h1>
+          <p className="mt-2 text-base text-muted md:text-lg lg:text-xl">
+            AI Gives Information. Humans Give Judgment.
+          </p>
         </div>
 
         <CategoryPills
@@ -247,7 +244,7 @@ export default function QuestionComposer({
                 accept={
                   activeFileType
                     ? FILE_TYPES.find((f) => f.id === activeFileType)?.accept
-                    : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv'
+                    : FILE_TYPES.find((f) => f.id === 'files')?.accept
                 }
                 onChange={handleFileSelect}
                 multiple
@@ -271,7 +268,7 @@ export default function QuestionComposer({
                 }}
                 className="text-xs font-medium text-muted transition-colors hover:text-ink"
               >
-                Link
+                Links
               </button>
             </div>
 

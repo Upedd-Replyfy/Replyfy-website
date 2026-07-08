@@ -9,7 +9,7 @@ import FAQ from '../components/home/FAQ'
 
 export default function Home() {
   return (
-    <div className="px-[1cm]">
+    <div>
       <Navbar />
       <main className="bg-black">
         <Hero />

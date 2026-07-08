@@ -9,7 +9,7 @@ import GoogleSignInButton from '../components/auth/GoogleSignInButton'
 import { useAuth } from '../context/AuthContext'
 
 const TRUST_STATS = [
-  { icon: Users, value: '120+', label: 'Experts' },
+  { icon: Users, value: '50', label: 'Experts' },
   { icon: MessageSquare, value: '2400+', label: 'Answers' },
   { icon: Star, value: '4.9', label: 'Rating' },
 ]

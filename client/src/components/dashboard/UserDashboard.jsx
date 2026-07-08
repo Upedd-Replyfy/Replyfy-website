@@ -322,7 +322,7 @@ export default function UserDashboard() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex w-full flex-1 flex-col items-center px-6 py-4 lg:px-10 xl:px-12"
+      className="flex w-full flex-1 flex-col items-center px-6 pb-4 pt-6 lg:px-10 xl:px-12"
     >
       <QuestionComposer
         categories={categories}

@@ -127,34 +127,20 @@ export default function HeroDashboardPreview() {
             </span>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-12 py-7">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-12 pb-7 pt-16">
             <div className="text-center">
-              <h3 className="text-xl font-semibold leading-[1.2] tracking-tight text-ink sm:text-[1.35rem]">
+              <h3 className="text-4xl font-semibold leading-[1.12] tracking-tight text-ink">
                 Your question,
                 <br />
                 <span className="font-light text-muted">answered by a human.</span>
               </h3>
-              <p className="mx-auto mt-3 max-w-[640px] text-[13px] leading-relaxed text-muted">
+              <p className="mx-auto mt-3 max-w-[640px] text-sm leading-relaxed text-muted">
                 Real experts — founders, CAs, mentors — read your question and reply personally.
-                Within 24–48 hours.
+                Within 12 hrs.
               </p>
             </div>
 
-            <div className="mt-8 flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-fg">
-                <Sparkles size={16} strokeWidth={2} />
-              </span>
-              <div>
-                <p className="text-base font-semibold tracking-tight text-ink">
-                  What would you like help with today?
-                </p>
-                <p className="mt-1 text-sm text-muted">
-                  Describe your question. A verified human expert — not AI — will respond.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2" onClick={stopZoomToggle}>
+            <div className="mt-6 flex flex-wrap gap-2" onClick={stopZoomToggle}>
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -172,11 +158,11 @@ export default function HeroDashboardPreview() {
             </div>
 
             <div
-              className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card"
+              className="mt-6 shrink-0 overflow-hidden rounded-xl border border-border bg-card"
               onClick={stopZoomToggle}
             >
-              <div className="flex min-h-0 flex-1 flex-col p-4">
-                <div className="mb-3 flex flex-wrap items-center gap-1 border-b border-border pb-2">
+              <div className="flex flex-col p-3">
+                <div className="mb-2 flex flex-wrap items-center gap-1 border-b border-border pb-2">
                   <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-light">
                     Expert
                   </span>
@@ -200,13 +186,14 @@ export default function HeroDashboardPreview() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={placeholders[category]}
-                  className="min-h-[100px] w-full flex-1 resize-none bg-transparent text-sm leading-relaxed text-ink placeholder:text-muted-light focus:outline-none"
+                  rows={3}
+                  className="h-[72px] w-full resize-none bg-transparent text-sm leading-relaxed text-ink placeholder:text-muted-light focus:outline-none"
                 />
 
-                <div className="mt-3 flex shrink-0 items-center justify-between gap-3 border-t border-border pt-3">
+                <div className="mt-2 flex shrink-0 items-center justify-between gap-3 border-t border-border pt-2">
                   <div className="flex flex-wrap items-center gap-3">
                     <Paperclip size={15} className="shrink-0 text-muted" />
-                    {['PDF', 'Resume', 'Pitch Deck', 'Financial Docs', 'Link'].map((label) => (
+                    {['PDF', 'Files', 'Links'].map((label) => (
                       <button
                         key={label}
                         type="button"

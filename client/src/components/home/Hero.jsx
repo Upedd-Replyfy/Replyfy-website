@@ -6,9 +6,9 @@ import TrustBanner from './TrustBanner'
 import ScrollLink from '../ui/ScrollLink'
 
 const stats = [
-  { value: '48h', label: 'Avg. response time' },
+  { value: '12 hrs', label: 'Avg. response time' },
   { value: '98%', label: 'Satisfaction rate' },
-  { value: '120+', label: 'Verified experts' },
+  { value: '50', label: 'Verified experts' },
 ]
 
 const ease = [0.22, 1, 0.36, 1]
@@ -30,24 +30,22 @@ export default function Hero() {
         }}
       />
 
-      <div className="relative z-10 grid min-h-0 flex-1 w-full grid-cols-1 items-center gap-8 gutter-left pb-4 pt-20 lg:grid-cols-[minmax(0,40fr)_minmax(0,60fr)] lg:gap-10 lg:pb-6 lg:pt-24 lg:pr-8">
-        <div className="flex w-full flex-col items-start justify-center text-left lg:-translate-y-5">
+      <div className="relative z-10 grid min-h-0 flex-1 w-full grid-cols-1 items-center gap-8 site-gutter-left pb-4 pt-20 lg:grid-cols-[minmax(0,40fr)_minmax(0,60fr)] lg:gap-10 lg:pb-6 lg:pt-24 lg:pr-8">
+        <div className="flex w-full max-w-xl flex-col items-start justify-center pr-6 text-left sm:max-w-2xl sm:pr-8 lg:-translate-y-5 lg:max-w-[34rem] lg:pr-4">
           <motion.h1
             {...reveal(0.1)}
-            className="font-semibold leading-[1.1] tracking-[-0.025em] text-white"
-            style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.125rem)', maxWidth: '14ch' }}
+            className="text-balance font-light leading-[1.18] tracking-[-0.02em] text-white"
+            style={{ fontSize: 'clamp(1.875rem, 3.4vw, 2.875rem)' }}
           >
-            Ask anything.
+            Stop asking AI.
             <br />
-            Get real answers
-            <br />
-            <span className="text-white/65">from real experts.</span>
+            Ask someone who's been there.
           </motion.h1>
 
           <motion.p
             {...reveal(0.16)}
-            className="mt-5 leading-relaxed text-white/50"
-            style={{ fontSize: 'clamp(0.8125rem, 0.9vw, 0.9375rem)', maxWidth: '42ch' }}
+            className="mt-6 max-w-[38ch] font-light leading-relaxed text-white"
+            style={{ fontSize: 'clamp(0.9375rem, 1.15vw, 1.125rem)' }}
           >
             Submit your question and get personalized answers from verified founders, mentors, and
             professionals.
@@ -59,7 +57,7 @@ export default function Hero() {
           >
             <Link
               to="/signup"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#050505] transition hover:bg-white/90"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-semibold text-[#050505] transition hover:bg-white/90"
             >
               Ask your first question
               <ArrowUpRight
@@ -69,23 +67,23 @@ export default function Hero() {
             </Link>
             <ScrollLink
               to="/#how-it-works"
-              className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-white/60 transition hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-3.5 text-base font-normal text-white transition hover:text-white/90"
             >
               See how it works
-              <CirclePlay size={14} className="text-white/35" />
+              <CirclePlay size={14} className="text-white" />
             </ScrollLink>
           </motion.div>
 
           <motion.div
             {...reveal(0.28)}
-            className="mt-10 flex w-full max-w-md justify-start gap-8 border-t border-white/20 pt-8 sm:gap-10"
+            className="mt-10 flex w-full max-w-md justify-start gap-6 border-t border-white/20 pt-8 sm:gap-10"
           >
             {stats.map((stat) => (
               <div key={stat.label} className="min-w-0">
-                <p className="text-lg font-semibold tracking-tight text-white lg:text-xl">
+                <p className="font-display text-xl font-normal tracking-tight text-white lg:text-2xl">
                   {stat.value}
                 </p>
-                <p className="mt-1 text-[11px] leading-snug text-white/40 lg:text-xs">
+                <p className="mt-1 text-xs font-light leading-snug text-white lg:text-sm">
                   {stat.label}
                 </p>
               </div>

@@ -94,7 +94,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
   ]
 
   return (
-    <header className="sticky top-0 z-40 flex w-full items-center gap-4 overflow-visible border-b border-border bg-card/90 px-5 py-3.5 backdrop-blur-xl md:px-8">
+    <header className="sticky top-0 z-40 flex w-full items-center gap-3 overflow-visible border-b border-border bg-card/90 px-5 py-3 backdrop-blur-xl md:px-8 md:py-3.5">
       <button
         type="button"
         onClick={onMenuOpen}
@@ -113,7 +113,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Ask or search anything — questions, experts, answers..."
-          className="w-full rounded-2xl border border-border bg-surface py-3 pl-11 pr-20 text-sm text-ink shadow-[var(--shadow-luxury-sm)] placeholder:text-muted-light transition-all focus:border-charcoal focus:bg-card focus:outline-none focus:ring-2 focus:ring-charcoal/10"
+          className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-20 text-sm text-ink shadow-[var(--shadow-luxury-sm)] placeholder:text-muted-light transition-all focus:border-charcoal focus:bg-card focus:outline-none focus:ring-2 focus:ring-charcoal/10"
         />
         <div className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-1.5 sm:flex">
           <kbd className="rounded-md border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-light">

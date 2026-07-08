@@ -10,7 +10,7 @@ export const PLANS = {
     features: [
       'We choose the best expert for your query',
       'Guaranteed email reply',
-      '24–48 hour turnaround',
+      '12 hr turnaround',
     ],
   },
   mentor: {

@@ -61,7 +61,7 @@ export default function LandingPreview() {
           <div className="grid gap-3 sm:grid-cols-3">
             {[
               { label: 'Matched expert', value: 'Founder' },
-              { label: 'Response', value: '24–48h' },
+              { label: 'Response', value: '12 hrs' },
               { label: 'Plan', value: 'Mentor' },
             ].map((item) => (
               <div
@@ -139,8 +139,8 @@ export default function LandingPreview() {
               <div className="flex flex-wrap items-center gap-3 text-[12px] text-[#9A9A9A]">
                 <Paperclip size={14} />
                 <span>PDF</span>
-                <span>Deck</span>
-                <span>Link</span>
+                <span>Files</span>
+                <span>Links</span>
               </div>
               <Link
                 to="/signup"

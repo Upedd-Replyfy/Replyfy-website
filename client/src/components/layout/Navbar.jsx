@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ArrowRight } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, Menu, X } from 'lucide-react'
 import Logo from '../ui/Logo'
 
 const navLinks = [
@@ -36,17 +36,16 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-[1cm] right-[1cm] z-50 transition-all duration-500 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
           ? 'border-b border-white/[0.06] bg-[#050505]/85 backdrop-blur-2xl'
           : 'bg-transparent'
       }`}
     >
-      <nav className="flex w-full items-center justify-between gap-6 gutter-left gutter-right py-5">
-        <div className="flex min-w-0 items-center gap-8 lg:gap-10">
-          <Logo light />
+      <nav className="site-gutter flex items-center justify-between gap-6 py-3.5 md:py-4">
+        <Logo light size="nav" alignArtwork />
 
-          <ul className="hidden lg:flex items-center gap-8">
+        <ul className="hidden lg:flex flex-1 items-center justify-center gap-8">
             {navLinks.map((link) => (
               <li key={link.href}>
                 {isHome ? (
@@ -67,10 +66,9 @@ export default function Navbar() {
                 )}
               </li>
             ))}
-          </ul>
-        </div>
+        </ul>
 
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-3">
           <Link
             to="/login"
             className="text-sm font-medium text-white/70 transition-colors hover:text-white"
@@ -79,7 +77,7 @@ export default function Navbar() {
           </Link>
           <Link
             to="/signup"
-            className="group inline-flex items-center gap-1.5 rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
+            className="group inline-flex items-center gap-1.5 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
           >
             Get started
             <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
@@ -88,11 +86,11 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="lg:hidden p-2 -mr-2 text-white"
+          className="lg:hidden p-1.5 -mr-1 text-white"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>
 
@@ -102,9 +100,9 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden w-full border-t border-white/[0.06] bg-[#050505]/95 backdrop-blur-2xl"
+            className="border-t border-white/[0.06] bg-[#050505]/95 backdrop-blur-2xl lg:hidden"
           >
-            <div className="gutter-left gutter-right flex flex-col gap-1 py-4">
+            <div className="site-gutter flex flex-col gap-1 py-4">
               {navLinks.map((link) =>
                 isHome ? (
                   <button
@@ -125,7 +123,7 @@ export default function Navbar() {
                   </Link>
                 )
               )}
-              <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-white/10">
+              <div className="mt-2 flex flex-col gap-2 border-t border-white/10 pt-4">
                 <Link
                   to="/login"
                   className="rounded-2xl border border-white/15 py-2.5 text-center text-sm text-white"
