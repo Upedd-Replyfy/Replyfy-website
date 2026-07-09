@@ -21,7 +21,7 @@ const reveal = (delay = 0) => ({
 
 export default function Hero() {
   return (
-    <section className="relative flex min-h-svh w-full flex-col overflow-x-hidden bg-[#050505]">
+    <section className="relative flex min-h-svh w-full flex-col overflow-x-hidden bg-[#1A1C1C]">
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -57,7 +57,7 @@ export default function Hero() {
           >
             <Link
               to="/signup"
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-semibold text-[#050505] transition hover:bg-white/90"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-base font-semibold text-[#1A1C1C] transition hover:bg-white/90"
             >
               Ask your first question
               <ArrowUpRight

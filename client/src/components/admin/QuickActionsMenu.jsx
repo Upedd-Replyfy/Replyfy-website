@@ -52,7 +52,7 @@ export default function QuickActionsMenu({ onRegisterExpert }) {
             initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111111] py-1 shadow-2xl"
+            className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#202323] py-1 shadow-2xl"
           >
             {actions.map((action) => {
               const Icon = action.icon

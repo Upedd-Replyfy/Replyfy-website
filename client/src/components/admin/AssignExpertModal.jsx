@@ -129,7 +129,7 @@ export default function AssignExpertModal({ open, onClose, question, mode = 'app
         )}
 
         <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm">
+          <button type="button" onClick={onClose} className="admin-btn-secondary">
             Cancel
           </button>
           <button type="submit" disabled={pending} className="admin-btn-gradient rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50">

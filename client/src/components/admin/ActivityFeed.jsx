@@ -33,7 +33,7 @@ export default function ActivityFeed({ activity = [], loading }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.15 }}
-      className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#111111]"
+      className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323]"
     >
       <div className="border-b border-white/[0.08] px-5 py-4">
         <h3 className="text-sm font-semibold text-ink">Recent Activity</h3>

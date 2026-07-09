@@ -10,17 +10,17 @@
   --color-charcoal: #d4d4d8;
   --color-muted: #a1a1aa;
   --color-muted-light: #71717a;
-  --color-border: #27272a;
-  --color-canvas: #000000;
-  --color-canvas-2: #0a0a0a;
-  --color-surface: #0f0f0f;
-  --color-card: #141414;
-  --color-line: #27272a;
+  --color-border: #343838;
+  --color-canvas: #1a1c1c;
+  --color-canvas-2: #202222;
+  --color-surface: #242727;
+  --color-card: #202323;
+  --color-line: #343838;
   --color-accent: #ffffff;
   --color-accent-light: #e4e4e7;
   --color-accent-glow: rgba(255, 255, 255, 0.06);
   --color-primary: #ffffff;
-  --color-primary-fg: #09090b;
+  --color-primary-fg: #1A1C1C;
 
   --shadow-luxury-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25);
   --shadow-luxury-md: 0 4px 16px rgba(0, 0, 0, 0.45), 0 12px 40px rgba(0, 0, 0, 0.3);
@@ -33,7 +33,6 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -55,8 +54,8 @@
   }
 
   ::selection {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fafafa;
+    background: rgba(37, 99, 235, 0.28);
+    color: #111827;
   }
 }
 
@@ -279,7 +278,7 @@
 
   .priority-selected {
     background: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
-    color: #09090b;
+    color: #1A1C1C;
     box-shadow: var(--shadow-luxury-lg);
   }
 
@@ -299,7 +298,7 @@
 
   .admin-btn-gradient {
     background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 50%, #22d3ee 100%);
-    color: #090909;
+    color: #1A1C1C;
     box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -347,13 +346,21 @@
   .admin-panel {
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   }
+
+  .admin-input {
+    @apply w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none;
+  }
+
+  .admin-btn-secondary {
+    @apply rounded-xl border border-border px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface;
+  }
 }
 
 /* Shared light theme for dashboard, admin, and expert shells */
 .dashboard-shell[data-theme='light'],
 .admin-shell[data-theme='light'],
 .expert-shell[data-theme='light'] {
-  --color-ink: #09090b;
+  --color-ink: #1A1C1C;
   --color-ink-secondary: #18181b;
   --color-charcoal: #52525b;
   --color-muted: #71717a;
@@ -364,10 +371,10 @@
   --color-surface: #f4f4f5;
   --color-card: #ffffff;
   --color-line: #e4e4e7;
-  --color-accent: #09090b;
+  --color-accent: #1A1C1C;
   --color-accent-light: #3f3f46;
   --color-accent-glow: rgba(0, 0, 0, 0.04);
-  --color-primary: #09090b;
+  --color-primary: #1A1C1C;
   --color-primary-fg: #fafafa;
 
   --shadow-luxury-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -401,7 +408,7 @@
 .admin-shell[data-theme='light'] ::selection,
 .expert-shell[data-theme='light'] ::selection {
   background: rgba(0, 0, 0, 0.1);
-  color: #09090b;
+  color: #1A1C1C;
 }
 
 .dashboard-shell[data-theme='light'] .glass,
@@ -437,6 +444,53 @@
 
 .admin-shell[data-theme='light'] .admin-nav-active {
   color: var(--color-ink) !important;
+}
+
+/* Remap hardcoded dark admin surfaces in light mode */
+.admin-shell[data-theme='light'] [class*='bg-[#202323]'],
+.admin-shell[data-theme='light'] [class*='bg-[#242727]'] {
+  background-color: var(--color-card) !important;
+}
+
+.admin-shell[data-theme='light'] [class*='bg-[#1A1C1C]'] {
+  background-color: var(--color-surface) !important;
+}
+
+.admin-shell[data-theme='light'] [class*='border-white/[0.08]'],
+.admin-shell[data-theme='light'] [class*='border-white/[0.06]'],
+.admin-shell[data-theme='light'] [class*='border-white/[0.15]'] {
+  border-color: var(--color-border) !important;
+}
+
+.admin-shell[data-theme='light'] [class*='bg-white/[0.02]'],
+.admin-shell[data-theme='light'] [class*='bg-white/[0.04]'] {
+  background-color: var(--color-surface) !important;
+}
+
+.admin-shell[data-theme='light'] tr[class*='hover:bg-white']:hover,
+.admin-shell[data-theme='light'] [class*='hover:bg-white/[0.04]']:hover,
+.admin-shell[data-theme='light'] [class*='hover:bg-white/[0.08]']:hover {
+  background-color: var(--color-surface) !important;
+}
+
+.admin-shell[data-theme='light'] .admin-stat-card:hover {
+  box-shadow: var(--shadow-luxury-md);
+}
+
+.admin-shell[data-theme='light'] .admin-panel {
+  box-shadow: var(--shadow-luxury-sm);
+}
+
+.admin-shell[data-theme='light'] .admin-btn-success {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.admin-shell[data-theme='light'] .admin-btn-danger {
+  color: #be123c;
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.25);
 }
 
 .expert-shell[data-theme='light'] .expert-sidebar,
@@ -479,87 +533,4 @@
 
 .auth-shell .space-y-2 > p.text-xs {
   color: #b91c1c !important;
-}
-
-@keyframes premium-section-reveal {
-  from {
-    opacity: 0.01;
-    transform: translateY(42px) scale(0.985);
-    filter: blur(14px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes premium-card-reveal {
-  from {
-    opacity: 0.01;
-    transform: translateY(26px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes premium-glow-drift {
-  0%,
-  100% {
-    transform: translate3d(-2%, -1%, 0) scale(1);
-    opacity: 0.5;
-  }
-
-  50% {
-    transform: translate3d(2%, 1%, 0) scale(1.06);
-    opacity: 0.85;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  main {
-    position: relative;
-    isolation: isolate;
-  }
-
-  main::before {
-    content: '';
-    pointer-events: none;
-    position: fixed;
-    inset: -20%;
-    z-index: -1;
-    background:
-      radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.07), transparent 28%),
-      radial-gradient(circle at 82% 42%, rgba(99, 102, 241, 0.12), transparent 30%),
-      radial-gradient(circle at 50% 88%, rgba(56, 189, 248, 0.08), transparent 32%);
-    animation: premium-glow-drift 12s ease-in-out infinite;
-  }
-
-  @supports (animation-timeline: view()) {
-    main > section:not(:first-child) {
-      animation: premium-section-reveal both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 34%;
-      transform-origin: center top;
-      will-change: opacity, transform, filter;
-    }
-
-    .luxury-card,
-    .glass,
-    .glass-strong,
-    .glass-premium,
-    .admin-panel,
-    .admin-stat-card,
-    .expert-panel,
-    .expert-stat-card {
-      animation: premium-card-reveal both;
-      animation-timeline: view();
-      animation-range: entry 8% cover 28%;
-      will-change: opacity, transform;
-    }
-  }
 }

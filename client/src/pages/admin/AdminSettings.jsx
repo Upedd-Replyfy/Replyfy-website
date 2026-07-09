@@ -28,7 +28,7 @@ export default function AdminSettings() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {sections.map((section) => (
-          <div key={section.title} className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#111111] p-5">
+          <div key={section.title} className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] p-5">
             <h3 className="text-sm font-semibold text-ink">{section.title}</h3>
             <div className="mt-4 space-y-2">
               {section.items.map((item) => {

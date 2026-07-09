@@ -45,7 +45,7 @@ export default function HomePricingCard({ plan, selected = false, onSelect }) {
       }`}
     >
       {isPopular && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-black px-4 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#1A1C1C] px-4 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
           Most popular
         </span>
       )}
@@ -56,7 +56,7 @@ export default function HomePricingCard({ plan, selected = false, onSelect }) {
           opacity: selected ? 1 : 0,
           scale: selected ? 1 : 0.6,
         }}
-        className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-black text-white"
+        className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-[#1A1C1C] text-white"
         aria-hidden={!selected}
       >
         <Check size={13} strokeWidth={2.5} />
@@ -101,7 +101,7 @@ export default function HomePricingCard({ plan, selected = false, onSelect }) {
         onClick={(e) => e.stopPropagation()}
         className={`mt-7 w-full rounded-2xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
           selected
-            ? 'bg-black text-white hover:bg-black/90'
+            ? 'bg-[#1A1C1C] text-white hover:bg-[#1A1C1C]/90'
             : 'border border-black/20 text-black hover:border-black/40 hover:bg-black/[0.03]'
         }`}
       >

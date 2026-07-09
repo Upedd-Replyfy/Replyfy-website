@@ -18,3 +18,17 @@ export function formatRupeeFixed(paise) {
 export function formatRupeeAmount(paise) {
   return (paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })
 }
+
+/**
+ * Format paise as expert points (1 point = ₹1).
+ */
+export function formatPoints(paise) {
+  return `${((paise || 0) / 100).toLocaleString('en-IN')} pts`
+}
+
+/**
+ * Format paise as points with decimals for balances.
+ */
+export function formatPointsFixed(paise) {
+  return `${((paise || 0) / 100).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} pts`
+}

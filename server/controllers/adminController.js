@@ -494,7 +494,7 @@ export const getExpertTypes = asyncHandler(async (req, res) => {
 })
 
 export const createExpertType = asyncHandler(async (req, res) => {
-  const { name, description, category, sortOrder } = req.body
+  const { name, description, placeholder, suggestions, category, sortOrder } = req.body
   const cat = await Category.findById(category)
   if (!cat) throw new ApiError(400, 'Invalid category')
 
@@ -506,6 +506,8 @@ export const createExpertType = asyncHandler(async (req, res) => {
     name,
     slug,
     description: description || '',
+    placeholder: placeholder || '',
+    suggestions: Array.isArray(suggestions) ? suggestions : [],
     category,
     sortOrder: sortOrder || 0,
     createdBy: req.user._id,

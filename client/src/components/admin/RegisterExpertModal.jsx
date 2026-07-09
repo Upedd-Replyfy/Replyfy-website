@@ -19,8 +19,7 @@ const emptyForm = {
   availability: 'available',
 }
 
-const inputClass =
-  'w-full rounded-xl border border-white/[0.08] bg-[#090909] px-4 py-2.5 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none'
+const inputClass = 'admin-input'
 
 export default function RegisterExpertModal({ open, onClose }) {
   const queryClient = useQueryClient()
@@ -102,12 +101,12 @@ export default function RegisterExpertModal({ open, onClose }) {
         <div className="sm:col-span-2">
           <ProfilePhotoPicker value={photo} onChange={setPhoto} />
         </div>
-        <label className="flex items-center gap-2 text-sm sm:col-span-2">
+        <label className="flex items-center gap-2 text-sm text-ink sm:col-span-2">
           <input type="checkbox" checked={form.isVerified} onChange={(e) => setForm((p) => ({ ...p, isVerified: e.target.checked }))} />
           Mark as verified expert
         </label>
         <div className="flex justify-end gap-2 sm:col-span-2">
-          <button type="button" onClick={onClose} className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm font-medium text-ink">
+          <button type="button" onClick={onClose} className="admin-btn-secondary">
             Cancel
           </button>
           <button type="submit" disabled={createMutation.isPending} className="admin-btn-gradient rounded-xl px-5 py-2 text-sm font-semibold disabled:opacity-50">

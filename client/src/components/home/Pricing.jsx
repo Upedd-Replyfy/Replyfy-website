@@ -74,7 +74,7 @@ export default function Pricing() {
             </p>
             <Link
               to={`/signup?plan=${selectedPlan}`}
-              className="rounded-2xl bg-black px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-black/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+              className="rounded-2xl bg-[#1A1C1C] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#1A1C1C]/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
             >
               Continue with {selected.name}
             </Link>

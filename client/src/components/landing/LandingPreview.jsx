@@ -43,11 +43,11 @@ export default function LandingPreview() {
         }}
         animate={{ scale }}
         transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-        className={`relative overflow-hidden rounded-[22px] border border-[#242424] bg-[#0E0E0E] shadow-[0_24px_80px_rgba(0,0,0,0.55)] ${
+        className={`relative overflow-hidden rounded-[22px] border border-[#242424] bg-[#202323] shadow-[0_24px_80px_rgba(0,0,0,0.55)] ${
           zoomed ? 'z-20 cursor-zoom-out' : 'cursor-zoom-in'
         }`}
       >
-        <div className="flex h-10 items-center gap-2 border-b border-[#242424] bg-[#0A0A0A] px-4">
+        <div className="flex h-10 items-center gap-2 border-b border-[#242424] bg-[#202222] px-4">
           <span className="h-2.5 w-2.5 rounded-full bg-[#3A3A3A]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#3A3A3A]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#3A3A3A]" />
@@ -66,7 +66,7 @@ export default function LandingPreview() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-[16px] border border-[#242424] bg-[#050505] px-4 py-3"
+                className="rounded-[16px] border border-[#242424] bg-[#1A1C1C] px-4 py-3"
               >
                 <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9A9A9A]">
                   {item.label}
@@ -76,7 +76,7 @@ export default function LandingPreview() {
             ))}
           </div>
 
-          <div className="rounded-[18px] border border-[#242424] bg-[#050505] p-4 sm:p-5">
+          <div className="rounded-[18px] border border-[#242424] bg-[#1A1C1C] p-4 sm:p-5">
             <div className="mb-4 flex items-start gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-black">
                 <Sparkles size={15} />

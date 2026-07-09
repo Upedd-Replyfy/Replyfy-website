@@ -24,7 +24,7 @@ export default function SectionHeader({
       {eyebrow && (
         <span
           className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${
-            dark ? 'text-white/45' : 'text-muted-light'
+            dark ? 'text-white/45' : 'text-black/50'
           }`}
         >
           {eyebrow}
@@ -32,7 +32,7 @@ export default function SectionHeader({
       )}
       <h2
         className={`text-2xl md:text-3xl lg:text-[2.125rem] font-semibold text-balance leading-[1.12] tracking-tight ${
-          dark ? 'text-white' : 'text-ink'
+          dark ? 'text-white' : 'text-black'
         }`}
       >
         {title}
@@ -43,7 +43,7 @@ export default function SectionHeader({
               className={
                 dark
                   ? 'bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent'
-                  : 'text-gradient'
+                  : 'bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent'
               }
             >
               {highlight}
@@ -54,7 +54,7 @@ export default function SectionHeader({
       {description && (
         <p
           className={`text-sm md:text-base leading-relaxed max-w-2xl mt-1 ${
-            dark ? 'text-white/55' : 'text-muted'
+            dark ? 'text-white/55' : 'text-black/65'
           }`}
         >
           {description}

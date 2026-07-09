@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const handleNavClick = (href) => {
     if (href.startsWith('/#') && isHome) {
-      document.getElementById(href.replace('/#', ''))?.scrollIntoView({ behavior: 'smooth' })
+      document.getElementById(href.replace('/#', ''))?.scrollIntoView()
       setMobileOpen(false)
     }
   }
@@ -38,7 +38,7 @@ export default function Navbar() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'border-b border-white/[0.06] bg-[#050505]/85 backdrop-blur-2xl'
+          ? 'border-b border-white/[0.06] bg-[#1A1C1C]/85 backdrop-blur-2xl'
           : 'bg-transparent'
       }`}
     >
@@ -100,7 +100,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-t border-white/[0.06] bg-[#050505]/95 backdrop-blur-2xl lg:hidden"
+            className="border-t border-white/[0.06] bg-[#1A1C1C]/95 backdrop-blur-2xl lg:hidden"
           >
             <div className="site-gutter flex flex-col gap-1 py-4">
               {navLinks.map((link) =>

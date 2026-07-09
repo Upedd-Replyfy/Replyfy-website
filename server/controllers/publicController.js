@@ -19,7 +19,7 @@ export const getExpertTypes = asyncHandler(async (req, res) => {
   }
 
   const expertTypes = await ExpertType.find({ category, isActive: true })
-    .select('name slug description category sortOrder')
+    .select('name slug description placeholder suggestions category sortOrder')
     .sort({ sortOrder: 1, name: 1 })
 
   res.json({ success: true, expertTypes })

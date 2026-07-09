@@ -17,10 +17,10 @@ export default function AdminPayments() {
         <p className="mt-1 text-sm text-muted">All platform transactions</p>
       </div>
 
-      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#111111]">
+      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#202323]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="bg-[#141414]">
+            <thead className="bg-[#242727]">
               <tr className="border-b border-white/[0.08] text-xs uppercase tracking-wider text-muted-light">
                 <th className="px-5 py-3">User</th>
                 <th className="px-5 py-3">Plan</th>

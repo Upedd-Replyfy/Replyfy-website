@@ -14,7 +14,7 @@ export default function AdminQuickLinks() {
   ]
 
   return (
-    <div className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#111111] p-5">
+    <div className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] p-5">
       <h3 className="text-sm font-semibold text-ink">Quick Actions</h3>
       <p className="mt-0.5 text-xs text-muted">{pending} items need attention</p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">

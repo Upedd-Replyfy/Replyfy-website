@@ -21,7 +21,7 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="relative w-full border-t border-white/25 bg-black">
+    <footer className="relative w-full border-t border-white/25 bg-[#1A1C1C]">
       <div className="gutter-left gutter-right w-full py-16 md:py-20">
         <div className="flex w-full flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div className="shrink-0">

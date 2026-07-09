@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <main className="bg-black">
+      <main className="bg-[#1A1C1C]">
         <Hero />
         <HowItWorks />
         <ExpertShowcase />

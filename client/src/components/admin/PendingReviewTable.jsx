@@ -52,7 +52,7 @@ export default function PendingReviewTable({ questions = [], loading }) {
 
   return (
     <>
-      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#111111]">
+      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#202323]">
         <div className="flex flex-col gap-3 border-b border-white/[0.08] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-sm font-semibold text-ink">Pending Review</h3>
@@ -63,12 +63,12 @@ export default function PendingReviewTable({ questions = [], loading }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter..."
-            className="w-full rounded-xl border border-white/[0.08] bg-[#090909] px-3 py-2 text-sm sm:w-48"
+            className="w-full rounded-xl border border-white/[0.08] bg-[#1A1C1C] px-3 py-2 text-sm sm:w-48"
           />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="bg-[#141414] text-xs uppercase tracking-wider text-muted-light">
+            <thead className="bg-[#242727] text-xs uppercase tracking-wider text-muted-light">
               <tr>
                 <th className="px-5 py-3">Question</th>
                 <th className="px-5 py-3">Category</th>

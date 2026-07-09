@@ -6,6 +6,8 @@ const expertTypeSchema = new mongoose.Schema(
     slug: { type: String, required: true, trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
     description: { type: String, default: '' },
+    placeholder: { type: String, default: '' },
+    suggestions: [{ type: String }],
     isActive: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

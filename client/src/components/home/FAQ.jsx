@@ -48,7 +48,7 @@ function FAQItem({ question, answer, isOpen, onToggle }) {
         </span>
         <motion.span
           animate={{
-            backgroundColor: isOpen ? '#000000' : 'rgba(0,0,0,0.05)',
+            backgroundColor: isOpen ? '#1A1C1C' : 'rgba(0,0,0,0.05)',
             color: isOpen ? '#ffffff' : 'rgba(0,0,0,0.55)',
           }}
           whileHover={{ scale: 1.06 }}

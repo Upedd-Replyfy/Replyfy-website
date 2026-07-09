@@ -46,6 +46,8 @@ export const expertApi = {
   withdraw: (data) => api.post('/expert/wallet/withdraw', data),
   getRatings: () => api.get('/expert/ratings'),
   updateProfile: (data) => api.put('/expert/profile', data),
+  getAvailability: () => api.get('/expert/availability'),
+  updateAvailability: (data) => api.patch('/expert/availability', data),
 }
 
 export const adminApi = {

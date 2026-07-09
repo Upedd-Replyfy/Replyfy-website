@@ -74,7 +74,7 @@ export default function AdminCategories() {
         }
       />
 
-      <div className="admin-panel grid gap-3 rounded-[20px] border border-white/[0.08] bg-[#111111] p-6 sm:grid-cols-2">
+      <div className="admin-panel grid gap-3 rounded-[20px] border border-white/[0.08] bg-[#202323] p-6 sm:grid-cols-2">
         <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Name" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
         <input value={form.sortOrder} onChange={(e) => setForm((p) => ({ ...p, sortOrder: e.target.value }))} placeholder="Sort order" type="number" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
         <input value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} placeholder="Description" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm sm:col-span-2" />
@@ -87,7 +87,7 @@ export default function AdminCategories() {
 
       <div className="mt-6 space-y-3">
         {isLoading ? <div className="luxury-card h-20 animate-pulse bg-surface" /> : (data?.categories || []).map((cat) => (
-          <div key={cat._id} className="admin-panel flex items-center justify-between rounded-[20px] border border-white/[0.08] bg-[#111111] p-5">
+          <div key={cat._id} className="admin-panel flex items-center justify-between rounded-[20px] border border-white/[0.08] bg-[#202323] p-5">
             <div>
               <p className="font-semibold text-ink">{cat.name} <span className="text-xs text-muted">({cat.slug})</span></p>
               <p className="text-sm text-muted">{cat.description}</p>

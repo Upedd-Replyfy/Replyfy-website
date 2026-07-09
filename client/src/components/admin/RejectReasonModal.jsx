@@ -27,15 +27,11 @@ export default function RejectReasonModal({ open, onClose, onConfirm, title = 'R
             rows={4}
             required
             placeholder="Explain why..."
-            className="w-full rounded-xl border border-white/[0.08] bg-[#090909] px-4 py-3 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none"
+            className="admin-input"
           />
         </div>
         <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="rounded-xl border border-white/[0.08] px-4 py-2 text-sm font-medium text-ink hover:bg-white/[0.04]"
-          >
+          <button type="button" onClick={handleClose} className="admin-btn-secondary">
             Cancel
           </button>
           <button

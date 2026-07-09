@@ -60,7 +60,7 @@ export default function AdminUsers() {
         description="Manage platform user accounts"
       />
       {isLoading ? (
-        <div className="admin-panel h-40 animate-pulse rounded-[20px] bg-[#111111]" />
+        <div className="admin-panel h-40 animate-pulse rounded-[20px] bg-[#202323]" />
       ) : (
         <DataTable columns={columns} rows={usersData?.users || []} emptyMessage="No users found" />
       )}

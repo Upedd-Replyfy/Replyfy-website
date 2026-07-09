@@ -46,7 +46,7 @@ export default function AdminExpertTypes() {
         description="Define expert roles within each category"
       />
 
-      <div className="admin-panel grid gap-3 rounded-[20px] border border-white/[0.08] bg-[#111111] p-6 sm:grid-cols-2">
+      <div className="admin-panel grid gap-3 rounded-[20px] border border-white/[0.08] bg-[#202323] p-6 sm:grid-cols-2">
         <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Name (e.g. Founder)" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
         <select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm">
           <option value="">Select category</option>
@@ -61,7 +61,7 @@ export default function AdminExpertTypes() {
 
       <div className="mt-6 space-y-3">
         {isLoading ? <div className="luxury-card h-20 animate-pulse bg-surface" /> : (data?.expertTypes || []).map((type) => (
-          <div key={type._id} className="admin-panel flex items-center justify-between rounded-[20px] border border-white/[0.08] bg-[#111111] p-5">
+          <div key={type._id} className="admin-panel flex items-center justify-between rounded-[20px] border border-white/[0.08] bg-[#202323] p-5">
             <div>
               <p className="font-semibold text-ink">{type.name}</p>
               <p className="text-sm text-muted">{type.category?.name} · {type.slug}</p>

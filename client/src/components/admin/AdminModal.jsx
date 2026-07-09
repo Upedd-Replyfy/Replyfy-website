@@ -25,9 +25,9 @@ export default function AdminModal({ open, onClose, title, description, children
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.2 }}
-            className={`relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#111111] shadow-2xl ${sizes[size]}`}
+            className={`admin-panel relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[20px] border border-border bg-card shadow-2xl ${sizes[size]}`}
           >
-            <div className="flex items-start justify-between border-b border-white/[0.08] px-6 py-4">
+            <div className="flex items-start justify-between border-b border-border px-6 py-4">
               <div>
                 <h2 className="text-lg font-semibold text-ink">{title}</h2>
                 {description && <p className="mt-1 text-sm text-muted">{description}</p>}
@@ -35,7 +35,7 @@ export default function AdminModal({ open, onClose, title, description, children
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/[0.06] hover:text-ink"
+                className="rounded-lg p-1.5 text-muted transition-colors hover:bg-surface hover:text-ink"
               >
                 <X size={18} />
               </button>

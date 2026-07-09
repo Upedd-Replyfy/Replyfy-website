@@ -256,7 +256,7 @@ export default function UserDashboard() {
               toast.error(err.message)
             }
           },
-          theme: { color: '#111111' },
+          theme: { color: '#202323' },
         }
         const rzp = new window.Razorpay(options)
         rzp.open()
@@ -334,6 +334,7 @@ export default function UserDashboard() {
         expertTypeId={expertTypeId}
         onExpertTypeChange={(type) => setExpertTypeId(type._id)}
         selectedCategory={selectedCategory}
+        selectedExpertType={selectedExpertType}
         query={query}
         onQueryChange={setQuery}
         files={files}

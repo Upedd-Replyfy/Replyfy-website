@@ -104,11 +104,11 @@ export default function AdminQuestions() {
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2].map((i) => (
-            <div key={i} className="admin-panel h-28 animate-pulse rounded-[20px] bg-[#111111]" />
+            <div key={i} className="admin-panel h-28 animate-pulse rounded-[20px] bg-[#202323]" />
           ))}
         </div>
       ) : questions.length === 0 ? (
-        <div className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#111111] py-16 text-center text-muted">
+        <div className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] py-16 text-center text-muted">
           No questions in this view
         </div>
       ) : (
@@ -117,7 +117,7 @@ export default function AdminQuestions() {
             const isOpen = expanded === q._id
             const canReview = q.status === 'pending_admin_review'
             return (
-              <div key={q._id} className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#111111]">
+              <div key={q._id} className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#202323]">
                 <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

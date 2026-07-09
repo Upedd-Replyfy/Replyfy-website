@@ -27,7 +27,7 @@ export default function ProfilePhotoPicker({ value, onChange, label = 'Profile p
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-white/[0.15] bg-[#090909] transition-colors hover:border-sky-500/40 hover:bg-sky-500/5"
+          className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface transition-colors hover:border-sky-500/40 hover:bg-sky-500/5"
         >
           {preview ? (
             <img src={preview} alt="Preview" className="h-full w-full object-cover" />
@@ -42,7 +42,7 @@ export default function ProfilePhotoPicker({ value, onChange, label = 'Profile p
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-white/[0.08]"
+            className="admin-btn-secondary"
           >
             Choose photo
           </button>

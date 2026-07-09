@@ -165,7 +165,7 @@ export default function ExpertCarousel({ dark = false }) {
       <div className="mt-4 flex items-center justify-center gap-2">
         {experts.map((expert, index) => (
           <button key={expert.id} type="button" onClick={() => goTo(index)} aria-label={`View ${expert.name}`} className="p-1">
-            <span className={`block rounded-full transition-all duration-300 ${index === activeIndex ? 'h-2 w-8 bg-primary' : 'h-2 w-2 bg-white/25 hover:bg-white/40'}`} />
+            <span className={`block rounded-full transition-all duration-300 ${index === activeIndex ? `h-2 w-8 ${dark ? 'bg-primary' : 'bg-black'}` : `${dark ? 'bg-white/25 hover:bg-white/40' : 'bg-black/15 hover:bg-black/25'}`}`} />
           </button>
         ))}
       </div>

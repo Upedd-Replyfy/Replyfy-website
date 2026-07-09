@@ -8,7 +8,7 @@ export default function ScrollLink({ to, children, className = '', onClick, ...p
   const handleClick = (e) => {
     if (hash && isSamePage) {
       e.preventDefault()
-      document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' })
+      document.getElementById(hash)?.scrollIntoView()
     }
     onClick?.(e)
   }

@@ -20,6 +20,7 @@ const expertProfileSchema = new mongoose.Schema(
       enum: ['available', 'unavailable', 'busy'],
       default: 'available',
     },
+    videoCallAvailable: { type: Boolean, default: false },
     profilePhoto: { type: String, default: '' },
     isVerified: { type: Boolean, default: false },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },

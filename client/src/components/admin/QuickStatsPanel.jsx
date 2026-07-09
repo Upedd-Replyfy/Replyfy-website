@@ -22,7 +22,7 @@ export default function QuickStatsPanel({ stats, loading }) {
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="admin-panel space-y-4 rounded-[20px] border border-white/[0.08] bg-[#111111] p-5"
+      className="admin-panel space-y-4 rounded-[20px] border border-white/[0.08] bg-[#202323] p-5"
     >
       <div>
         <h3 className="text-sm font-semibold text-ink">Quick Stats</h3>

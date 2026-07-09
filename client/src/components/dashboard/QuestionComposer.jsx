@@ -13,6 +13,7 @@ import {
 import { CategoryPills, ExpertTypeTabs } from '../catalog/CatalogSelectors'
 import SuggestionCarousel from './SuggestionCarousel'
 import { useAuth } from '../../context/AuthContext'
+import { getQuestionPlaceholder } from '../../utils/questionPrompts'
 
 const FILE_TYPES = [
   { id: 'pdf', label: 'PDF', accept: '.pdf' },
@@ -31,6 +32,7 @@ export default function QuestionComposer({
   expertTypeId,
   onExpertTypeChange,
   selectedCategory,
+  selectedExpertType,
   query,
   onQueryChange,
   files,
@@ -48,10 +50,7 @@ export default function QuestionComposer({
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkDraft, setLinkDraft] = useState('')
 
-  const placeholder =
-    selectedCategory?.placeholder ||
-    selectedCategory?.description ||
-    'Describe your question in detail...'
+  const placeholder = getQuestionPlaceholder(selectedCategory, selectedExpertType)
 
   const addFiles = (incoming) => {
     if (incoming.length) onFilesChange([...files, ...incoming])
@@ -297,7 +296,11 @@ export default function QuestionComposer({
         </div>
         </div>
 
-        <SuggestionCarousel category={selectedCategory} onSelect={onQueryChange} />
+        <SuggestionCarousel
+          category={selectedCategory}
+          expertType={selectedExpertType}
+          onSelect={onQueryChange}
+        />
       </div>
     </motion.div>
   )

@@ -226,14 +226,6 @@ export default function Auth({ initialMode }) {
       </div>
 
       <div className="auth-shell relative flex w-full flex-col justify-center bg-[#f5f5f5] px-5 py-10 sm:px-8 lg:w-[55%] lg:px-12 xl:px-16">
-        <Link
-          to="/"
-          className="relative mb-6 inline-flex w-fit items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-black/70 transition-colors hover:bg-black/[0.06] hover:text-black lg:absolute lg:left-12 lg:top-8 xl:left-16"
-        >
-          <ArrowLeft size={16} />
-          Back to home
-        </Link>
-
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -356,7 +348,7 @@ export default function Auth({ initialMode }) {
                 <button
                   type="submit"
                   disabled={authBusy}
-                  className="mt-1 w-full rounded-xl bg-black px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all hover:bg-black/90 hover:shadow-[0_6px_20px_rgba(0,0,0,0.22)] disabled:opacity-50"
+                  className="mt-1 w-full rounded-xl bg-[#1A1C1C] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all hover:bg-[#1A1C1C]/90 hover:shadow-[0_6px_20px_rgba(0,0,0,0.22)] disabled:opacity-50"
                 >
                   {authBusy
                     ? isSignup
@@ -370,35 +362,11 @@ export default function Auth({ initialMode }) {
 
               <div className="mt-5">
                 <div className="mb-5 flex items-center gap-3" aria-hidden="true">
-                  <svg
-                    className="h-3 flex-1 text-black/30"
-                    viewBox="0 0 120 12"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M0 6 C20 6 30 2 45 2 C60 2 60 10 75 10 C90 10 100 6 120 6"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <div className="h-px flex-1 bg-black/15" />
                   <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-black/55">
                     or
                   </span>
-                  <svg
-                    className="h-3 flex-1 text-black/30"
-                    viewBox="0 0 120 12"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M0 6 C20 6 30 10 45 10 C60 10 60 2 75 2 C90 2 100 6 120 6"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <div className="h-px flex-1 bg-black/15" />
                 </div>
                 <GoogleSignInButton
                   label={isSignup ? 'Sign up with Google' : 'Continue with Google'}
@@ -407,6 +375,13 @@ export default function Auth({ initialMode }) {
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
                 />
+                <Link
+                  to="/"
+                  className="mt-5 inline-flex w-full items-center justify-center gap-2 text-sm font-medium text-black/70 transition-colors hover:text-black"
+                >
+                  <ArrowLeft size={16} />
+                  Back to home
+                </Link>
               </div>
             </div>
 

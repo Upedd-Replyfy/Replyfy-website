@@ -23,7 +23,7 @@ const app = (
         position="top-right"
         toastOptions={{
           className: 'text-sm',
-          style: { background: '#141414', color: '#fafafa', border: '1px solid #27272a', borderRadius: '12px' },
+          style: { background: '#242727', color: '#fafafa', border: '1px solid #27272a', borderRadius: '12px' },
         }}
       />
     </AuthProvider>

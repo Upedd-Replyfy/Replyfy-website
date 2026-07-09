@@ -43,7 +43,7 @@ export default function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="section-spacing relative w-full overflow-hidden border-t border-white/10 bg-black"
+      className="section-spacing relative w-full overflow-hidden border-t border-black/[0.06] bg-white"
     >
       <div className="page-container">
         <SectionHeader
@@ -52,7 +52,6 @@ export default function Testimonials() {
           highlight="real answers"
           description="Thousands of professionals use Replyfy when they need clarity, not more noise."
           className="mx-auto mb-12 md:mb-16"
-          dark
         />
 
         <motion.div
@@ -69,7 +68,7 @@ export default function Testimonials() {
               custom={index * 0.12}
               whileHover={{ y: -6, scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-              className="group relative min-h-[280px] overflow-hidden rounded-[18px] border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.4)] md:min-h-[300px]"
+              className="group relative min-h-[280px] overflow-hidden rounded-[18px] border border-black/10 shadow-[0_12px_32px_rgba(0,0,0,0.08)] md:min-h-[300px]"
             >
               <img
                 src={item.image}

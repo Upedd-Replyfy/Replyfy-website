@@ -22,6 +22,7 @@ export function formatExpert(profile) {
     responseTimeHours: profile.responseTime,
     availability: profile.availability,
     isAvailable: profile.availability === 'available',
+    videoCallAvailable: profile.videoCallAvailable ?? false,
     isVerified: profile.isVerified,
     status: profile.status,
     category: profile.category,

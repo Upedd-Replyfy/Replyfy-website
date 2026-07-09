@@ -5,7 +5,6 @@ import {
   UserCheck,
   Send,
   Shield,
-  Lock,
   Zap,
   Star,
 } from 'lucide-react'
@@ -44,7 +43,6 @@ const steps = [
 
 const features = [
   { icon: Shield, title: 'Verified experts', description: 'Every expert is vetted for credibility.' },
-  { icon: Lock, title: 'Private & secure', description: 'Your questions and data are always protected.' },
   { icon: Zap, title: 'Faster clarity', description: 'Get answers in hours, not weeks.' },
   { icon: Star, title: 'Actionable advice', description: 'Real-world insights you can actually use.' },
 ]
@@ -137,21 +135,21 @@ export default function HowItWorks() {
           variants={fadeUp}
           className="mx-auto mt-16 w-full max-w-[1650px] px-4 sm:px-6 md:mt-20 lg:px-8"
         >
-          <div className="rounded-[20px] bg-black px-8 py-8 sm:px-10 md:px-14 md:py-9 lg:px-16 lg:py-10">
-            <div className="grid gap-8 sm:grid-cols-2 sm:gap-9 lg:grid-cols-4 lg:gap-0">
+          <div className="rounded-[20px] bg-[#1A1C1C] px-6 py-5 sm:px-8 md:px-10 md:py-6 lg:px-12">
+            <div className="grid gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-0">
               {features.map((feature, index) => (
                 <div
                   key={feature.title}
-                  className={`flex items-start gap-4 lg:px-8 ${
+                  className={`flex items-center gap-3.5 lg:px-6 ${
                     index < features.length - 1 ? 'lg:border-r lg:border-white/10' : ''
                   }`}
                 >
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white">
-                    <feature.icon size={24} strokeWidth={1.6} />
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white">
+                    <feature.icon size={20} strokeWidth={1.6} />
                   </div>
                   <div>
-                    <h4 className="text-base font-semibold text-white">{feature.title}</h4>
-                    <p className="mt-1.5 text-sm leading-relaxed text-white/50">
+                    <h4 className="text-sm font-semibold text-white md:text-base">{feature.title}</h4>
+                    <p className="mt-1 text-xs leading-relaxed text-white/50 md:text-sm">
                       {feature.description}
                     </p>
                   </div>

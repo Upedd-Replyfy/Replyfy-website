@@ -195,3 +195,41 @@ export const getRatings = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
   res.json({ success: true, ratings })
 })
+
+export const getAvailability = asyncHandler(async (req, res) => {
+  const profile = await ExpertProfile.findOne({ user: req.user._id }).select(
+    'availability videoCallAvailable status'
+  )
+  if (!profile) throw new ApiError(404, 'Expert profile not found')
+  res.json({
+    success: true,
+    availability: profile.availability,
+    videoCallAvailable: profile.videoCallAvailable ?? false,
+  })
+})
+
+export const updateAvailability = asyncHandler(async (req, res) => {
+  const { availability, videoCallAvailable } = req.body
+  if (availability === undefined && videoCallAvailable === undefined) {
+    throw new ApiError(400, 'Provide availability and/or videoCallAvailable')
+  }
+  if (availability !== undefined && !['available', 'unavailable'].includes(availability)) {
+    throw new ApiError(400, 'Availability must be available or unavailable')
+  }
+
+  const profile = await ExpertProfile.findOne({ user: req.user._id })
+  if (!profile) throw new ApiError(404, 'Expert profile not found')
+  if (profile.status !== 'active') {
+    throw new ApiError(400, 'Your expert account is not active')
+  }
+
+  if (availability !== undefined) profile.availability = availability
+  if (videoCallAvailable !== undefined) profile.videoCallAvailable = videoCallAvailable
+  await profile.save()
+
+  res.json({
+    success: true,
+    availability: profile.availability,
+    videoCallAvailable: profile.videoCallAvailable,
+  })
+})

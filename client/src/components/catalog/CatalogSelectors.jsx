@@ -68,7 +68,9 @@ export function ExpertTypeTabs({ expertTypes, selectedId, onSelect, loading }) {
               type="button"
               onClick={() => onSelect(type)}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                active ? 'bg-surface text-ink' : 'text-muted hover:text-ink'
+                active
+                  ? 'bg-surface text-ink underline decoration-charcoal/50 decoration-2 underline-offset-4 dark:decoration-white/70'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               {type.name}

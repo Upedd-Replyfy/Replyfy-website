@@ -38,11 +38,11 @@ export default function AdminAnswers() {
       <AdminPageHeader eyebrow="Moderation" title="Answer Review" description="Approve expert answers or request revisions" />
 
       {isLoading ? (
-        <div className="admin-panel h-32 animate-pulse rounded-[20px] bg-[#111111]" />
+        <div className="admin-panel h-32 animate-pulse rounded-[20px] bg-[#202323]" />
       ) : (
         <div className="space-y-4">
           {(data?.answers || []).map((a) => (
-            <div key={a._id} className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#111111] p-6">
+            <div key={a._id} className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] p-6">
               <p className="font-semibold text-ink">{a.question?.title}</p>
               <p className="mt-1 text-xs text-muted">By {a.expert?.name}</p>
               <p className="mt-4 whitespace-pre-wrap text-sm text-muted">{a.content}</p>
@@ -57,7 +57,7 @@ export default function AdminAnswers() {
             </div>
           ))}
           {!data?.answers?.length && (
-            <div className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#111111] py-12 text-center text-muted">
+            <div className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] py-12 text-center text-muted">
               No pending answers
             </div>
           )}

@@ -5,7 +5,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import { adminApi } from '../../services/api'
 
 const inputClass =
-  'w-full rounded-xl border border-white/[0.08] bg-[#090909] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
+  'w-full rounded-xl border border-white/[0.08] bg-[#1A1C1C] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
 
 export default function AdminNotifications() {
   const [form, setForm] = useState({ userId: '', title: '', message: '', link: '' })
@@ -34,7 +34,7 @@ export default function AdminNotifications() {
         description="Send notifications to platform users"
       />
 
-      <div className="admin-panel max-w-xl rounded-[20px] border border-white/[0.08] bg-[#111111] p-6">
+      <div className="admin-panel max-w-xl rounded-[20px] border border-white/[0.08] bg-[#202323] p-6">
         <form
           onSubmit={(e) => {
             e.preventDefault()

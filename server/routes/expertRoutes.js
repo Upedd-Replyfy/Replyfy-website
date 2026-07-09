@@ -13,6 +13,8 @@ import {
   getWallet,
   requestWithdrawal,
   getRatings,
+  getAvailability,
+  updateAvailability,
 } from '../controllers/expertController.js'
 
 const router = Router()
@@ -28,5 +30,13 @@ router.put('/profile', updateExpertProfile)
 router.get('/wallet', getWallet)
 router.post('/wallet/withdraw', body('amount').isInt({ min: 1 }), validate, requestWithdrawal)
 router.get('/ratings', getRatings)
+router.get('/availability', getAvailability)
+router.patch(
+  '/availability',
+  body('availability').optional().isIn(['available', 'unavailable']),
+  body('videoCallAvailable').optional().isBoolean(),
+  validate,
+  updateAvailability
+)
 
 export default router

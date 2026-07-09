@@ -8,7 +8,7 @@ import { StatusBadge } from '../../components/layouts/DashboardShell'
 import { expertApi } from '../../services/api'
 
 const inputClass =
-  'w-full rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-3.5 text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-sky-500/30'
+  'w-full rounded-xl border border-white/[0.08] bg-[#202222] px-4 py-3.5 text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-sky-500/30'
 
 export default function ExpertQuestionDetail() {
   const { id } = useParams()
