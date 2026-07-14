@@ -1,11 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useQuery } from '@tanstack/react-query'
 import { notificationApi } from '../../services/api'
 import { Bell, LogOut, Menu } from 'lucide-react'
+import Logo from '../ui/Logo'
 
 export function DashboardShell({ title, nav, children, onMenuOpen }) {
-  const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { data } = useQuery({
     queryKey: ['notifications-count'],
@@ -25,7 +25,7 @@ export function DashboardShell({ title, nav, children, onMenuOpen }) {
                 <Menu size={20} />
               </button>
             )}
-            <Link to="/" className="text-lg font-semibold text-ink">Replyfy</Link>
+            <Logo to="/" size="xs" surface="adaptive" />
             {title && <span className="hidden text-sm text-muted sm:inline">/ {title}</span>}
           </div>
           <nav className="hidden items-center gap-1 md:flex">
@@ -53,7 +53,6 @@ export function DashboardShell({ title, nav, children, onMenuOpen }) {
               type="button"
               onClick={async () => {
                 await logout()
-                navigate('/login', { replace: true })
               }}
               className="rounded-lg p-2 text-muted hover:bg-surface hover:text-ink"
               aria-label="Logout"

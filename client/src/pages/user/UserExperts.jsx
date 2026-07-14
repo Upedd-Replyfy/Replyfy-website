@@ -43,8 +43,8 @@ export default function UserExperts() {
     <DashboardLayout>
       <div className="mx-auto max-w-6xl px-6 py-6">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-ink">Experts</h1>
-          <p className="mt-1 text-sm text-muted">Browse verified experts and start a question with your preferred mentor.</p>
+          <h1 className="text-2xl font-semibold text-ink">Mentors</h1>
+          <p className="mt-1 text-sm text-muted">Browse verified mentors and start a question with your preferred mentor.</p>
         </div>
 
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -80,7 +80,7 @@ export default function UserExperts() {
           </div>
         ) : experts.length === 0 ? (
           <div className="luxury-card py-16 text-center">
-            <p className="text-muted">No experts found. Try a different search or category.</p>
+            <p className="text-muted">No mentors found. Try a different search or category.</p>
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -112,7 +112,7 @@ export default function UserExperts() {
                   onClick={() => navigate('/dashboard', { state: { reset: true } })}
                   className="btn-primary mt-4 w-full rounded-xl py-2.5 text-sm font-semibold"
                 >
-                  Ask this expert
+                  Ask this mentor
                 </button>
               </article>
             ))}

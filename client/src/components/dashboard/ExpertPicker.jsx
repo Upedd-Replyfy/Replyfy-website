@@ -26,7 +26,7 @@ function avatarUrl(expert) {
   return (
     expert.profilePhoto ||
     expert.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(expert.name || 'Expert')}&background=111&color=fff`
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(expert.name || 'Mentor')}&background=111&color=fff`
   )
 }
 
@@ -45,7 +45,7 @@ export default function ExpertPicker({
       animate={{ opacity: 1, y: 0 }}
       className="mx-auto w-full max-w-4xl"
     >
-      <h2 className="text-2xl font-semibold text-ink">Choose your expert</h2>
+      <h2 className="text-2xl font-semibold text-ink">Choose your mentor</h2>
       <p className="mt-2 text-sm text-muted">
         Premium plan — compare profiles and select who answers your question.
       </p>
@@ -63,8 +63,8 @@ export default function ExpertPicker({
       {!loading && !error && experts.length === 0 && (
         <div className="mt-8">
           <EmptyState
-            title="No experts available"
-            message="No verified experts match this category and type right now. Try a different expert type or check back later."
+            title="No mentors available"
+            message="No verified mentors match this category and type right now. Try a different mentor type or check back later."
           />
         </div>
       )}

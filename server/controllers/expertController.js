@@ -121,7 +121,7 @@ export const submitAnswer = asyncHandler(async (req, res) => {
     userId: question.user,
     type: 'answer_submitted',
     title: 'Answer Submitted for Review',
-    message: 'An expert has submitted an answer. It will be delivered after admin approval.',
+    message: 'A mentor has submitted an answer. It will be delivered after admin approval.',
     link: `/dashboard/questions/${question._id}`,
     email: user?.email,
   })
@@ -130,7 +130,7 @@ export const submitAnswer = asyncHandler(async (req, res) => {
   await notifyAdmins({
     type: 'answer_submitted',
     title: 'Answer Needs Review',
-    message: `Expert submitted answer for "${question.title}".`,
+    message: `Mentor submitted answer for "${question.title}".`,
     link: `/admin/answers/${answer._id}`,
     admins,
   })
@@ -141,7 +141,7 @@ export const submitAnswer = asyncHandler(async (req, res) => {
 export const updateExpertProfile = asyncHandler(async (req, res) => {
   const { bio, experience, languages, skills } = req.body
   const profile = await ExpertProfile.findOne({ user: req.user._id })
-  if (!profile) throw new ApiError(404, 'Expert profile not found')
+  if (!profile) throw new ApiError(404, 'Mentor profile not found')
 
   if (bio !== undefined) profile.bio = bio
   if (experience !== undefined) profile.experience = experience
@@ -180,7 +180,7 @@ export const requestWithdrawal = asyncHandler(async (req, res) => {
   await notifyAdmins({
     type: 'general',
     title: 'Withdrawal Request',
-    message: `Expert ${req.user.name} requested withdrawal of ₹${amount / 100}`,
+    message: `Mentor ${req.user.name} requested withdrawal of ₹${amount / 100}`,
     link: '/admin/withdrawals',
     admins,
   })
@@ -200,7 +200,7 @@ export const getAvailability = asyncHandler(async (req, res) => {
   const profile = await ExpertProfile.findOne({ user: req.user._id }).select(
     'availability videoCallAvailable status'
   )
-  if (!profile) throw new ApiError(404, 'Expert profile not found')
+  if (!profile) throw new ApiError(404, 'Mentor profile not found')
   res.json({
     success: true,
     availability: profile.availability,
@@ -218,9 +218,9 @@ export const updateAvailability = asyncHandler(async (req, res) => {
   }
 
   const profile = await ExpertProfile.findOne({ user: req.user._id })
-  if (!profile) throw new ApiError(404, 'Expert profile not found')
+  if (!profile) throw new ApiError(404, 'Mentor profile not found')
   if (profile.status !== 'active') {
-    throw new ApiError(400, 'Your expert account is not active')
+    throw new ApiError(400, 'Your mentor account is not active')
   }
 
   if (availability !== undefined) profile.availability = availability

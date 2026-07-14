@@ -23,7 +23,7 @@ export default function RecentQuestions({ questions, onSelect }) {
           Recent questions
         </h2>
         <p className="mt-2 text-sm text-muted md:text-base">
-          Your conversation history with experts
+          Your conversation history with mentors
         </p>
       </div>
 

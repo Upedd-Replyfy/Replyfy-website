@@ -25,7 +25,7 @@ const listLinkClass =
 
 export default function ExpertDashboard() {
   const { user } = useAuth()
-  const firstName = user?.name?.split(' ')[0] || 'Expert'
+  const firstName = user?.name?.split(' ')[0] || 'Mentor'
 
   const { data, isLoading } = useQuery({
     queryKey: ['expert-dashboard'],

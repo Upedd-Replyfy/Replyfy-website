@@ -107,7 +107,7 @@ export default function AnalyticsSection({ charts, loading, compact = false }) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="User & Expert Growth" subtitle="New registrations" delay={0.15} compact={compact}>
+        <ChartCard title="User & Mentor Growth" subtitle="New registrations" delay={0.15} compact={compact}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={growthMerged}>
               <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
@@ -116,7 +116,7 @@ export default function AnalyticsSection({ charts, loading, compact = false }) {
               <Tooltip {...tooltipStyle} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="users" fill="#38bdf8" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="experts" fill="#a78bfa" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="experts" name="Mentors" fill="#a78bfa" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>

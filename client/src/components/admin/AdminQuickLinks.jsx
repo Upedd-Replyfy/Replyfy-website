@@ -10,7 +10,7 @@ export default function AdminQuickLinks() {
     { to: '/admin/questions', label: 'Review Questions', count: data?.stats?.pendingQuestions },
     { to: '/admin/answers', label: 'Review Answers', count: data?.stats?.pendingAnswers },
     { to: '/admin/withdrawals', label: 'Withdrawals', count: data?.stats?.pendingWithdrawals },
-    { to: '/admin/experts', label: 'Register Expert', register: true },
+    { to: '/admin/experts', label: 'Register Mentor', register: true },
   ]
 
   return (

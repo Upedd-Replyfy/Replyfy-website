@@ -14,7 +14,7 @@ export default function PlanSelector({ plan, onSelect, onContinue }) {
     >
       <h2 className="text-2xl font-semibold text-ink">Choose your plan</h2>
       <p className="mt-2 text-sm text-muted">
-        Basic auto-assigns an expert. Choose Mentor or Expert Call to pick your expert.
+        Basic auto-assigns a mentor. Choose Mentor or Mentor Call to pick your mentor.
       </p>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-3">

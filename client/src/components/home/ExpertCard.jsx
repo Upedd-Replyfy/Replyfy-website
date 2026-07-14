@@ -24,7 +24,7 @@ export default function ExpertCard({ expert, isCenter, dark = false }) {
         {expert.topExpert && (
           <span className="absolute top-4 left-4 flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-black shadow-sm">
             <Star size={10} fill="currentColor" />
-            Top Expert
+            Top Mentor
           </span>
         )}
 

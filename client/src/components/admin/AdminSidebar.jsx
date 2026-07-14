@@ -1,7 +1,7 @@
 import { NavLink, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Logo from '../ui/Logo'
+import Logo, { LogoMark } from '../ui/Logo'
 import { ADMIN_NAV } from './adminNav'
 
 export default function AdminSidebar({ collapsed, onToggle }) {
@@ -12,10 +12,10 @@ export default function AdminSidebar({ collapsed, onToggle }) {
       }`}
     >
       <div className={`flex h-16 items-center border-b border-border ${collapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
-        {!collapsed && <Logo admin className="scale-90" light={false} />}
+        {!collapsed && <Logo admin className="scale-90" surface="adaptive" />}
         {collapsed && (
-          <Link to="/admin" className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-fg">
-            R
+          <Link to="/admin" className="flex h-9 w-9 items-center justify-center" aria-label="Replyfy Admin">
+            <LogoMark className="h-9 w-9 object-contain" />
           </Link>
         )}
         <button

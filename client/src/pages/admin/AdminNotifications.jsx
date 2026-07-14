@@ -5,7 +5,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import { adminApi } from '../../services/api'
 
 const inputClass =
-  'w-full rounded-xl border border-white/[0.08] bg-[#1A1C1C] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
+  'w-full rounded-xl border border-white/[0.08] bg-[#272927] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
 
 export default function AdminNotifications() {
   const [form, setForm] = useState({ userId: '', title: '', message: '', link: '' })

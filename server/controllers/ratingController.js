@@ -16,7 +16,7 @@ export const submitRating = asyncHandler(async (req, res) => {
   })
   if (!question) throw new ApiError(404, 'Question not found or not completed')
   if (question.isRated) throw new ApiError(400, 'Already rated')
-  if (!question.assignedExpert) throw new ApiError(400, 'No expert assigned')
+  if (!question.assignedExpert) throw new ApiError(400, 'No mentor assigned')
 
   const rating = await Rating.create({
     question: questionId,

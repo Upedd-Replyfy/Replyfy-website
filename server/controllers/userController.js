@@ -20,11 +20,11 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
   const ExpertType = (await import('../models/ExpertType.js')).default
   const type = await ExpertType.findById(expertType)
   if (!type || !type.isActive || type.category.toString() !== category.toString()) {
-    throw new ApiError(400, 'Invalid expert type for this category')
+    throw new ApiError(400, 'Invalid mentor type for this category')
   }
 
   if (planRequiresExpertSelection(plan) && !selectedExpert) {
-    throw new ApiError(400, 'This plan requires expert selection')
+    throw new ApiError(400, 'This plan requires mentor selection')
   }
 
   if (planRequiresExpertSelection(plan) && selectedExpert) {
@@ -36,7 +36,7 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
       availability: 'available',
       status: 'active',
     })
-    if (!profile) throw new ApiError(400, 'Selected expert is not available for this category and type')
+    if (!profile) throw new ApiError(400, 'Selected mentor is not available for this category and type')
   }
 
   const amount = getPlanAmount(plan)

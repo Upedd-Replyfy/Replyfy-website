@@ -1,4 +1,4 @@
-export default function ExpertPageHeader({ title, description, badge, eyebrow = 'Expert portal' }) {
+export default function ExpertPageHeader({ title, description, badge, eyebrow = 'Mentor portal' }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>

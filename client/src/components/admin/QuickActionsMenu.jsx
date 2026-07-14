@@ -12,12 +12,12 @@ import {
 } from 'lucide-react'
 
 const actions = [
-  { label: 'Register Expert', icon: UserPlus, to: '/admin/experts?register=1' },
+  { label: 'Register Mentor', icon: UserPlus, to: '/admin/experts?register=1' },
   { label: 'Review Questions', icon: CircleHelp, to: '/admin/questions' },
   { label: 'Review Answers', icon: MessageSquare, to: '/admin/answers' },
   { label: 'Process Withdrawals', icon: Wallet, to: '/admin/withdrawals' },
   { label: 'Manage Categories', icon: FolderTree, to: '/admin/categories' },
-  { label: 'Expert Types', icon: Tags, to: '/admin/expert-types' },
+  { label: 'Mentor Types', icon: Tags, to: '/admin/expert-types' },
 ]
 
 export default function QuickActionsMenu({ onRegisterExpert }) {

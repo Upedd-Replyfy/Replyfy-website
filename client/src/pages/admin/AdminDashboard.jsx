@@ -37,7 +37,7 @@ export default function AdminDashboard() {
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <StatOverviewCard label="Total Users" value={stats?.totalUsers ?? 0} trend={trends?.users} icon={Users} accent="sky" loading={isLoading} />
-        <StatOverviewCard label="Verified Experts" value={stats?.verifiedExperts ?? 0} trend={trends?.experts} icon={UserCheck} accent="violet" loading={isLoading} />
+        <StatOverviewCard label="Verified Mentors" value={stats?.verifiedExperts ?? 0} trend={trends?.experts} icon={UserCheck} accent="violet" loading={isLoading} />
         <StatOverviewCard label="Pending Questions" value={stats?.pendingQuestions ?? 0} trend={trends?.questions} icon={HelpCircle} accent="amber" loading={isLoading} />
         <StatOverviewCard label="Pending Answers" value={stats?.pendingAnswers ?? 0} trend={trends?.answers} icon={MessageSquare} accent="cyan" loading={isLoading} />
         <StatOverviewCard label="Revenue" value={formatRupee(stats?.totalRevenue)} trend={trends?.revenue} icon={IndianRupee} accent="emerald" loading={isLoading} />

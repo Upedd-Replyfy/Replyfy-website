@@ -78,7 +78,7 @@ export default function QuestionDetail() {
         {answer && question.status === 'completed' && (
           <div className="luxury-card mt-6 p-6">
             <div className="flex items-start justify-between gap-4">
-              <h2 className="text-lg font-semibold text-ink">Expert Answer</h2>
+              <h2 className="text-lg font-semibold text-ink">Mentor Answer</h2>
               <button
                 type="button"
                 onClick={() => {
@@ -117,7 +117,7 @@ export default function QuestionDetail() {
 
         {question.status === 'completed' && !question.isRated && (
           <div className="luxury-card mt-6 p-6">
-            <h2 className="text-lg font-semibold text-ink">Rate this expert</h2>
+            <h2 className="text-lg font-semibold text-ink">Rate this mentor</h2>
             <div className="mt-4 flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} type="button" onClick={() => setStars(n)}>

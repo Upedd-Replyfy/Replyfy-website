@@ -72,18 +72,18 @@ export default function PaymentStep({
             <span className="font-medium text-ink">{category?.name}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Expert type</span>
+            <span className="text-muted">Mentor type</span>
             <span className="font-medium text-ink">{expertType?.name}</span>
           </div>
           {planRequiresExpertSelection(plan) && selectedExpert && (
             <div className="flex justify-between">
-              <span className="text-muted">Expert</span>
+              <span className="text-muted">Mentor</span>
               <span className="font-medium text-ink">{selectedExpert.name}</span>
             </div>
           )}
           {plan === 'basic' && (
             <p className="rounded-xl bg-surface px-4 py-3 text-xs text-muted-light">
-              We&apos;ll choose the best available expert after admin approval.
+              We&apos;ll choose the best available mentor after admin approval.
             </p>
           )}
           {plan === 'expert_call' && (

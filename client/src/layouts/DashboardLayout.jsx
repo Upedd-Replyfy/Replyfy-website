@@ -5,17 +5,11 @@ import { DashboardThemeProvider, useDashboardTheme } from '../context/DashboardT
 
 function DashboardLayoutInner({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const { theme } = useDashboardTheme()
 
   return (
     <div className="dashboard-shell relative flex min-h-screen bg-canvas" data-theme={theme}>
-      <DashboardSidebar
-        open={sidebarOpen}
-        collapsed={sidebarCollapsed}
-        onClose={() => setSidebarOpen(false)}
-        onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
-      />
+      <DashboardSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="relative flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
         <DashboardTopbar onMenuOpen={() => setSidebarOpen(true)} />

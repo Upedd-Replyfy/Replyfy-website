@@ -8,23 +8,7 @@ const imageSizes = {
   lg: 'h-14 w-auto max-w-[280px] sm:h-16 sm:max-w-[320px] md:h-[4.5rem] md:max-w-[360px]',
 }
 
-const iconSizes = {
-  xs: 'h-7 w-7',
-  sm: 'h-9 w-9',
-  md: 'h-10 w-10',
-  nav: 'h-11 w-11 md:h-12 md:w-12',
-  lg: 'h-14 w-14 sm:h-16 sm:w-16',
-}
-
-const textSizes = {
-  xs: 'text-base',
-  sm: 'text-lg',
-  md: 'text-xl',
-  nav: 'text-xl md:text-2xl',
-  lg: 'text-2xl sm:text-3xl md:text-4xl',
-}
-
-function LogoIcon({ className = '' }) {
+export function LogoMark({ className = '' }) {
   return (
     <img
       src="/logo-mark.png"
@@ -40,6 +24,7 @@ export default function Logo({
   className = '',
   to,
   light = true,
+  surface,
   alignArtwork = false,
   dashboard = false,
   admin = false,
@@ -55,6 +40,8 @@ export default function Logo({
         : (to ?? '/')
 
   const resolvedSize = size || (dashboard || admin || expert ? 'sm' : 'nav')
+  const resolvedSurface = surface || (light ? 'dark' : 'adaptive')
+  const wordmarkSrc = resolvedSurface === 'light' ? '/logo-light.png' : '/logo.png'
 
   return (
     <Link
@@ -62,24 +49,32 @@ export default function Logo({
       className={`inline-flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-90 ${className}`}
       aria-label="Replyfy"
     >
-      {light ? (
+      {resolvedSurface === 'adaptive' ? (
+        <>
+          <img
+            src="/logo.png"
+            alt="Replyfy"
+            className={`replyfy-logo-adaptive replyfy-logo-dark object-contain object-left ${imageSizes[resolvedSize]}`}
+            style={alignArtwork ? { marginLeft: '-0.8rem' } : undefined}
+            draggable={false}
+          />
+          <img
+            src="/logo-light.png"
+            alt=""
+            className={`replyfy-logo-adaptive replyfy-logo-light object-contain object-left ${imageSizes[resolvedSize]}`}
+            style={alignArtwork ? { marginLeft: '-0.8rem' } : undefined}
+            aria-hidden
+            draggable={false}
+          />
+        </>
+      ) : (
         <img
-          src="/logo.png"
+          src={wordmarkSrc}
           alt="Replyfy"
           className={`object-contain object-left ${imageSizes[resolvedSize]}`}
-          data-blend={light && !dashboard && !admin && !expert ? 'lighten' : undefined}
           style={alignArtwork ? { marginLeft: '-0.8rem' } : undefined}
           draggable={false}
         />
-      ) : (
-        <>
-          <LogoIcon className={`shrink-0 ${iconSizes[resolvedSize]}`} />
-          <span
-            className={`font-display font-semibold tracking-tight text-ink ${textSizes[resolvedSize]}`}
-          >
-            Replyfy
-          </span>
-        </>
       )}
     </Link>
   )

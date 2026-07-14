@@ -11,9 +11,7 @@ import {
   Plus,
   MessageSquarePlus,
   User,
-  Settings,
   LogOut,
-  CreditCard,
   Sun,
   Moon,
 } from 'lucide-react'
@@ -62,7 +60,6 @@ export default function DashboardTopbar({ onMenuOpen }) {
   const handleSignOut = async () => {
     setProfileOpen(false)
     await logout()
-    navigate('/login', { replace: true })
   }
 
   const handleSearch = (e) => {
@@ -87,9 +84,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
     `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=111&color=fff`
 
   const profileMenu = [
-    { icon: User, label: 'Profile', action: () => navigate('/dashboard/settings') },
-    { icon: CreditCard, label: 'Billing', action: () => navigate('/dashboard/billing') },
-    { icon: Settings, label: 'Settings', action: () => navigate('/dashboard/settings') },
+    { icon: User, label: 'Account', action: () => navigate('/dashboard/settings') },
     { icon: LogOut, label: 'Sign out', action: handleSignOut },
   ]
 
@@ -112,7 +107,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
           type="search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Ask or search anything — questions, experts, answers..."
+          placeholder="Ask or search anything — questions, mentors, answers..."
           className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-20 text-sm text-ink shadow-[var(--shadow-luxury-sm)] placeholder:text-muted-light transition-all focus:border-charcoal focus:bg-card focus:outline-none focus:ring-2 focus:ring-charcoal/10"
         />
         <div className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center gap-1.5 sm:flex">
@@ -144,7 +139,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
               >
                 {[
                   { icon: MessageSquarePlus, label: 'New question', action: () => navigate('/dashboard', { state: { reset: true } }) },
-                  { icon: Search, label: 'Find expert', action: () => navigate('/dashboard/experts') },
+                  { icon: Search, label: 'Find mentor', action: () => navigate('/dashboard/experts') },
                   { icon: Sparkles, label: 'Go to workspace', action: () => navigate('/dashboard') },
                 ].map((action) => (
                   <button

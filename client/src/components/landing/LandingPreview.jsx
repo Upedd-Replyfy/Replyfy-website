@@ -60,13 +60,13 @@ export default function LandingPreview() {
         >
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              { label: 'Matched expert', value: 'Founder' },
+              { label: 'Matched mentor', value: 'Founder' },
               { label: 'Response', value: '12 hrs' },
               { label: 'Plan', value: 'Mentor' },
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-[16px] border border-[#242424] bg-[#1A1C1C] px-4 py-3"
+                className="rounded-[16px] border border-[#242424] bg-[#272927] px-4 py-3"
               >
                 <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9A9A9A]">
                   {item.label}
@@ -76,7 +76,7 @@ export default function LandingPreview() {
             ))}
           </div>
 
-          <div className="rounded-[18px] border border-[#242424] bg-[#1A1C1C] p-4 sm:p-5">
+          <div className="rounded-[18px] border border-[#242424] bg-[#272927] p-4 sm:p-5">
             <div className="mb-4 flex items-start gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-black">
                 <Sparkles size={15} />
@@ -86,7 +86,7 @@ export default function LandingPreview() {
                   What would you like help with?
                 </p>
                 <p className="mt-1 text-[13px] text-[#9A9A9A]">
-                  A verified human expert will respond — not AI.
+                  A verified human mentor will respond — not AI.
                 </p>
               </div>
             </div>
@@ -110,7 +110,7 @@ export default function LandingPreview() {
 
             <div className="mb-3 flex flex-wrap gap-1 border-b border-[#242424] pb-3">
               <span className="mr-2 self-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[#9A9A9A]">
-                Expert
+                Mentor
               </span>
               {experts.map((item) => (
                 <button
@@ -147,7 +147,7 @@ export default function LandingPreview() {
                 className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-black transition hover:bg-[#F5F5F5]"
                 style={{ transitionTimingFunction: `cubic-bezier(${ease.join(',')})` }}
               >
-                Ask expert
+                Ask mentor
                 <ArrowUp size={14} />
               </Link>
             </div>

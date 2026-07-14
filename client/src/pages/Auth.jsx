@@ -9,7 +9,7 @@ import GoogleSignInButton from '../components/auth/GoogleSignInButton'
 import { useAuth } from '../context/AuthContext'
 
 const TRUST_STATS = [
-  { icon: Users, value: '50', label: 'Experts' },
+  { icon: Users, value: '50', label: 'Mentors' },
   { icon: MessageSquare, value: '2400+', label: 'Answers' },
   { icon: Star, value: '4.9', label: 'Rating' },
 ]
@@ -24,7 +24,7 @@ function AuthVisual() {
     <div className="relative hidden h-full min-h-screen w-full overflow-hidden lg:block">
       <img
         src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=1600&fit=crop"
-        alt="Founders and experts collaborating"
+        alt="Founders and mentors collaborating"
         className="absolute inset-0 h-full w-full object-cover grayscale"
       />
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-900/85 via-neutral-800/75 to-black/80" />
@@ -80,13 +80,13 @@ function AuthVisual() {
           </motion.div>
         </div>
 
-        <p className="text-xs text-white/60">Secure · Verified experts · Pay per question</p>
+        <p className="text-xs text-white/60">Secure · Verified mentors · Pay per question</p>
       </div>
     </div>
   )
 }
 
-export default function Auth({ initialMode }) {
+export default function Auth({ initialMode, embedded = false, onClose }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { login, register, loginWithGoogle, getDashboardPath } = useAuth()
@@ -204,6 +204,185 @@ export default function Auth({ initialMode }) {
 
   const authBusy = loading || googleLoading
 
+  if (embedded) {
+    return (
+      <div className="auth-shell flex h-full w-full items-center justify-center overflow-y-auto bg-[#f5f5f5] px-8 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={transition}
+          className="relative mx-auto w-full max-w-[430px]"
+        >
+          <div className="overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-[0_12px_48px_rgba(0,0,0,0.07)]">
+            <div className="border-b border-black/10 px-8 pb-5 pt-7 md:px-9">
+              <Logo surface="light" className="mb-5" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/60">
+                {isSignup ? 'Get started' : 'Sign in'}
+              </p>
+              <h1 className="mt-2 text-[1.65rem] font-semibold tracking-tight text-black md:text-[1.85rem]">
+                {isSignup ? 'Create your account' : 'Welcome back'}
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-black/65">
+                {isSignup
+                  ? 'Start asking questions in under a minute.'
+                  : 'Sign in to view your questions and mentor responses.'}
+              </p>
+            </div>
+
+            <div className="px-8 py-5 md:px-9">
+              {formError && (
+                <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {formError}
+                </p>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
+                <AnimatePresence initial={false}>
+                  {isSignup && (
+                    <motion.div
+                      key="name-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <Input
+                        label="Full Name"
+                        id="embedded-name"
+                        name="name"
+                        type="text"
+                        placeholder="Your full name"
+                        value={signupForm.name}
+                        onChange={handleChange}
+                        error={errors.name}
+                        autoComplete="name"
+                        className={inputClass}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <Input
+                  label="Email"
+                  id="embedded-email"
+                  name="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  error={errors.email}
+                  autoComplete="email"
+                  className={inputClass}
+                />
+
+                <Input
+                  label="Password"
+                  id="embedded-password"
+                  name="password"
+                  type="password"
+                  placeholder={isSignup ? 'Min. 6 characters' : 'Password'}
+                  value={form.password}
+                  onChange={handleChange}
+                  error={errors.password}
+                  autoComplete={isSignup ? 'new-password' : 'current-password'}
+                  className={inputClass}
+                />
+
+                <AnimatePresence initial={false}>
+                  {isSignup && (
+                    <motion.div
+                      key="confirm-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <Input
+                        label="Confirm Password"
+                        id="embedded-confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Repeat your password"
+                        value={signupForm.confirmPassword}
+                        onChange={handleChange}
+                        error={errors.confirmPassword}
+                        autoComplete="new-password"
+                        className={inputClass}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <button
+                  type="submit"
+                  disabled={authBusy}
+                  className="mt-1 w-full rounded-xl bg-[#272927] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all hover:bg-[#272927]/90 hover:shadow-[0_6px_20px_rgba(0,0,0,0.22)] disabled:opacity-50"
+                >
+                  {authBusy
+                    ? isSignup
+                      ? 'Creating account...'
+                      : 'Signing in...'
+                    : isSignup
+                      ? 'Create Account'
+                      : 'Sign In'}
+                </button>
+              </form>
+
+              <div className="mt-4">
+                <GoogleSignInButton
+                  label={isSignup ? 'Sign up with Google' : 'Continue with Google'}
+                  loading={googleLoading}
+                  disabled={authBusy}
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-black/10 bg-[#fafafa] px-8 py-4 md:px-9">
+              <p className="text-center text-sm text-black/70">
+                {isSignup ? (
+                  <>
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchMode('login')}
+                      className="font-semibold text-black underline-offset-2 hover:underline"
+                    >
+                      Sign In
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Don&apos;t have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchMode('signup')}
+                      className="font-semibold text-black underline-offset-2 hover:underline"
+                    >
+                      Sign Up
+                    </button>
+                  </>
+                )}
+              </p>
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="mt-3 inline-flex w-full items-center justify-center text-sm font-medium text-black/60 transition-colors hover:text-black"
+                >
+                  Back to preview
+                </button>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen bg-[#f5f5f5]">
       <div className="relative w-full lg:w-[45%]">
@@ -234,7 +413,7 @@ export default function Auth({ initialMode }) {
         >
           <div className="overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-[0_12px_48px_rgba(0,0,0,0.07)]">
             <div className="border-b border-black/10 px-8 pb-6 pt-8 md:px-10 md:pt-10">
-              <Logo light={false} className="mb-6 lg:hidden" />
+              <Logo surface="light" className="mb-6 lg:hidden" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/60">
                 {isSignup ? 'Get started' : 'Sign in'}
               </p>
@@ -244,7 +423,7 @@ export default function Auth({ initialMode }) {
               <p className="mt-2 text-sm leading-relaxed text-black/65">
                 {isSignup
                   ? 'Start asking questions in under a minute.'
-                  : 'Sign in to view your questions and expert responses.'}
+                  : 'Sign in to view your questions and mentor responses.'}
               </p>
             </div>
 
@@ -348,7 +527,7 @@ export default function Auth({ initialMode }) {
                 <button
                   type="submit"
                   disabled={authBusy}
-                  className="mt-1 w-full rounded-xl bg-[#1A1C1C] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all hover:bg-[#1A1C1C]/90 hover:shadow-[0_6px_20px_rgba(0,0,0,0.22)] disabled:opacity-50"
+                  className="mt-1 w-full rounded-xl bg-[#272927] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all hover:bg-[#272927]/90 hover:shadow-[0_6px_20px_rgba(0,0,0,0.22)] disabled:opacity-50"
                 >
                   {authBusy
                     ? isSignup

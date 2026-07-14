@@ -51,7 +51,7 @@ export default function RegisterExpertModal({ open, onClose }) {
       return adminApi.createExpert(fd)
     },
     onSuccess: () => {
-      toast.success('Expert registered successfully')
+      toast.success('Mentor registered successfully')
       queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
       setForm(emptyForm)
@@ -74,8 +74,8 @@ export default function RegisterExpertModal({ open, onClose }) {
     <AdminModal
       open={open}
       onClose={onClose}
-      title="Register Expert"
-      description="Create a new expert account with profile"
+      title="Register Mentor"
+      description="Create a new mentor account with profile"
       size="lg"
     >
       <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-2">
@@ -90,7 +90,7 @@ export default function RegisterExpertModal({ open, onClose }) {
           ))}
         </select>
         <select required value={form.expertType} onChange={(e) => setForm((p) => ({ ...p, expertType: e.target.value }))} disabled={!form.category} className={inputClass}>
-          <option value="">Select expert type *</option>
+          <option value="">Select mentor type *</option>
           {expertTypes.map((t) => (
             <option key={t._id} value={t._id}>{t.name}</option>
           ))}
@@ -103,14 +103,14 @@ export default function RegisterExpertModal({ open, onClose }) {
         </div>
         <label className="flex items-center gap-2 text-sm text-ink sm:col-span-2">
           <input type="checkbox" checked={form.isVerified} onChange={(e) => setForm((p) => ({ ...p, isVerified: e.target.checked }))} />
-          Mark as verified expert
+          Mark as verified mentor
         </label>
         <div className="flex justify-end gap-2 sm:col-span-2">
           <button type="button" onClick={onClose} className="admin-btn-secondary">
             Cancel
           </button>
           <button type="submit" disabled={createMutation.isPending} className="admin-btn-gradient rounded-xl px-5 py-2 text-sm font-semibold disabled:opacity-50">
-            {createMutation.isPending ? 'Creating...' : 'Register Expert'}
+            {createMutation.isPending ? 'Creating...' : 'Register Mentor'}
           </button>
         </div>
       </form>

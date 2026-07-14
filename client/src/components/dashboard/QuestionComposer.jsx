@@ -101,14 +101,14 @@ export default function QuestionComposer({
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="w-full"
     >
-      <div className="mb-9 mt-12 text-center md:mt-20">
+      <div className="mb-7 mt-4 text-center md:mt-8">
         <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-ink md:text-4xl lg:text-5xl">
           Your question,
           <br />
           <span className="font-light text-muted">answered by a human.</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-balance text-sm leading-relaxed text-muted md:text-base">
-          Real experts — founders, CAs, mentors — read your question and reply personally.
+        <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted md:text-base">
+          Real mentors — founders, CAs, advisors — read your question and reply personally.
           <span className="mt-1 block">Within 12 hrs.</span>
         </p>
       </div>
@@ -287,7 +287,7 @@ export default function QuestionComposer({
               ) : (
                 <>
                   <Sparkles size={14} />
-                  Ask expert
+                  Ask mentor
                   <ArrowUp size={14} />
                 </>
               )}

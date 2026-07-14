@@ -13,7 +13,7 @@ const testimonials = [
   },
   {
     quote:
-      'The expert actually read my full question and addressed my specific situation. Felt like a $500 consultation for a fraction of the price.',
+      'The mentor actually read my full question and addressed my specific situation. Felt like a $500 consultation for a fraction of the price.',
     name: 'Rahul M.',
     role: 'Product Manager',
     image:

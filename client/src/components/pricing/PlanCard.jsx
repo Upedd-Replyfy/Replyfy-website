@@ -32,7 +32,7 @@ export default function PlanCard({ plan, active = false, onClick, className = ''
           className={`absolute -top-2.5 right-4 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
             active
               ? dark
-                ? 'bg-[#1A1C1C] text-white'
+                ? 'bg-[#272927] text-white'
                 : 'bg-white text-ink'
               : dark
                 ? 'bg-gradient-to-r from-sky-400 to-violet-400 text-white'

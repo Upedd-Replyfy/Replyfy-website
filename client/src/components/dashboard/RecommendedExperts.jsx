@@ -24,7 +24,7 @@ export default function RecommendedExperts({ experts, loading, categoryName, exp
     >
       <div className="mb-8">
         <h2 className="font-display text-2xl font-semibold tracking-tight text-ink md:text-3xl">
-          Recommended experts
+          Recommended mentors
         </h2>
         <p className="mt-2 text-sm text-muted md:text-base">
           Top matches for {categoryName || 'your selection'}

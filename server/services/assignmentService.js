@@ -25,7 +25,7 @@ export async function findAvailableExpert(categoryId, expertTypeId, excludeExper
 export async function assignExpertToQuestion({ question, expertUserId, assignedBy, assignmentType, session }) {
   const profile = await ExpertProfile.findOne({ user: expertUserId }).session(session || null)
   if (!profile || profile.availability !== 'available' || profile.status !== 'active') {
-    throw new ApiError(400, 'Expert is not available')
+    throw new ApiError(400, 'Mentor is not available')
   }
 
   question.assignedExpert = expertUserId

@@ -114,7 +114,7 @@ export const getExpertById = asyncHandler(async (req, res) => {
       .populate('expertType', 'name slug description')
   }
 
-  if (!profile) return res.status(404).json({ success: false, message: 'Expert not found' })
+  if (!profile) return res.status(404).json({ success: false, message: 'Mentor not found' })
 
   const ratings = await Rating.find({ expert: profile.user._id })
     .populate('user', 'name')

@@ -6,7 +6,7 @@ export default function ExpertSidebar({ onNavigate }) {
   return (
     <aside className="expert-sidebar flex h-full w-[248px] flex-col border-r border-border bg-card/98 backdrop-blur-xl">
       <div className="flex h-16 items-center border-b border-border px-6">
-        <Logo expert light={false} />
+        <Logo expert surface="adaptive" />
       </div>
       <div className="px-4 py-5">
         <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted">Menu</p>

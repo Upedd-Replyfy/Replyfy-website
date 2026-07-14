@@ -63,7 +63,7 @@ export default function PendingReviewTable({ questions = [], loading }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter..."
-            className="w-full rounded-xl border border-white/[0.08] bg-[#1A1C1C] px-3 py-2 text-sm sm:w-48"
+            className="w-full rounded-xl border border-white/[0.08] bg-[#272927] px-3 py-2 text-sm sm:w-48"
           />
         </div>
         <div className="overflow-x-auto">
@@ -90,7 +90,7 @@ export default function PendingReviewTable({ questions = [], loading }) {
                     <td className="px-5 py-3">
                       <div className="flex gap-1">
                         <button type="button" onClick={() => approveMutation.mutate(q._id)} className="admin-btn-success rounded-lg p-1.5" title="Auto assign"><Check size={14} /></button>
-                        <button type="button" onClick={() => setAssignQuestion(q)} className="admin-btn-gradient rounded-lg p-1.5 text-black" title="Pick expert"><Eye size={14} /></button>
+                        <button type="button" onClick={() => setAssignQuestion(q)} className="admin-btn-gradient rounded-lg p-1.5 text-black" title="Pick mentor"><Eye size={14} /></button>
                         <button type="button" onClick={() => setRejectQuestion(q)} className="admin-btn-danger rounded-lg p-1.5" title="Reject"><X size={14} /></button>
                         <Link to="/admin/questions" className="rounded-lg border border-white/[0.08] p-1.5 text-muted hover:text-ink"><Eye size={14} /></Link>
                       </div>

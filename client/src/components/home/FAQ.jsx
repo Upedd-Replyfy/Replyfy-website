@@ -7,7 +7,7 @@ const faqs = [
   {
     question: 'How is this different from asking ChatGPT?',
     answer:
-      'AI gives generic answers from public data. Replyfy connects you with a verified human expert who reviews your specific situation and writes a tailored response.',
+      'AI gives generic answers from public data. Replyfy connects you with a verified human mentor who reviews your specific situation and writes a tailored response.',
   },
   {
     question: "What if I'm not satisfied with the answer?",
@@ -20,9 +20,9 @@ const faqs = [
       'We use Razorpay for secure payment processing. Your payment is confirmed only after signature verification. We never store card details.',
   },
   {
-    question: 'Can I choose a specific expert?',
+    question: 'Can I choose a specific mentor?',
     answer:
-      'Experts are matched based on category and availability. Consultation-tier questions are assigned to senior experts in the relevant field.',
+      'Mentors are matched based on category and availability. Consultation-tier questions are assigned to senior mentors in the relevant field.',
   },
   {
     question: 'What types of questions can I ask?',
@@ -48,7 +48,7 @@ function FAQItem({ question, answer, isOpen, onToggle }) {
         </span>
         <motion.span
           animate={{
-            backgroundColor: isOpen ? '#1A1C1C' : 'rgba(0,0,0,0.05)',
+            backgroundColor: isOpen ? '#272927' : 'rgba(0,0,0,0.05)',
             color: isOpen ? '#ffffff' : 'rgba(0,0,0,0.55)',
           }}
           whileHover={{ scale: 1.06 }}

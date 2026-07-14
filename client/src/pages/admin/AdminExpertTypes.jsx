@@ -20,7 +20,7 @@ export default function AdminExpertTypes() {
       return editing ? adminApi.updateExpertType(editing, payload) : adminApi.createExpertType(payload)
     },
     onSuccess: () => {
-      toast.success(editing ? 'Expert type updated' : 'Expert type created')
+      toast.success(editing ? 'Mentor type updated' : 'Mentor type created')
       setEditing(null)
       setForm({ name: '', description: '', category: '', sortOrder: 0 })
       queryClient.invalidateQueries({ queryKey: ['admin-expert-types'] })
@@ -32,7 +32,7 @@ export default function AdminExpertTypes() {
   const disableMutation = useMutation({
     mutationFn: (id) => adminApi.deleteExpertType(id),
     onSuccess: () => {
-      toast.success('Expert type disabled')
+      toast.success('Mentor type disabled')
       queryClient.invalidateQueries({ queryKey: ['admin-expert-types'] })
     },
     onError: (err) => toast.error(err.message),
@@ -42,8 +42,8 @@ export default function AdminExpertTypes() {
     <div className="space-y-6">
       <AdminPageHeader
         eyebrow="Catalog"
-        title="Expert Types"
-        description="Define expert roles within each category"
+        title="Mentor Types"
+        description="Define mentor roles within each category"
       />
 
       <div className="admin-panel grid gap-3 rounded-[20px] border border-white/[0.08] bg-[#202323] p-6 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export default function AdminExpertTypes() {
         <input value={form.sortOrder} onChange={(e) => setForm((p) => ({ ...p, sortOrder: e.target.value }))} placeholder="Sort order" type="number" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm" />
         <input value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} placeholder="Description" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm sm:col-span-2" />
         <button type="button" onClick={() => saveMutation.mutate()} disabled={!form.name || !form.category || saveMutation.isPending} className="btn-primary rounded-xl px-4 py-2 text-sm font-semibold sm:col-span-2">
-          {editing ? 'Update Expert Type' : 'Create Expert Type'}
+          {editing ? 'Update Mentor Type' : 'Create Mentor Type'}
         </button>
       </div>
 

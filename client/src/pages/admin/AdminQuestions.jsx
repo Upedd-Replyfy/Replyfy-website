@@ -48,7 +48,7 @@ export default function AdminQuestions() {
   const approveMutation = useMutation({
     mutationFn: (id) => adminApi.approveQuestion(id),
     onSuccess: () => {
-      toast.success('Question approved & expert assigned')
+      toast.success('Question approved & mentor assigned')
       invalidate()
     },
     onError: (err) => toast.error(err.message),
@@ -78,7 +78,7 @@ export default function AdminQuestions() {
       <AdminPageHeader
         eyebrow="Moderation"
         title="Questions"
-        description="Review, approve, reject, and assign experts"
+        description="Review, approve, reject, and assign mentors"
       />
 
       <div className="flex gap-2 border-b border-white/[0.08] pb-1">
@@ -128,7 +128,7 @@ export default function AdminQuestions() {
                       {q.user?.name} · {q.category?.name} · {q.expertType?.name || '—'} · {q.plan} · ₹{q.amount / 100}
                     </p>
                     {q.assignedExpert && (
-                      <p className="mt-1 text-xs text-sky-400">Assigned: {q.assignedExpert?.name || 'Expert'}</p>
+                      <p className="mt-1 text-xs text-sky-400">Assigned: {q.assignedExpert?.name || 'Mentor'}</p>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ export default function AdminQuestions() {
                           onClick={() => setAssignQuestion(q)}
                           className="admin-btn-gradient flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-semibold"
                         >
-                          <UserPlus size={14} /> Pick Expert
+                          <UserPlus size={14} /> Pick Mentor
                         </button>
                         <button
                           type="button"
@@ -171,7 +171,7 @@ export default function AdminQuestions() {
                         onClick={() => setAssignQuestion({ ...q, _reassign: true })}
                         className="rounded-xl border border-white/[0.08] px-3 py-2 text-xs font-medium hover:bg-white/[0.04]"
                       >
-                        Reassign Expert
+                        Reassign Mentor
                       </button>
                     )}
                   </div>

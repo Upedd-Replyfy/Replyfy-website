@@ -19,12 +19,12 @@ const searchRoutes = [
   { label: 'Dashboard', path: '/admin' },
   { label: 'Questions', path: '/admin/questions' },
   { label: 'Answers', path: '/admin/answers' },
-  { label: 'Experts', path: '/admin/experts' },
+  { label: 'Mentors', path: '/admin/experts' },
   { label: 'Users', path: '/admin/users' },
   { label: 'Payments', path: '/admin/payments' },
   { label: 'Withdrawals', path: '/admin/withdrawals' },
   { label: 'Categories', path: '/admin/categories' },
-  { label: 'Expert Types', path: '/admin/expert-types' },
+  { label: 'Mentor Types', path: '/admin/expert-types' },
   { label: 'Settings', path: '/admin/settings' },
 ]
 
@@ -146,7 +146,6 @@ export default function AdminTopbar({
             type="button"
             onClick={async () => {
               await logout()
-              navigate('/login', { replace: true })
             }}
             className="rounded-xl border border-border p-2.5 text-muted transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
             aria-label="Logout"

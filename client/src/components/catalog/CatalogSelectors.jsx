@@ -55,10 +55,10 @@ export function ExpertTypeTabs({ expertTypes, selectedId, onSelect, loading }) {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-1 border-b border-border pb-2">
       <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-light">
-        Expert
+        Mentor
       </span>
       {expertTypes.length === 0 ? (
-        <span className="text-sm text-muted">No expert types for this category</span>
+        <span className="text-sm text-muted">No mentor types for this category</span>
       ) : (
         expertTypes.map((type) => {
           const active = selectedId === type._id

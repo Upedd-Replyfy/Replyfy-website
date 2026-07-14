@@ -35,7 +35,7 @@ export default function AdminAnswers() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader eyebrow="Moderation" title="Answer Review" description="Approve expert answers or request revisions" />
+      <AdminPageHeader eyebrow="Moderation" title="Answer Review" description="Approve mentor answers or request revisions" />
 
       {isLoading ? (
         <div className="admin-panel h-32 animate-pulse rounded-[20px] bg-[#202323]" />
@@ -68,7 +68,7 @@ export default function AdminAnswers() {
         open={!!rejectAnswer}
         onClose={() => setRejectAnswer(null)}
         title="Request Revision"
-        label="Revision notes for expert"
+        label="Revision notes for mentor"
         loading={rejectMutation.isPending}
         onConfirm={(reason) => rejectMutation.mutate({ id: rejectAnswer._id, reason })}
       />

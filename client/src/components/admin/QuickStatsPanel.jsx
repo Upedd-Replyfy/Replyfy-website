@@ -57,7 +57,7 @@ export default function QuickStatsPanel({ stats, loading }) {
           />
           <QuickStat
             icon={UserCheck}
-            label="Online Experts"
+            label="Online Mentors"
             value={stats?.onlineExperts ?? 0}
             accent="bg-cyan-500/10 text-cyan-400"
           />

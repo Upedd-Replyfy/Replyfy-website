@@ -135,10 +135,10 @@ export default function ExpertCarousel({ dark = false }) {
 
   return (
     <div ref={containerRef} className="relative mx-auto w-full max-w-[1400px]">
-      <button type="button" onClick={prev} disabled={isAnimating} className={`absolute left-2 md:left-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95 ${dark ? 'border border-white/15 bg-white/10 backdrop-blur-xl' : 'glass-strong'}`} aria-label="Previous expert">
+      <button type="button" onClick={prev} disabled={isAnimating} className={`absolute left-2 md:left-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95 ${dark ? 'border border-white/15 bg-white/10 backdrop-blur-xl' : 'glass-strong'}`} aria-label="Previous mentor">
         <ChevronLeft size={20} className={dark ? 'text-white' : 'text-ink'} />
       </button>
-      <button type="button" onClick={next} disabled={isAnimating} className={`absolute right-2 md:right-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95 ${dark ? 'border border-white/15 bg-white/10 backdrop-blur-xl' : 'glass-strong'}`} aria-label="Next expert">
+      <button type="button" onClick={next} disabled={isAnimating} className={`absolute right-2 md:right-6 top-[42%] z-50 flex h-11 w-11 md:h-12 md:w-12 items-center justify-center rounded-full shadow-lg disabled:opacity-50 transition-transform hover:scale-105 active:scale-95 ${dark ? 'border border-white/15 bg-white/10 backdrop-blur-xl' : 'glass-strong'}`} aria-label="Next mentor">
         <ChevronRight size={20} className={dark ? 'text-white' : 'text-ink'} />
       </button>
       <div className="relative mx-auto overflow-hidden" style={{ width: '100%', maxWidth: '1400px', height: isMobile ? '400px' : '460px' }}>

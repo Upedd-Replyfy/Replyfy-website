@@ -4,7 +4,8 @@ import Logo from '../ui/Logo'
 const footerLinks = {
   Product: [
     { label: 'How it works', href: '/#how-it-works' },
-    { label: 'Experts', href: '/#experts' },
+    { label: 'Mentors', href: '/#experts' },
+    { label: 'Find mentor', href: '/mentors' },
     { label: 'Pricing', href: '/#pricing' },
     { label: 'FAQ', href: '/#faq' },
   ],
@@ -21,7 +22,7 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="relative w-full border-t border-white/25 bg-[#1A1C1C]">
+    <footer className="relative w-full border-t border-white/25 bg-[#272927]">
       <div className="gutter-left gutter-right w-full py-16 md:py-20">
         <div className="flex w-full flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div className="shrink-0">
@@ -30,7 +31,7 @@ export default function Footer() {
               className="mt-5 text-sm text-white/50 leading-relaxed"
               style={{ maxWidth: '36ch' }}
             >
-              Expert answers to your hardest questions. Pay once, get a thoughtful response from a
+              Mentor answers to your hardest questions. Pay once, get a thoughtful response from a
               verified professional.
             </p>
           </div>

@@ -3,7 +3,7 @@ import { planRequiresExpertSelection } from '../../constants'
 const STEPS = [
   { id: 'compose', label: 'Question' },
   { id: 'plan', label: 'Plan' },
-  { id: 'expert', label: 'Expert' },
+  { id: 'expert', label: 'Mentor' },
   { id: 'payment', label: 'Payment' },
 ]
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -15,6 +15,7 @@ import { userApi } from '../../services/api'
 import { PLANS, planRequiresExpertSelection } from '../../constants'
 import { useCategories, useExpertTypes, useExperts, usePlatformStats } from '../../hooks/useCatalog'
 import { fadeUp } from '../../utils/animations'
+import { clearQuestionDraft, loadQuestionDraft, namesMatch } from '../../utils/questionDraft'
 
 const trustIcons = [ShieldCheck, Clock, MessageSquare]
 
@@ -62,13 +63,32 @@ export default function UserDashboard() {
   const [step, setStep] = useState('compose')
   const [categoryId, setCategoryId] = useState(null)
   const [expertTypeId, setExpertTypeId] = useState(null)
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => {
+    const draft = loadQuestionDraft()
+    return draft?.query?.trim() ? draft.query : ''
+  })
   const [files, setFiles] = useState([])
   const [links, setLinks] = useState([])
   const [plan, setPlan] = useState('basic')
   const [selectedExpert, setSelectedExpert] = useState(null)
   const [paying, setPaying] = useState(false)
   const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const pendingDraftRef = useRef(null)
+  const draftHydratedRef = useRef(false)
+  const draftInitRef = useRef(false)
+
+  if (!draftInitRef.current) {
+    draftInitRef.current = true
+    const draft = loadQuestionDraft()
+    if (draft?.query?.trim()) {
+      pendingDraftRef.current = {
+        categoryName: draft.categoryName,
+        expertTypeName: draft.expertTypeName,
+      }
+    } else {
+      draftHydratedRef.current = true
+    }
+  }
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
   const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(categoryId)
@@ -124,28 +144,60 @@ export default function UserDashboard() {
   const trustIndicators = useMemo(() => {
     if (!stats) return null
     return [
-      { value: `${stats.experts}+`, label: 'Verified experts' },
+      { value: `${stats.experts}+`, label: 'Verified mentors' },
       { value: `${stats.avgResponseHours}h`, label: 'Avg response' },
       { value: `${stats.answers.toLocaleString()}+`, label: 'Questions answered' },
     ]
   }, [stats])
 
   useEffect(() => {
-    if (categories.length && !categoryId) {
+    if (!categories.length) return
+
+    const pending = pendingDraftRef.current
+    if (pending?.categoryName && !draftHydratedRef.current) {
+      const match = categories.find((c) => namesMatch(c.name, pending.categoryName))
+      setCategoryId(match?._id || categories[0]._id)
+      return
+    }
+
+    if (!categoryId) {
       setCategoryId(categories[0]._id)
     }
   }, [categories, categoryId])
 
   useEffect(() => {
-    if (expertTypes.length) {
-      setExpertTypeId((prev) => (expertTypes.some((t) => t._id === prev) ? prev : expertTypes[0]._id))
-    } else {
+    if (!categoryId || expertTypesLoading) return
+
+    if (!expertTypes.length) {
       setExpertTypeId(null)
+      if (pendingDraftRef.current && !draftHydratedRef.current) {
+        clearQuestionDraft()
+        pendingDraftRef.current = null
+        draftHydratedRef.current = true
+      }
+      return
     }
-  }, [expertTypes])
+
+    const pending = pendingDraftRef.current
+    if (pending && !draftHydratedRef.current) {
+      const match = pending.expertTypeName
+        ? expertTypes.find((t) => namesMatch(t.name, pending.expertTypeName))
+        : null
+      setExpertTypeId(match?._id || expertTypes[0]._id)
+      clearQuestionDraft()
+      pendingDraftRef.current = null
+      draftHydratedRef.current = true
+      return
+    }
+
+    setExpertTypeId((prev) => (expertTypes.some((t) => t._id === prev) ? prev : expertTypes[0]._id))
+  }, [categoryId, expertTypes, expertTypesLoading])
 
   useEffect(() => {
     if (location.state?.reset) {
+      clearQuestionDraft()
+      pendingDraftRef.current = null
+      draftHydratedRef.current = true
       setStep('compose')
       setQuery('')
       setFiles([])
@@ -171,7 +223,7 @@ export default function UserDashboard() {
   const handleComposeSubmit = () => {
     if (!query.trim()) return toast.error('Please describe your question')
     if (!categoryId) return toast.error('Please select a category')
-    if (!expertTypeId) return toast.error('Please select an expert type')
+    if (!expertTypeId) return toast.error('Please select a mentor type')
     setStep('plan')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -182,7 +234,7 @@ export default function UserDashboard() {
   }
 
   const handleExpertContinue = () => {
-    if (!selectedExpert) return toast.error('Please select an expert')
+    if (!selectedExpert) return toast.error('Please select a mentor')
     setStep('payment')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -198,7 +250,7 @@ export default function UserDashboard() {
     setPaying(true)
     try {
       const title = query.split('\n')[0].slice(0, 120)
-      if (!categoryId || !expertTypeId) return toast.error('Missing category or expert type')
+      if (!categoryId || !expertTypeId) return toast.error('Missing category or mentor type')
 
       const formData = new FormData()
       formData.append('title', title)
@@ -322,7 +374,7 @@ export default function UserDashboard() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex w-full flex-1 flex-col items-center px-6 pb-4 pt-6 lg:px-10 xl:px-12"
+      className="flex w-full flex-1 flex-col items-center px-6 pb-4 pt-2 lg:px-10 xl:px-12"
     >
       <QuestionComposer
         categories={categories}

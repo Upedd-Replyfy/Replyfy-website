@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { LogOut, Menu, Moon, Sun, Video } from 'lucide-react'
@@ -51,7 +50,6 @@ function AvailabilityToggle({
 }
 
 export default function ExpertTopbar({ onMenuOpen }) {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useShellTheme()
@@ -149,7 +147,6 @@ export default function ExpertTopbar({ onMenuOpen }) {
           type="button"
           onClick={async () => {
             await logout()
-            navigate('/login', { replace: true })
           }}
           className="flex items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-ink sm:px-4"
         >

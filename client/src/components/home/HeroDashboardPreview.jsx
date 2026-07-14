@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import { Sparkles, ArrowUp, Paperclip, Maximize2, X } from 'lucide-react'
 import { getQuestionPlaceholder } from '../../utils/questionPrompts'
+import { clearQuestionDraft, loadQuestionDraft, saveQuestionDraft } from '../../utils/questionDraft'
+import Auth from '../../pages/Auth'
 
 const FRAME_W = 1080
 const FRAME_H = 680
@@ -13,12 +14,12 @@ const categories = ['Startup', 'Finance', 'Legal', 'Marketing', 'Engineering', '
 const expertTypesByCategory = {
   Startup: ['Founder', 'Co-Founder', 'Angel Investor', 'VC Mentor'],
   Finance: ['CA', 'CFO', 'Tax Consultant', 'Investment Banker'],
-  Legal: ['Lawyer', 'Compliance Expert', 'IP Attorney', 'Contract Specialist'],
+  Legal: ['Lawyer', 'Compliance Mentor', 'IP Attorney', 'Contract Specialist'],
   Marketing: ['Growth Marketer', 'Brand Strategist', 'Performance Marketer', 'Content Lead'],
-  Engineering: ['Tech Lead', 'CTO Mentor', 'DevOps Expert', 'Security Architect'],
+  Engineering: ['Tech Lead', 'CTO Mentor', 'DevOps Mentor', 'Security Architect'],
   Career: ['Career Coach', 'HR Leader', 'Interview Mentor', 'Leadership Coach'],
   Product: ['Product Manager', 'UX Lead', 'Product Strategist', 'Growth PM'],
-  Other: ['Industry Expert', 'Consultant', 'Mentor', 'Advisor'],
+  Other: ['Industry Mentor', 'Consultant', 'Mentor', 'Advisor'],
 }
 
 function useFrameScale(containerRef, enabled = true) {
@@ -73,13 +74,13 @@ function stopPropagation(e) {
   e.stopPropagation()
 }
 
-function PreviewChrome({ hint, onFullscreen, fullscreenActive }) {
+function PreviewChrome({ hint, onFullscreen, fullscreenActive, path = 'dashboard' }) {
   return (
-    <div className="flex h-[34px] shrink-0 items-center gap-2 border-b border-white/[0.06] bg-[#111] px-4">
+    <div className="flex h-[34px] shrink-0 items-center gap-2 border-b border-white/[0.06] bg-[#171818] px-4">
       <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
       <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
       <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-      <span className="ml-2 text-[10px] text-white/35">replyfy.app/dashboard</span>
+      <span className="ml-2 text-[10px] text-white/35">replyfy.app/{path}</span>
       <span className="ml-auto hidden text-[10px] text-white/30 sm:inline">{hint}</span>
       <button
         type="button"
@@ -107,6 +108,7 @@ function DashboardPreviewBody({
   query,
   setQuery,
   placeholder,
+  onAuthOpen,
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-12 pb-7 pt-16">
@@ -117,7 +119,7 @@ function DashboardPreviewBody({
           <span className="font-light text-muted">answered by a human.</span>
         </h3>
         <p className="mx-auto mt-3 max-w-[640px] text-sm leading-relaxed text-muted">
-          Real experts — founders, CAs, mentors — read your question and reply personally.
+          Real mentors — founders, CAs, advisors — read your question and reply personally.
           Within 12 hrs.
         </p>
       </div>
@@ -127,7 +129,10 @@ function DashboardPreviewBody({
           <button
             key={cat}
             type="button"
-            onClick={() => setCategory(cat)}
+            onClick={() => {
+              setCategory(cat)
+              setExpertType(expertTypesByCategory[cat]?.[0] || expertTypesByCategory.Other[0])
+            }}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               category === cat
                 ? 'bg-primary text-primary-fg'
@@ -146,7 +151,7 @@ function DashboardPreviewBody({
         <div className="flex flex-col p-3">
           <div className="mb-2 flex flex-wrap items-center gap-1 border-b border-border pb-2">
             <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-light">
-              Expert
+              Mentor
             </span>
             {expertTypes.map((type) => (
               <button
@@ -186,15 +191,18 @@ function DashboardPreviewBody({
                 </button>
               ))}
             </div>
-            <Link
-              to="/signup"
-              onClick={stopPropagation}
+            <button
+              type="button"
+              onClick={(e) => {
+                stopPropagation(e)
+                onAuthOpen('login')
+              }}
               className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:bg-white/90"
             >
               <Sparkles size={14} />
-              Ask expert
+              Ask mentor
               <ArrowUp size={14} />
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -209,6 +217,7 @@ function DashboardPreviewBody({
 function PreviewFrame({
   scale,
   hint,
+  path,
   fullscreenActive,
   onOpenFullscreen,
   onFrameClick,
@@ -221,26 +230,35 @@ function PreviewFrame({
       tabIndex={0}
       onClick={onFrameClick}
       onKeyDown={(e) => {
+        const tag = e.target?.tagName
+        if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT' || e.target?.isContentEditable) {
+          return
+        }
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           onFrameClick()
         }
       }}
-      className={`overflow-hidden rounded-2xl border border-white/15 bg-[#202222] outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${frameClassName}`}
+      className={`overflow-hidden rounded-2xl border border-white/15 bg-[#171818] outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${frameClassName}`}
       style={{
         width: FRAME_W * scale,
         height: FRAME_H * scale,
       }}
     >
       <div
-        className="flex origin-top-left flex-col bg-[#1A1C1C]"
+        className="flex origin-top-left flex-col bg-[#171818]"
         style={{
           width: FRAME_W,
           height: FRAME_H,
           transform: `scale(${scale})`,
         }}
       >
-        <PreviewChrome hint={hint} onFullscreen={onOpenFullscreen} fullscreenActive={fullscreenActive} />
+        <PreviewChrome
+          hint={hint}
+          path={path}
+          onFullscreen={onOpenFullscreen}
+          fullscreenActive={fullscreenActive}
+        />
         {children}
       </div>
     </div>
@@ -251,11 +269,24 @@ export default function HeroDashboardPreview() {
   const containerRef = useRef(null)
   const scale = useFrameScale(containerRef)
   const fullscreenScale = useViewportFrameScale(true)
-  const [category, setCategory] = useState('Startup')
-  const [expertType, setExpertType] = useState('Founder')
-  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState(() => {
+    const name = loadQuestionDraft()?.categoryName
+    return categories.includes(name) ? name : 'Startup'
+  })
+  const [expertType, setExpertType] = useState(() => {
+    const draft = loadQuestionDraft()
+    const cat = categories.includes(draft?.categoryName) ? draft.categoryName : 'Startup'
+    const types = expertTypesByCategory[cat] || expertTypesByCategory.Other
+    if (draft?.expertTypeName && types.includes(draft.expertTypeName)) return draft.expertTypeName
+    return types[0]
+  })
+  const [query, setQuery] = useState(() => {
+    const draft = loadQuestionDraft()
+    return draft?.query?.trim() ? draft.query : ''
+  })
   const [hovered, setHovered] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
+  const [authMode, setAuthMode] = useState(null)
 
   const expertTypes = expertTypesByCategory[category] || expertTypesByCategory.Other
   const placeholder = getQuestionPlaceholder(
@@ -266,14 +297,26 @@ export default function HeroDashboardPreview() {
   const hoverScale = hovered && !fullscreen ? 1.05 : 1
 
   const openFullscreen = () => setFullscreen(true)
-  const closeFullscreen = () => setFullscreen(false)
+  const openAuth = (mode) => {
+    if (query.trim()) {
+      saveQuestionDraft({ query, categoryName: category, expertTypeName: expertType })
+    }
+    setAuthMode(mode)
+    setFullscreen(true)
+  }
+  const closeFullscreen = () => {
+    setFullscreen(false)
+    setAuthMode(null)
+  }
   const toggleFullscreen = () => setFullscreen((prev) => !prev)
 
   useEffect(() => {
-    if (!expertTypes.includes(expertType)) {
-      setExpertType(expertTypes[0])
+    if (query.trim()) {
+      saveQuestionDraft({ query, categoryName: category, expertTypeName: expertType })
+    } else {
+      clearQuestionDraft()
     }
-  }, [category, expertType, expertTypes])
+  }, [query, category, expertType])
 
   useEffect(() => {
     if (!fullscreen) return undefined
@@ -301,7 +344,14 @@ export default function HeroDashboardPreview() {
     query,
     setQuery,
     placeholder,
+    onAuthOpen: openAuth,
   }
+
+  const fullscreenContent = authMode ? (
+    <Auth key={authMode} initialMode={authMode} embedded onClose={() => setAuthMode(null)} />
+  ) : (
+    <DashboardPreviewBody {...previewProps} />
+  )
 
   return (
     <>
@@ -352,7 +402,9 @@ export default function HeroDashboardPreview() {
               onClick={closeFullscreen}
             >
               <div className="mb-4 flex w-full max-w-6xl items-center justify-between gap-4">
-                <p className="text-sm text-white/55">Interactive dashboard preview</p>
+                <p className="text-sm text-white/55">
+                  {authMode ? 'Replyfy account' : 'Interactive dashboard preview'}
+                </p>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -376,12 +428,13 @@ export default function HeroDashboardPreview() {
               >
                 <PreviewFrame
                   scale={fullscreenScale}
-                  hint="Press Esc to exit"
+                  hint={authMode ? `replyfy.app/${authMode}` : 'Press Esc to exit'}
+                  path={authMode || 'dashboard'}
                   fullscreenActive
                   onOpenFullscreen={toggleFullscreen}
                   onFrameClick={() => {}}
                 >
-                  <DashboardPreviewBody {...previewProps} />
+                  {fullscreenContent}
                 </PreviewFrame>
               </motion.div>
 

@@ -133,7 +133,7 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
     ...recentExperts.map((e) => ({
       id: `expert-${e._id}`,
       type: 'expert_verified',
-      title: 'Expert verified',
+      title: 'Mentor verified',
       subtitle: e.user?.name,
       avatar: e.user?.avatar || e.profilePhoto,
       at: e.updatedAt,
@@ -297,7 +297,7 @@ export const createExpert = asyncHandler(async (req, res) => {
 
   const type = await ExpertType.findById(expertType)
   if (!type || type.category.toString() !== category.toString()) {
-    throw new ApiError(400, 'Invalid expert type for this category')
+    throw new ApiError(400, 'Invalid mentor type for this category')
   }
 
   let profilePhoto = ''
@@ -361,7 +361,7 @@ export const getExperts = asyncHandler(async (req, res) => {
 
 export const updateExpert = asyncHandler(async (req, res) => {
   const profile = await ExpertProfile.findById(req.params.id).populate('user')
-  if (!profile) throw new ApiError(404, 'Expert not found')
+  if (!profile) throw new ApiError(404, 'Mentor not found')
 
   const {
     bio,
@@ -418,7 +418,7 @@ export const updateExpert = asyncHandler(async (req, res) => {
 
 export const deleteExpert = asyncHandler(async (req, res) => {
   const profile = await ExpertProfile.findById(req.params.id).populate('user')
-  if (!profile) throw new ApiError(404, 'Expert not found')
+  if (!profile) throw new ApiError(404, 'Mentor not found')
 
   const expertUserId = profile.user?._id
   if (expertUserId) {
@@ -427,7 +427,7 @@ export const deleteExpert = asyncHandler(async (req, res) => {
       status: { $in: ['assigned', 'in_progress', 'waiting_admin_review'] },
     })
     if (activeQuestions > 0) {
-      throw new ApiError(400, 'Cannot delete expert with active question assignments')
+      throw new ApiError(400, 'Cannot delete mentor with active question assignments')
     }
   }
 
@@ -456,7 +456,7 @@ export const deleteExpert = asyncHandler(async (req, res) => {
     ip: req.ip,
   })
 
-  res.json({ success: true, message: 'Expert profile deleted' })
+  res.json({ success: true, message: 'Mentor profile deleted' })
 })
 
 export const createCategory = asyncHandler(async (req, res) => {
@@ -500,7 +500,7 @@ export const createExpertType = asyncHandler(async (req, res) => {
 
   const slug = slugify(name)
   const exists = await ExpertType.findOne({ category, slug })
-  if (exists) throw new ApiError(400, 'Expert type already exists for this category')
+  if (exists) throw new ApiError(400, 'Mentor type already exists for this category')
 
   const expertType = await ExpertType.create({
     name,
@@ -518,16 +518,16 @@ export const createExpertType = asyncHandler(async (req, res) => {
 
 export const updateExpertType = asyncHandler(async (req, res) => {
   const expertType = await ExpertType.findByIdAndUpdate(req.params.id, req.body, { new: true })
-  if (!expertType) throw new ApiError(404, 'Expert type not found')
+  if (!expertType) throw new ApiError(404, 'Mentor type not found')
   res.json({ success: true, expertType })
 })
 
 export const deleteExpertType = asyncHandler(async (req, res) => {
   const expertType = await ExpertType.findById(req.params.id)
-  if (!expertType) throw new ApiError(404, 'Expert type not found')
+  if (!expertType) throw new ApiError(404, 'Mentor type not found')
   expertType.isActive = false
   await expertType.save()
-  res.json({ success: true, message: 'Expert type disabled' })
+  res.json({ success: true, message: 'Mentor type disabled' })
 })
 
 export const getCategories = asyncHandler(async (req, res) => {
@@ -578,10 +578,10 @@ export const approveQuestion = asyncHandler(async (req, res) => {
 
   if (!expertId && question.plan === 'basic') {
     const expert = await findAvailableExpert(question.category, question.expertType)
-    if (!expert) throw new ApiError(400, 'No available expert for this category and expert type')
+    if (!expert) throw new ApiError(400, 'No available mentor for this category and mentor type')
     expertId = expert.user._id
   } else if (!expertId) {
-    throw new ApiError(400, 'No expert selected for this plan')
+    throw new ApiError(400, 'No mentor selected for this plan')
   }
 
   await assignExpertToQuestion({
@@ -600,7 +600,7 @@ export const approveQuestion = asyncHandler(async (req, res) => {
     userId: question.user._id,
     type: 'question_approved',
     title: 'Question Approved',
-    message: 'Your question has been approved and assigned to an expert.',
+    message: 'Your question has been approved and assigned to a mentor.',
     link: `/dashboard/questions/${question._id}`,
     email: question.user.email,
   })
@@ -701,8 +701,8 @@ export const approveAnswer = asyncHandler(async (req, res) => {
   await createNotification({
     userId: question.user._id,
     type: 'rating_reminder',
-    title: 'Rate Your Expert',
-    message: 'Please rate your experience with the expert.',
+    title: 'Rate Your Mentor',
+    message: 'Please rate your experience with the mentor.',
     link: `/dashboard/questions/${question._id}/rate`,
     email: question.user.email,
   })

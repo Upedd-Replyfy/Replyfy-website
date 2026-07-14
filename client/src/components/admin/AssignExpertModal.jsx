@@ -31,7 +31,7 @@ export default function AssignExpertModal({ open, onClose, question, mode = 'app
   const approveMutation = useMutation({
     mutationFn: (expertId) => adminApi.approveQuestion(question._id, expertId),
     onSuccess: () => {
-      toast.success('Question approved and expert assigned')
+      toast.success('Question approved and mentor assigned')
       queryClient.invalidateQueries({ queryKey: ['admin-pending-questions'] })
       queryClient.invalidateQueries({ queryKey: ['admin-questions'] })
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
@@ -44,7 +44,7 @@ export default function AssignExpertModal({ open, onClose, question, mode = 'app
   const assignMutation = useMutation({
     mutationFn: (expertId) => adminApi.assignExpert(question._id, expertId),
     onSuccess: () => {
-      toast.success('Expert assigned')
+      toast.success('Mentor assigned')
       queryClient.invalidateQueries({ queryKey: ['admin-questions'] })
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
       setSelectedExpertId('')
@@ -58,7 +58,7 @@ export default function AssignExpertModal({ open, onClose, question, mode = 'app
     if (mode === 'approve') {
       approveMutation.mutate(selectedExpertId || undefined)
     } else if (!selectedExpertId) {
-      toast.error('Select an expert')
+      toast.error('Select a mentor')
     } else {
       assignMutation.mutate(selectedExpertId)
     }
@@ -70,22 +70,22 @@ export default function AssignExpertModal({ open, onClose, question, mode = 'app
     <AdminModal
       open={open}
       onClose={onClose}
-      title={mode === 'approve' ? 'Approve & Assign Expert' : 'Assign Expert'}
+      title={mode === 'approve' ? 'Approve & Assign Mentor' : 'Assign Mentor'}
       description={question?.title}
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-xs text-muted">
           {question?.plan === 'basic' && mode === 'approve'
-            ? 'Leave unselected to auto-pick the best available expert, or choose manually.'
-            : 'Select an expert for this category and type.'}
+            ? 'Leave unselected to auto-pick the best available mentor, or choose manually.'
+            : 'Select a mentor for this category and type.'}
         </p>
 
         {isLoading ? (
           <div className="h-24 animate-pulse rounded-xl bg-white/[0.04]" />
         ) : experts.length === 0 ? (
           <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-            No available experts match this category and type.
+            No available mentors match this category and type.
           </p>
         ) : (
           <div className="max-h-64 space-y-2 overflow-y-auto">
@@ -133,7 +133,7 @@ export default function AssignExpertModal({ open, onClose, question, mode = 'app
             Cancel
           </button>
           <button type="submit" disabled={pending} className="admin-btn-gradient rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50">
-            {pending ? 'Processing...' : mode === 'approve' ? 'Approve & Assign' : 'Assign Expert'}
+            {pending ? 'Processing...' : mode === 'approve' ? 'Approve & Assign' : 'Assign Mentor'}
           </button>
         </div>
       </form>

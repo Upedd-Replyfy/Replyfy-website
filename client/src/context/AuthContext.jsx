@@ -66,8 +66,8 @@ export function AuthProvider({ children }) {
     }
     localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
-    setUser(null)
-    setExpertProfile(null)
+    // Hard redirect so ProtectedRoute cannot race to /login after user is cleared.
+    window.location.replace('/')
   }
 
   const getDashboardPath = () => DASHBOARD_ROUTES[user?.role] || '/dashboard'

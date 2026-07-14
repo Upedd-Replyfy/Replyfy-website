@@ -30,12 +30,12 @@ export default function TrustBanner({ className = '' }) {
                 draggable={false}
               />
             ))}
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1A1C1C] text-white ring-2 ring-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#272927] text-white ring-2 ring-white">
               <Plus size={14} strokeWidth={2.5} />
             </span>
           </div>
           <p className="max-w-[14rem] text-sm leading-snug text-black/50">
-            Join 1,000+ people getting expert answers
+            Join 1,000+ people getting mentor answers
           </p>
         </div>
       </div>

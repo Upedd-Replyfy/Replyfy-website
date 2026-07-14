@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import DisplayMentors from './pages/DisplayMentors'
 import Dashboard from './pages/Dashboard'
 import AskQuestion from './pages/user/AskQuestion'
 import UserQuestions from './pages/user/UserQuestions'
@@ -36,6 +37,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/mentors" element={<DisplayMentors />} />
+        <Route path="/displaymentor" element={<Navigate to="/mentors" replace />} />
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
 

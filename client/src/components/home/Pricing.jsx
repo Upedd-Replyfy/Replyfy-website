@@ -30,7 +30,7 @@ export default function Pricing() {
             <span className="text-black">One for every need.</span>
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-black/50 md:text-base">
-            Basic auto-assigns an expert. Choose Mentor or Expert Call to pick your expert.
+            Basic auto-assigns a mentor. Choose Mentor or Mentor Call to pick your mentor.
           </p>
         </motion.div>
 
@@ -74,7 +74,7 @@ export default function Pricing() {
             </p>
             <Link
               to={`/signup?plan=${selectedPlan}`}
-              className="rounded-2xl bg-[#1A1C1C] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#1A1C1C]/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+              className="rounded-2xl bg-[#272927] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#272927]/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
             >
               Continue with {selected.name}
             </Link>

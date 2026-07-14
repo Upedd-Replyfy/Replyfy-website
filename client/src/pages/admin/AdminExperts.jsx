@@ -9,7 +9,7 @@ import ProfilePhotoPicker from '../../components/admin/ProfilePhotoPicker'
 import { adminApi } from '../../services/api'
 
 const inputClass =
-  'w-full rounded-xl border border-white/[0.08] bg-[#1A1C1C] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
+  'w-full rounded-xl border border-white/[0.08] bg-[#272927] px-4 py-2.5 text-sm text-ink focus:border-sky-500/40 focus:outline-none'
 
 function ExpertAvatar({ expert }) {
   const src = expert.user?.avatar || expert.profilePhoto
@@ -38,7 +38,7 @@ export default function AdminExperts() {
   const deleteMutation = useMutation({
     mutationFn: (id) => adminApi.deleteExpert(id),
     onSuccess: () => {
-      toast.success('Expert profile deleted')
+      toast.success('Mentor profile deleted')
       setDeleteExpert(null)
       queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
@@ -57,7 +57,7 @@ export default function AdminExperts() {
       return adminApi.updateExpert(editExpert._id, fd)
     },
     onSuccess: () => {
-      toast.success('Expert updated')
+      toast.success('Mentor updated')
       queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
       setEditExpert(null)
       setEditPhoto(null)
@@ -82,15 +82,15 @@ export default function AdminExperts() {
     <div className="space-y-6">
       <AdminPageHeader
         eyebrow="Directory"
-        title="Experts"
-        description="Register, verify, and manage expert accounts"
+        title="Mentors"
+        description="Register, verify, and manage mentor accounts"
         actions={
           <button
             type="button"
             onClick={openRegisterExpert}
             className="admin-btn-gradient flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
           >
-            <UserPlus size={16} /> Register Expert
+            <UserPlus size={16} /> Register Mentor
           </button>
         }
       />
@@ -100,7 +100,7 @@ export default function AdminExperts() {
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="bg-[#242727]">
               <tr className="border-b border-white/[0.08] text-xs uppercase tracking-wider text-muted-light">
-                <th className="px-5 py-3">Expert</th>
+                <th className="px-5 py-3">Mentor</th>
                 <th className="px-5 py-3">Category</th>
                 <th className="px-5 py-3">Rating</th>
                 <th className="px-5 py-3">Status</th>
@@ -111,7 +111,7 @@ export default function AdminExperts() {
               {isLoading ? (
                 <tr><td colSpan={5} className="px-5 py-8 text-center text-muted">Loading...</td></tr>
               ) : (data?.experts || []).length === 0 ? (
-                <tr><td colSpan={5} className="px-5 py-8 text-center text-muted">No experts yet. Register one to get started.</td></tr>
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-muted">No mentors yet. Register one to get started.</td></tr>
               ) : (
                 data.experts.map((e) => (
                   <tr key={e._id} className="border-b border-white/[0.06] hover:bg-white/[0.02]">
@@ -161,7 +161,7 @@ export default function AdminExperts() {
         </div>
       </div>
 
-      <AdminModal open={!!editExpert} onClose={() => { setEditExpert(null); setEditPhoto(null) }} title="Edit Expert" size="md">
+      <AdminModal open={!!editExpert} onClose={() => { setEditExpert(null); setEditPhoto(null) }} title="Edit Mentor" size="md">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -183,7 +183,7 @@ export default function AdminExperts() {
           </select>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={editForm.isVerified} onChange={(ev) => setEditForm((p) => ({ ...p, isVerified: ev.target.checked }))} />
-            Verified expert
+            Verified mentor
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={editForm.isActive} onChange={(ev) => setEditForm((p) => ({ ...p, isActive: ev.target.checked }))} />
@@ -201,7 +201,7 @@ export default function AdminExperts() {
       <AdminModal
         open={!!deleteExpert}
         onClose={() => setDeleteExpert(null)}
-        title="Delete Expert Profile"
+        title="Delete Mentor Profile"
         description={`Permanently delete ${deleteExpert?.user?.name}'s profile and account? This cannot be undone.`}
         size="sm"
       >

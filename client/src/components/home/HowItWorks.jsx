@@ -20,14 +20,14 @@ const steps = [
   },
   {
     icon: Users,
-    title: 'We match an expert',
+    title: 'We match a mentor',
     description:
-      'Our system matches you with a verified expert who has solved this before.',
+      'Our system matches you with a verified mentor who has solved this before.',
     delay: 0.08,
   },
   {
     icon: UserCheck,
-    title: 'Expert reviews',
+    title: 'Mentor reviews',
     description:
       'A real human reviews your question and crafts a thoughtful, personalized response.',
     delay: 0.16,
@@ -42,7 +42,7 @@ const steps = [
 ]
 
 const features = [
-  { icon: Shield, title: 'Verified experts', description: 'Every expert is vetted for credibility.' },
+  { icon: Shield, title: 'Verified mentors', description: 'Every mentor is vetted for credibility.' },
   { icon: Zap, title: 'Faster clarity', description: 'Get answers in hours, not weeks.' },
   { icon: Star, title: 'Actionable advice', description: 'Real-world insights you can actually use.' },
 ]
@@ -108,7 +108,7 @@ export default function HowItWorks() {
             <span className="text-black">four simple steps</span>
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-black/50 md:text-base">
-            Get personalized answers from verified experts in four simple steps.
+            Get personalized answers from verified mentors in four simple steps.
           </p>
         </motion.div>
 
@@ -135,7 +135,7 @@ export default function HowItWorks() {
           variants={fadeUp}
           className="mx-auto mt-16 w-full max-w-[1650px] px-4 sm:px-6 md:mt-20 lg:px-8"
         >
-          <div className="rounded-[20px] bg-[#1A1C1C] px-6 py-5 sm:px-8 md:px-10 md:py-6 lg:px-12">
+          <div className="rounded-[20px] bg-[#272927] px-6 py-5 sm:px-8 md:px-10 md:py-6 lg:px-12">
             <div className="grid gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-0">
               {features.map((feature, index) => (
                 <div

@@ -8,13 +8,13 @@ const sections = [
     title: 'Catalog',
     items: [
       { to: '/admin/categories', icon: FolderTree, label: 'Categories', desc: 'Manage question categories' },
-      { to: '/admin/expert-types', icon: Tags, label: 'Expert Types', desc: 'Roles within categories' },
+      { to: '/admin/expert-types', icon: Tags, label: 'Mentor Types', desc: 'Roles within categories' },
     ],
   },
   {
     title: 'Operations',
     items: [
-      { to: '/admin/experts?register=1', icon: UserPlus, label: 'Register Expert', desc: 'Onboard new mentors' },
+      { to: '/admin/experts?register=1', icon: UserPlus, label: 'Register Mentor', desc: 'Onboard new mentors' },
       { to: '/admin/notifications', icon: Bell, label: 'Notifications', desc: 'Send user messages' },
       { to: '/admin/payments', icon: CreditCard, label: 'Payments', desc: 'View transactions' },
     ],

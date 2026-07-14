@@ -4,11 +4,11 @@ export const PLANS = {
   basic: {
     id: 'basic',
     name: 'Basic',
-    tagline: 'Best expert chosen for you',
+    tagline: 'Best mentor chosen for you',
     price: 99,
     pricePaise: 9900,
     features: [
-      'We choose the best expert for your query',
+      'We choose the best mentor for your query',
       'Guaranteed email reply',
       '12 hr turnaround',
     ],
@@ -16,24 +16,24 @@ export const PLANS = {
   mentor: {
     id: 'mentor',
     name: 'Choose Mentor',
-    tagline: 'Pick your preferred expert',
+    tagline: 'Pick your preferred mentor',
     price: 199,
     pricePaise: 19900,
     popular: true,
     features: [
-      'You select your preferred expert',
+      'You select your preferred mentor',
       'Guaranteed email reply',
       'Priority routing',
     ],
   },
   expert_call: {
     id: 'expert_call',
-    name: 'Expert Call',
+    name: 'Mentor Call',
     tagline: 'Live 1-on-1 guidance',
     price: 999,
     pricePaise: 99900,
     features: [
-      '20-minute live call with your expert',
+      '20-minute live call with your mentor',
       'Deep personalised guidance',
       'Choose any mentor',
     ],
