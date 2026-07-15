@@ -29,7 +29,7 @@ function GoogleButtonShell({ label, loading, disabled, onClick }) {
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      className="flex w-full items-center justify-center gap-3 rounded-xl border border-black/20 bg-white px-6 py-3.5 text-sm font-semibold text-black shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:bg-[#fafafa] hover:border-black/30 hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)] disabled:cursor-not-allowed disabled:opacity-50"
+      className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-[#E5E7EB] bg-white px-5 py-2.5 text-sm font-semibold text-[#111827] transition hover:bg-[#F9FAFB] hover:border-[#D1D5DB] disabled:cursor-not-allowed disabled:opacity-50"
     >
       <GoogleIcon />
       <span>{loading ? 'Connecting...' : label}</span>
