@@ -37,7 +37,7 @@ function FAQItem({ question, answer, isOpen, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
-        className="group flex w-full items-center justify-between gap-4 py-5 text-left transition-colors"
+        className="group flex min-h-12 w-full items-center justify-between gap-4 py-5 text-left transition-colors"
       >
         <span
           className={`pr-4 text-[15px] font-semibold leading-snug transition-colors md:text-base ${
@@ -113,7 +113,7 @@ export default function FAQ() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-[20px] border border-black/[0.08] bg-white px-6 py-2 shadow-[0_12px_48px_rgba(0,0,0,0.07)] md:px-8"
+            className="rounded-[20px] border border-black/[0.08] bg-white px-4 py-2 shadow-[0_12px_48px_rgba(0,0,0,0.07)] sm:px-6 md:px-8"
           >
             {faqs.map((faq, index) => (
               <FAQItem

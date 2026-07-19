@@ -1,15 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ArrowUp, Paperclip, Maximize2, X } from 'lucide-react'
+import { Sparkles, ArrowUp, Paperclip, Moon, Sun, X } from 'lucide-react'
 import { getQuestionPlaceholder } from '../../utils/questionPrompts'
 import { clearQuestionDraft, loadQuestionDraft, saveQuestionDraft } from '../../utils/questionDraft'
 import Auth from '../../pages/Auth'
+import { LAPTOP_FRAME_W, LAPTOP_FRAME_H, LaptopPreview, PhonePreview } from './DevicePreview'
 
-const FRAME_W = 1080
-const FRAME_H = 680
+const PREVIEW_THEME_KEY = 'replyfy-preview-theme'
 
-const categories = ['Startup', 'Finance', 'Legal', 'Marketing', 'Engineering', 'Career', 'Product', 'Other']
+const categories = [
+  'Startup',
+  'Finance',
+  'Legal',
+  'Marketing',
+  'Engineering',
+  'Career',
+  'Product',
+  'Other',
+]
 
 const expertTypesByCategory = {
   Startup: ['Founder', 'Co-Founder', 'Angel Investor', 'VC Mentor'],
@@ -33,7 +42,7 @@ function useFrameScale(containerRef, enabled = true) {
     const update = () => {
       const { width, height } = el.getBoundingClientRect()
       if (!width || !height) return
-      setScale(Math.min(width / FRAME_W, height / FRAME_H))
+      setScale(Math.min(width / LAPTOP_FRAME_W, height / LAPTOP_FRAME_H))
     }
 
     update()
@@ -59,7 +68,7 @@ function useViewportFrameScale(enabled) {
       const padding = 48
       const maxW = window.innerWidth - padding * 2
       const maxH = window.innerHeight - padding * 2 - 56
-      setScale(Math.min(maxW / FRAME_W, maxH / FRAME_H, 1.25))
+      setScale(Math.min(maxW / LAPTOP_FRAME_W, maxH / LAPTOP_FRAME_H, 1.25))
     }
 
     update()
@@ -70,57 +79,72 @@ function useViewportFrameScale(enabled) {
   return scale
 }
 
+function useCanHover() {
+  const [canHover, setCanHover] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)')
+    const update = () => setCanHover(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  return canHover
+}
+
 function stopPropagation(e) {
   e.stopPropagation()
 }
 
-function PreviewChrome({ hint, onFullscreen, fullscreenActive, path = 'dashboard' }) {
-  return (
-    <div className="flex h-[34px] shrink-0 items-center gap-2 border-b border-white/[0.06] bg-[#171818] px-4">
-      <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-      <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-      <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-      <span className="ml-2 text-[10px] text-white/35">replyfy.app/{path}</span>
-      <span className="ml-auto hidden text-[10px] text-white/30 sm:inline">{hint}</span>
-      <button
-        type="button"
-        onClick={(e) => {
-          stopPropagation(e)
-          onFullscreen()
-        }}
-        className="ml-1 flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-white/45 transition hover:bg-white/10 hover:text-white/80"
-        aria-label={fullscreenActive ? 'Exit fullscreen' : 'Enter fullscreen'}
-        title={fullscreenActive ? 'Exit fullscreen' : 'Fullscreen'}
-      >
-        {fullscreenActive ? <X size={12} /> : <Maximize2 size={12} />}
-        <span className="hidden md:inline">{fullscreenActive ? 'Exit' : 'Fullscreen'}</span>
-      </button>
-    </div>
-  )
-}
+function DesktopDashboardBody(props) {
+  const {
+    category,
+    setCategory,
+    expertTypes,
+    expertType,
+    setExpertType,
+    query,
+    setQuery,
+    placeholder,
+    onAuthOpen,
+    theme,
+    onToggleTheme,
+  } = props
+  const isLight = theme === 'light'
 
-function DashboardPreviewBody({
-  category,
-  setCategory,
-  expertTypes,
-  expertType,
-  setExpertType,
-  query,
-  setQuery,
-  placeholder,
-  onAuthOpen,
-}) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-12 pb-7 pt-16">
+    <div
+      className="dashboard-shell flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-12 pb-7 pt-12"
+      data-theme={theme}
+    >
+      <div className="mb-4 flex justify-end" onClick={stopPropagation}>
+        <button
+          type="button"
+          onClick={(e) => {
+            stopPropagation(e)
+            onToggleTheme()
+          }}
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-muted shadow-[var(--shadow-luxury-sm)] transition hover:bg-surface hover:text-ink"
+          aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          {isLight ? <Moon size={14} /> : <Sun size={14} />}
+          <span>{isLight ? 'Dark' : 'Light'}</span>
+        </button>
+      </div>
+
       <div className="text-center">
         <h3 className="text-4xl font-semibold leading-[1.12] tracking-tight text-ink">
           Your question,
           <br />
-          <span className="font-light text-muted">answered by a human.</span>
+          <span className="font-light text-muted">answered </span>
+          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text font-semibold text-transparent">
+            by a human.
+          </span>
         </h3>
         <p className="mx-auto mt-3 max-w-[640px] text-sm leading-relaxed text-muted">
-          Real mentors — founders, CAs, advisors — read your question and reply personally.
-          Within 12 hrs.
+          Real mentors — founders, CAs, advisors — read your question and reply personally. Within
+          12 hrs.
         </p>
       </div>
 
@@ -145,7 +169,7 @@ function DashboardPreviewBody({
       </div>
 
       <div
-        className="mt-6 shrink-0 overflow-hidden rounded-xl border border-border bg-card"
+        className="mt-6 shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]"
         onClick={stopPropagation}
       >
         <div className="flex flex-col p-3">
@@ -160,7 +184,7 @@ function DashboardPreviewBody({
                 onClick={() => setExpertType(type)}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                   expertType === type
-                    ? 'bg-surface text-ink underline decoration-white/80 decoration-2 underline-offset-4'
+                    ? 'bg-surface text-ink underline decoration-2 underline-offset-4 decoration-charcoal/50'
                     : 'text-muted hover:text-ink'
                 }`}
               >
@@ -170,7 +194,7 @@ function DashboardPreviewBody({
           </div>
 
           <textarea
-            key={`${category}-${expertType}`}
+            key={`${category}-${expertType}-desktop`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
@@ -197,7 +221,9 @@ function DashboardPreviewBody({
                 stopPropagation(e)
                 onAuthOpen('login')
               }}
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition hover:bg-white/90"
+              className={`inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition ${
+                isLight ? 'hover:bg-black/85' : 'hover:bg-white/90'
+              }`}
             >
               <Sparkles size={14} />
               Ask mentor
@@ -214,53 +240,142 @@ function DashboardPreviewBody({
   )
 }
 
-function PreviewFrame({
-  scale,
-  hint,
-  path,
-  fullscreenActive,
-  onOpenFullscreen,
-  onFrameClick,
-  frameClassName = '',
-  children,
+/** Mirrors real QuestionComposer / user dashboard at mobile density */
+function MobileAppScreen({
+  category,
+  setCategory,
+  expertTypes,
+  expertType,
+  setExpertType,
+  query,
+  setQuery,
+  placeholder,
+  onAuthOpen,
+  theme,
+  onToggleTheme,
 }) {
+  const isLight = theme === 'light'
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onFrameClick}
-      onKeyDown={(e) => {
-        const tag = e.target?.tagName
-        if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT' || e.target?.isContentEditable) {
-          return
-        }
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onFrameClick()
-        }
-      }}
-      className={`overflow-hidden rounded-2xl border border-white/15 bg-[#171818] outline-none focus-visible:ring-2 focus-visible:ring-white/30 ${frameClassName}`}
-      style={{
-        width: FRAME_W * scale,
-        height: FRAME_H * scale,
-      }}
+      className="dashboard-shell flex h-full min-h-0 w-full flex-col overflow-hidden bg-canvas touch-pan-y"
+      data-theme={theme}
+      onClick={stopPropagation}
     >
-      <div
-        className="flex origin-top-left flex-col bg-[#171818]"
-        style={{
-          width: FRAME_W,
-          height: FRAME_H,
-          transform: `scale(${scale})`,
-        }}
-      >
-        <PreviewChrome
-          hint={hint}
-          path={path}
-          onFullscreen={onOpenFullscreen}
-          fullscreenActive={fullscreenActive}
-        />
-        {children}
+      <div className="flex shrink-0 justify-end px-3 pt-3 pb-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            stopPropagation(e)
+            onToggleTheme()
+          }}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-card text-muted"
+          aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+        >
+          {isLight ? <Moon size={12} /> : <Sun size={12} />}
+        </button>
       </div>
+
+      <div className="shrink-0 px-3.5 pb-3 text-center">
+        <h3 className="text-balance text-[1.05rem] font-semibold leading-snug tracking-tight text-ink">
+          Your question,
+          <br />
+          <span className="font-light text-muted">answered </span>
+          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text font-semibold text-transparent">
+            by a human.
+          </span>
+        </h3>
+        <p className="mx-auto mt-1.5 max-w-[30ch] text-[10px] leading-snug text-muted">
+          Real mentors reply personally — within 12 hrs.
+        </p>
+      </div>
+
+      <div className="shrink-0 px-3.5 pb-2">
+        <p className="text-sm font-semibold tracking-tight text-ink">
+          Hey!{' '}
+          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+            there
+          </span>
+        </p>
+        <p className="mt-0.5 text-[10px] text-muted">AI Gives Information. Humans Give Judgment.</p>
+      </div>
+
+      <div className="flex shrink-0 gap-1.5 overflow-x-auto touch-pan-x px-3.5 pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => {
+              setCategory(cat)
+              setExpertType(expertTypesByCategory[cat]?.[0] || expertTypesByCategory.Other[0])
+            }}
+            className={`inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-[11px] font-medium transition ${
+              category === cat
+                ? 'bg-primary text-primary-fg'
+                : 'border border-border bg-card text-ink'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <div className="mx-3 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
+        <div className="flex shrink-0 items-center gap-0.5 overflow-x-auto touch-pan-x border-b border-border px-2 py-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span className="mr-1 shrink-0 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-light">
+            Mentor
+          </span>
+          {expertTypes.map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setExpertType(type)}
+              className={`inline-flex h-7 shrink-0 items-center rounded-md px-2 text-[11px] font-medium transition ${
+                expertType === type
+                  ? 'bg-surface text-ink underline decoration-charcoal/40 decoration-2 underline-offset-2'
+                  : 'text-muted'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          key={`${category}-${expertType}-mobile`}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={placeholder}
+          className="min-h-[56px] w-full flex-1 resize-none touch-pan-y bg-transparent px-2.5 py-2 text-xs leading-relaxed text-ink placeholder:text-muted-light focus:outline-none"
+        />
+
+        <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border px-2 py-2">
+          <div className="flex items-center gap-2">
+            <Paperclip size={13} className="text-muted" />
+            {['PDF', 'Files', 'Links'].map((label) => (
+              <button key={label} type="button" className="text-[10px] font-medium text-muted">
+                {label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              stopPropagation(e)
+              onAuthOpen('login')
+            }}
+            className="inline-flex h-8 items-center gap-1 rounded-lg bg-primary px-2.5 text-[11px] font-semibold text-primary-fg"
+          >
+            <Sparkles size={12} />
+            Ask mentor
+            <ArrowUp size={12} />
+          </button>
+        </div>
+      </div>
+
+      <p className="shrink-0 px-3 pb-1 pt-0.5 text-center text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-light">
+        Suggested for {category} · {expertType}
+      </p>
     </div>
   )
 }
@@ -269,6 +384,7 @@ export default function HeroDashboardPreview() {
   const containerRef = useRef(null)
   const scale = useFrameScale(containerRef)
   const fullscreenScale = useViewportFrameScale(true)
+  const canHover = useCanHover()
   const [category, setCategory] = useState(() => {
     const name = loadQuestionDraft()?.categoryName
     return categories.includes(name) ? name : 'Startup'
@@ -287,6 +403,11 @@ export default function HeroDashboardPreview() {
   const [hovered, setHovered] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [authMode, setAuthMode] = useState(null)
+  const [isNarrow, setIsNarrow] = useState(false)
+  const [previewTheme, setPreviewTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark'
+    return localStorage.getItem(PREVIEW_THEME_KEY) === 'light' ? 'light' : 'dark'
+  })
 
   const expertTypes = expertTypesByCategory[category] || expertTypesByCategory.Other
   const placeholder = getQuestionPlaceholder(
@@ -294,7 +415,7 @@ export default function HeroDashboardPreview() {
     { name: expertType, slug: expertType.toLowerCase().replace(/\s+/g, '-') }
   )
 
-  const hoverScale = hovered && !fullscreen ? 1.05 : 1
+  const hoverScale = canHover && hovered && !fullscreen ? 1.05 : 1
 
   const openFullscreen = () => setFullscreen(true)
   const openAuth = (mode) => {
@@ -309,6 +430,20 @@ export default function HeroDashboardPreview() {
     setAuthMode(null)
   }
   const toggleFullscreen = () => setFullscreen((prev) => !prev)
+  const togglePreviewTheme = () => {
+    setPreviewTheme((current) => {
+      const next = current === 'dark' ? 'light' : 'dark'
+      localStorage.setItem(PREVIEW_THEME_KEY, next)
+      return next
+    })
+  }
+
+  useEffect(() => {
+    const update = () => setIsNarrow(window.innerWidth < 1024)
+    update()
+    window.addEventListener('resize', update, { passive: true })
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   useEffect(() => {
     if (query.trim()) {
@@ -320,15 +455,12 @@ export default function HeroDashboardPreview() {
 
   useEffect(() => {
     if (!fullscreen) return undefined
-
     const onKeyDown = (e) => {
       if (e.key === 'Escape') closeFullscreen()
     }
-
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     window.addEventListener('keydown', onKeyDown)
-
     return () => {
       document.body.style.overflow = prevOverflow
       window.removeEventListener('keydown', onKeyDown)
@@ -345,22 +477,35 @@ export default function HeroDashboardPreview() {
     setQuery,
     placeholder,
     onAuthOpen: openAuth,
+    theme: previewTheme,
+    onToggleTheme: togglePreviewTheme,
   }
 
   const fullscreenContent = authMode ? (
     <Auth key={authMode} initialMode={authMode} embedded onClose={() => setAuthMode(null)} />
+  ) : isNarrow ? (
+    <MobileAppScreen {...previewProps} />
   ) : (
-    <DashboardPreviewBody {...previewProps} />
+    <DesktopDashboardBody {...previewProps} />
   )
 
   return (
     <>
+      <div className="relative z-10 h-full w-full lg:hidden">
+        <PhonePreview
+          theme={previewTheme}
+          onOpenFullscreen={openFullscreen}
+        >
+          <MobileAppScreen {...previewProps} />
+        </PhonePreview>
+      </div>
+
       <motion.div
         ref={containerRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.75, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 flex h-full w-full items-center justify-center"
+        className="relative z-10 hidden h-full w-full items-center justify-center lg:flex"
       >
         <motion.div
           onHoverStart={() => setHovered(true)}
@@ -374,7 +519,7 @@ export default function HeroDashboardPreview() {
           transition={{ type: 'spring', stiffness: 260, damping: 22 }}
           className="cursor-pointer"
         >
-          <PreviewFrame
+          <LaptopPreview
             scale={scale}
             hint="Hover to zoom · Click for fullscreen"
             fullscreenActive={false}
@@ -382,8 +527,8 @@ export default function HeroDashboardPreview() {
             onFrameClick={openFullscreen}
             frameClassName="cursor-zoom-in"
           >
-            <DashboardPreviewBody {...previewProps} />
-          </PreviewFrame>
+            <DesktopDashboardBody {...previewProps} />
+          </LaptopPreview>
         </motion.div>
       </motion.div>
 
@@ -411,10 +556,10 @@ export default function HeroDashboardPreview() {
                     stopPropagation(e)
                     closeFullscreen()
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white"
                 >
                   <X size={16} />
-                  Exit fullscreen
+                  Exit
                 </button>
               </div>
 
@@ -424,21 +569,34 @@ export default function HeroDashboardPreview() {
                 exit={{ opacity: 0, scale: 0.98, y: 8 }}
                 transition={{ type: 'spring', stiffness: 280, damping: 26 }}
                 onClick={stopPropagation}
-                className="shadow-[0_40px_120px_rgba(0,0,0,0.75)]"
               >
-                <PreviewFrame
-                  scale={fullscreenScale}
-                  hint={authMode ? `replyfy.app/${authMode}` : 'Press Esc to exit'}
-                  path={authMode || 'dashboard'}
-                  fullscreenActive
-                  onOpenFullscreen={toggleFullscreen}
-                  onFrameClick={() => {}}
-                >
-                  {fullscreenContent}
-                </PreviewFrame>
+                {isNarrow && !authMode ? (
+                  <div className="h-[min(84svh,740px)] w-[min(94vw,420px)]">
+                    <PhonePreview
+                      theme={previewTheme}
+                      allowInnerScroll
+                      onOpenFullscreen={toggleFullscreen}
+                    >
+                      {fullscreenContent}
+                    </PhonePreview>
+                  </div>
+                ) : authMode && isNarrow ? (
+                  <div className="max-h-[min(88dvh,720px)] w-[min(92vw,420px)] overflow-hidden rounded-2xl border border-white/10 bg-[#EEF0F3]">
+                    <div className="max-h-[min(88dvh,720px)] overflow-y-auto">{fullscreenContent}</div>
+                  </div>
+                ) : (
+                  <LaptopPreview
+                    scale={fullscreenScale}
+                    hint={authMode ? `replyfy.app/${authMode}` : 'Press Esc to exit'}
+                    path={authMode || 'dashboard'}
+                    fullscreenActive
+                    onOpenFullscreen={toggleFullscreen}
+                    onFrameClick={() => {}}
+                  >
+                    {fullscreenContent}
+                  </LaptopPreview>
+                )}
               </motion.div>
-
-              <p className="mt-4 text-xs text-white/40">Esc · click outside · or Exit to return</p>
             </motion.div>
           )}
         </AnimatePresence>,

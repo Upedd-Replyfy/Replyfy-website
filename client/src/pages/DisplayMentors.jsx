@@ -66,13 +66,13 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.3), ease: [0.22, 1, 0.36, 1] }}
-      className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:border-violet-200/80 hover:shadow-[0_24px_60px_rgba(99,102,241,0.12)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition duration-300 hover:border-violet-200/80 md:hover:-translate-y-1 md:hover:shadow-[0_24px_60px_rgba(99,102,241,0.12)]"
     >
-      <div className="relative h-52 overflow-hidden sm:h-56">
+      <div className="relative h-48 overflow-hidden sm:h-56">
         <img
           src={avatarUrl(mentor)}
           alt={mentor.name}
-          className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.04]"
+          className="h-full w-full object-cover object-top transition duration-500 md:group-hover:scale-[1.04]"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
@@ -317,7 +317,7 @@ export default function DisplayMentors() {
         />
         <Navbar onAuthOpen={setAuthMode} />
 
-        <div className="relative mx-auto max-w-[1280px] px-5 pb-20 pt-24 sm:px-8 md:pb-24 md:pt-28">
+        <div className="relative mx-auto max-w-[1280px] px-4 pb-16 pt-20 sm:px-8 sm:pb-20 md:pb-24 md:pt-28">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -326,7 +326,7 @@ export default function DisplayMentors() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-white/55 transition hover:text-white"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-white/55 transition hover:text-white"
             >
               <ArrowLeft size={16} />
               Back to home
@@ -357,12 +357,12 @@ export default function DisplayMentors() {
         </div>
       </div>
 
-      <main className="relative z-10 mx-auto max-w-[1280px] px-5 pb-20 sm:px-8">
+      <main className="relative z-10 mx-auto max-w-[1280px] px-4 pb-16 sm:px-8 sm:pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="-mt-14 rounded-[24px] border border-[#E5E7EB] bg-white/90 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl sm:-mt-16 sm:p-8"
+          className="-mt-12 rounded-[24px] border border-[#E5E7EB] bg-white/90 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl sm:-mt-16 sm:p-8"
         >
           <CategoryPills
             categories={categories}

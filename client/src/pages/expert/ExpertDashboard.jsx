@@ -42,33 +42,42 @@ export default function ExpertDashboard() {
   const questions = questionsData?.questions || []
 
   return (
-    <div className="space-y-8">
-      <section className="overflow-hidden rounded-[20px] border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
-        <div className="grid gap-6 p-6 md:p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+    <div className="space-y-5 sm:space-y-6">
+      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
+        <div className="grid gap-4 p-4 sm:gap-5 sm:p-5 lg:grid-cols-[1fr_auto] lg:items-center lg:p-6">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-              <Sparkles size={12} />
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-sky-500/20 bg-gradient-to-r from-sky-500/10 to-violet-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-600">
+              <Sparkles size={11} className="text-violet-500" />
               Mentor workspace
             </div>
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-              Good to see you, {firstName}
+            <h1 className="font-display text-xl font-semibold tracking-tight text-ink sm:text-2xl">
+              Good to see you,{' '}
+              <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+                {firstName}
+              </span>
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted sm:text-base">
-              Manage assigned questions, deliver thoughtful answers, and track your points earnings.
+            <p className="mt-1 max-w-lg text-xs leading-relaxed text-muted sm:text-sm">
+              Manage questions, deliver answers, and track your{' '}
+              <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text font-medium text-transparent">
+                points
+              </span>
+              .
             </p>
           </div>
 
-          <div className="min-w-[220px] rounded-2xl border border-border bg-surface p-5">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500">
-                <Coins size={20} />
+          <div className="rounded-xl border border-border bg-surface px-3.5 py-3 sm:min-w-[200px]">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500">
+                <Coins size={17} />
               </span>
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted">Available points</p>
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
+                  Available points
+                </p>
                 {isLoading ? (
-                  <div className="mt-2 h-8 w-24 animate-pulse rounded-lg bg-card" />
+                  <div className="mt-1 h-6 w-16 animate-pulse rounded-lg bg-card" />
                 ) : (
-                  <p className="mt-1 text-2xl font-bold tracking-tight text-ink">
+                  <p className="mt-0.5 text-xl font-bold tracking-tight text-ink">
                     {formatPointsFixed(stats?.walletBalance)}
                   </p>
                 )}
@@ -76,24 +85,66 @@ export default function ExpertDashboard() {
             </div>
             <Link
               to="/expert/wallet"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink transition-colors hover:text-muted"
+              className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-ink transition-colors hover:text-muted"
             >
-              View points wallet <ArrowRight size={14} />
+              View points wallet <ArrowRight size={12} />
             </Link>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <ExpertStatCard label="Assigned" value={stats?.assigned ?? 0} icon={ClipboardList} accent="sky" loading={isLoading} />
-        <ExpertStatCard label="In Progress" value={stats?.inProgress ?? 0} icon={Loader} accent="amber" loading={isLoading} />
-        <ExpertStatCard label="Completed" value={stats?.completed ?? 0} icon={CheckCircle2} accent="emerald" loading={isLoading} />
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <ExpertStatCard
+          compact
+          label="Assigned"
+          value={stats?.assigned ?? 0}
+          icon={ClipboardList}
+          accent="sky"
+          loading={isLoading}
+        />
+        <ExpertStatCard
+          compact
+          label="Progress"
+          value={stats?.inProgress ?? 0}
+          icon={Loader}
+          accent="amber"
+          loading={isLoading}
+        />
+        <ExpertStatCard
+          compact
+          label="Completed"
+          value={stats?.completed ?? 0}
+          icon={CheckCircle2}
+          accent="emerald"
+          loading={isLoading}
+        />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <ExpertStatCard label="Total Points Earned" value={formatPoints(stats?.totalEarned)} icon={TrendingUp} accent="cyan" loading={isLoading} />
-        <ExpertStatCard label="Points Balance" value={formatPoints(stats?.walletBalance)} icon={Coins} accent="violet" loading={isLoading} />
-        <ExpertStatCard label="Average Rating" value={stats?.averageRating?.toFixed(1) ?? '0.0'} icon={Star} accent="amber" loading={isLoading} />
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <ExpertStatCard
+          compact
+          label="Earned"
+          value={formatPoints(stats?.totalEarned)}
+          icon={TrendingUp}
+          accent="cyan"
+          loading={isLoading}
+        />
+        <ExpertStatCard
+          compact
+          label="Balance"
+          value={formatPoints(stats?.walletBalance)}
+          icon={Coins}
+          accent="violet"
+          loading={isLoading}
+        />
+        <ExpertStatCard
+          compact
+          label="Rating"
+          value={stats?.averageRating?.toFixed(1) ?? '0.0'}
+          icon={Star}
+          accent="amber"
+          loading={isLoading}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

@@ -105,7 +105,10 @@ export default function QuestionComposer({
         <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-ink md:text-4xl lg:text-5xl">
           Your question,
           <br />
-          <span className="font-light text-muted">answered by a human.</span>
+          <span className="font-light text-muted">answered </span>
+          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text font-semibold text-transparent">
+            by a human.
+          </span>
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-balance text-sm leading-relaxed text-muted md:text-base">
           Real mentors — founders, CAs, advisors — read your question and reply personally.
@@ -116,7 +119,10 @@ export default function QuestionComposer({
       <div className="mx-auto w-full max-w-4xl">
         <div className="mb-5">
           <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl lg:text-4xl">
-            Hey! {firstName}
+            Hey!{' '}
+            <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+              {firstName}
+            </span>
           </h1>
           <p className="mt-2 text-base text-muted md:text-lg lg:text-xl">
             AI Gives Information. Humans Give Judgment.

@@ -20,16 +20,18 @@ export default function Pricing() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="mx-auto mb-10 max-w-3xl md:mb-12"
+          className="mx-auto mb-10 max-w-3xl text-center md:mb-12"
         >
           <span className="inline-flex rounded-full border border-black/10 bg-[#f5f5f5] px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-black/55">
             Pricing
           </span>
           <h2 className="mt-4 text-2xl font-semibold tracking-tight text-black leading-[1.12] md:text-3xl lg:text-[2.125rem]">
             Three tiers.{' '}
-            <span className="text-black">One for every need.</span>
+            <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+              One for every need.
+            </span>
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-black/50 md:text-base">
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-black/50 md:text-base">
             Basic auto-assigns a mentor. Choose Mentor or Mentor Call to pick your mentor.
           </p>
         </motion.div>
@@ -46,7 +48,7 @@ export default function Pricing() {
               key={plan.id}
               variants={fadeUp}
               custom={index * 0.1}
-              className="w-full max-w-[300px] flex-1 md:max-w-[310px]"
+              className="w-full max-w-full flex-1 sm:max-w-[300px] md:max-w-[310px]"
             >
               <HomePricingCard
                 plan={plan}
@@ -74,7 +76,7 @@ export default function Pricing() {
             </p>
             <Link
               to={`/signup?plan=${selectedPlan}`}
-              className="rounded-2xl bg-[#272927] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#272927]/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+              className="inline-flex min-h-12 w-full max-w-[300px] items-center justify-center rounded-2xl bg-[#272927] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#272927]/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)] sm:w-auto"
             >
               Continue with {selected.name}
             </Link>

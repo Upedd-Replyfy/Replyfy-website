@@ -73,7 +73,7 @@ function StepCard({ step, index }) {
 
   return (
     <motion.article variants={fadeUp} custom={step.delay} className="relative z-10 h-full">
-      <div className="flex h-full min-h-[220px] flex-col items-center rounded-[20px] border border-black/[0.07] bg-white px-9 py-6 text-center shadow-[0_12px_48px_rgba(0,0,0,0.07)] md:min-h-[230px] md:px-10 md:py-7 lg:min-h-[240px] lg:px-11">
+      <div className="flex h-full min-h-[200px] flex-col items-center rounded-[20px] border border-black/[0.07] bg-white px-5 py-6 text-center shadow-[0_12px_48px_rgba(0,0,0,0.07)] sm:px-7 md:min-h-[230px] md:px-10 md:py-7 lg:min-h-[240px] lg:px-11">
         <span className="text-sm font-medium tracking-widest text-black/35">{num}</span>
 
         <div className="mt-3 flex h-16 w-16 items-center justify-center rounded-full bg-black/[0.04] text-black">
@@ -104,8 +104,11 @@ export default function HowItWorks() {
             How it works
           </span>
           <h2 className="mt-4 text-2xl font-semibold tracking-tight text-black leading-[1.12] md:text-3xl lg:text-[2.125rem]">
-            From question to clarity in{' '}
-            <span className="text-black">four simple steps</span>
+            From question to clarity
+            <br />
+            <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+              in four simple steps
+            </span>
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-black/50 md:text-base">
             Get personalized answers from verified mentors in four simple steps.
@@ -117,11 +120,11 @@ export default function HowItWorks() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={staggerContainer}
-          className="relative mx-auto w-full max-w-[1650px] px-4 sm:px-6 lg:px-8"
+          className="relative mx-auto w-full max-w-[1650px] px-0 sm:px-6 lg:px-8"
         >
           <StepConnector />
 
-          <div className="grid auto-rows-fr gap-8 sm:grid-cols-2 sm:gap-9 lg:grid-cols-4 lg:gap-10 xl:gap-12">
+          <div className="grid auto-rows-fr gap-5 sm:grid-cols-2 sm:gap-9 lg:grid-cols-4 lg:gap-10 xl:gap-12">
             {steps.map((step, index) => (
               <StepCard key={step.title} step={step} index={index} />
             ))}
@@ -133,7 +136,7 @@ export default function HowItWorks() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="mx-auto mt-16 w-full max-w-[1650px] px-4 sm:px-6 md:mt-20 lg:px-8"
+          className="mx-auto mt-12 w-full max-w-[1650px] px-0 sm:px-6 md:mt-20 lg:px-8"
         >
           <div className="rounded-[20px] bg-[#272927] px-6 py-5 sm:px-8 md:px-10 md:py-6 lg:px-12">
             <div className="grid gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3 lg:gap-0">

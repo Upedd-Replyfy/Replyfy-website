@@ -108,16 +108,16 @@
     }
   }
 
-  /* Navbar logo + hero headline share this left edge (1cm + responsive gutter) */
+  /* Navbar logo + hero headline share this left edge (1cm from lg+) */
   .site-gutter {
-    padding-left: calc(1cm + max(1.25rem, env(safe-area-inset-left, 0px)));
-    padding-right: calc(1cm + max(1.25rem, env(safe-area-inset-right, 0px)));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
   }
 
   @media (min-width: 640px) {
     .site-gutter {
-      padding-left: calc(1cm + max(1.5rem, env(safe-area-inset-left, 0px)));
-      padding-right: calc(1cm + max(1.5rem, env(safe-area-inset-right, 0px)));
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
     }
   }
 
@@ -136,12 +136,12 @@
   }
 
   .site-gutter-left {
-    padding-left: calc(1cm + max(1.25rem, env(safe-area-inset-left, 0px)));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
   }
 
   @media (min-width: 640px) {
     .site-gutter-left {
-      padding-left: calc(1cm + max(1.5rem, env(safe-area-inset-left, 0px)));
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
     }
   }
 
@@ -242,6 +242,14 @@
     border-color: #52525b;
     box-shadow: var(--shadow-luxury-hover);
     transform: translateY(-2px);
+  }
+
+  @media (hover: none) {
+    .luxury-card-hover:hover {
+      border-color: var(--color-border);
+      box-shadow: var(--shadow-luxury-sm);
+      transform: none;
+    }
   }
 
   .btn-accent,

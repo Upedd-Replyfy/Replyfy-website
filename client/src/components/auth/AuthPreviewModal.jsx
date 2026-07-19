@@ -61,13 +61,13 @@ export default function AuthPreviewModal({ mode, onClose }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/92 px-4 py-6 backdrop-blur-md"
+          className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/92 px-4 py-6 backdrop-blur-md sm:px-6"
           role="dialog"
           aria-modal="true"
           aria-label={mode === 'signup' ? 'Sign up' : 'Log in'}
           onClick={onClose}
         >
-          <div className="mb-4 flex w-full max-w-6xl items-center justify-between gap-4">
+          <div className="mb-4 flex w-full max-w-md items-center justify-between gap-4 lg:max-w-6xl">
             <p className="text-sm text-white/55">Replyfy account</p>
             <button
               type="button"
@@ -75,20 +75,35 @@ export default function AuthPreviewModal({ mode, onClose }) {
                 stopPropagation(e)
                 onClose()
               }}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/15"
             >
               <X size={16} />
               Close
             </button>
           </div>
 
+          {/* Mobile / tablet: form-only card */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+            onClick={stopPropagation}
+            className="flex max-h-[min(90dvh,720px)] w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#EEF0F3] shadow-[0_40px_120px_rgba(0,0,0,0.75)] lg:hidden"
+          >
+            <div className="w-full overflow-y-auto">
+              <Auth key={mode} initialMode={mode} embedded onClose={onClose} />
+            </div>
+          </motion.div>
+
+          {/* Desktop: scaled preview frame with split layout */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 8 }}
             transition={{ type: 'spring', stiffness: 280, damping: 26 }}
             onClick={stopPropagation}
-            className="overflow-hidden rounded-2xl border border-white/15 bg-[#171818] shadow-[0_40px_120px_rgba(0,0,0,0.75)]"
+            className="hidden overflow-hidden rounded-2xl border border-white/15 bg-[#171818] shadow-[0_40px_120px_rgba(0,0,0,0.75)] lg:block"
             style={{
               width: FRAME_W * scale,
               height: FRAME_H * scale,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Menu, X } from 'lucide-react'
@@ -28,9 +29,27 @@ export default function Navbar({ onAuthOpen }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    if (!mobileOpen) return undefined
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMobileOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [mobileOpen])
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
+
   const handleHashClick = (href) => {
     if (isHome) {
-      document.getElementById(href.replace('/#', ''))?.scrollIntoView()
+      document.getElementById(href.replace('/#', ''))?.scrollIntoView({ behavior: 'smooth' })
     }
     setMobileOpen(false)
   }
@@ -42,14 +61,10 @@ export default function Navbar({ onAuthOpen }) {
 
   const renderLink = (link, mobile = false) => {
     const className = mobile
-      ? 'py-3 text-left text-sm text-white/70 hover:text-white'
+      ? 'flex min-h-12 w-full items-center rounded-xl px-4 py-3 text-left text-base font-medium text-white/80 transition hover:bg-white/5 hover:text-white'
       : 'text-sm font-medium text-white/60 transition-colors hover:text-white'
     const activeClass =
-      link.href === '/mentors' && location.pathname === '/mentors'
-        ? mobile
-          ? ' text-white'
-          : ' text-white'
-        : ''
+      link.href === '/mentors' && location.pathname === '/mentors' ? ' text-white' : ''
 
     if (isHashLink(link.href)) {
       if (isHome) {
@@ -65,7 +80,12 @@ export default function Navbar({ onAuthOpen }) {
         )
       }
       return (
-        <Link key={link.href} to={link.href} className={`${className}${activeClass}`}>
+        <Link
+          key={link.href}
+          to={link.href}
+          onClick={() => setMobileOpen(false)}
+          className={`${className}${activeClass}`}
+        >
           {link.label}
         </Link>
       )
@@ -83,81 +103,137 @@ export default function Navbar({ onAuthOpen }) {
     )
   }
 
-  return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? 'border-b border-white/[0.06] bg-[#171818]/90 backdrop-blur-2xl'
-          : 'bg-transparent'
-      }`}
-    >
-      <nav className="site-gutter flex items-center justify-between gap-6 py-3.5 md:py-4">
-        <Logo light size="nav" />
-
-        <ul className="hidden lg:flex flex-1 items-center justify-center gap-8">
-          {navLinks.map((link) => (
-            <li key={link.href}>{renderLink(link)}</li>
-          ))}
-        </ul>
-
-        <div className="hidden lg:flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => openAuth('login')}
-            className="text-sm font-medium text-white/70 transition-colors hover:text-white"
-          >
-            Log in
-          </button>
-          <button
-            type="button"
-            onClick={() => openAuth('signup')}
-            className="group inline-flex items-center gap-1.5 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
-          >
-            Get started
-            <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-          </button>
-        </div>
-
-        <button
-          type="button"
-          className="lg:hidden p-1.5 -mr-1 text-white"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-        >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-      </nav>
-
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-t border-white/[0.06] bg-[#171818]/95 backdrop-blur-2xl lg:hidden"
-          >
-            <div className="site-gutter flex flex-col gap-1 py-4">
-              {navLinks.map((link) => renderLink(link, true))}
-              <div className="mt-2 flex flex-col gap-2 border-t border-white/10 pt-4">
-                <button
+  const mobileMenu =
+    typeof document !== 'undefined'
+      ? createPortal(
+          <AnimatePresence>
+            {mobileOpen && (
+              <div className="lg:hidden" key="mobile-menu">
+                <motion.button
                   type="button"
-                  onClick={() => openAuth('login')}
-                  className="rounded-2xl border border-white/15 py-2.5 text-center text-sm text-white"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm"
+                  aria-label="Close menu overlay"
+                  onClick={() => setMobileOpen(false)}
+                />
+                <motion.aside
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', stiffness: 340, damping: 34 }}
+                  className="fixed inset-y-0 right-0 z-[70] flex h-[100dvh] w-[min(100vw,320px)] flex-col bg-[#141515] shadow-[-24px_0_60px_rgba(0,0,0,0.55)]"
+                  style={{ paddingTop: 'env(safe-area-inset-top)' }}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Mobile navigation"
                 >
-                  Log in
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openAuth('signup')}
-                  className="rounded-2xl bg-white py-2.5 text-center text-sm font-semibold text-black"
-                >
-                  Get started
-                </button>
+                  <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-3.5">
+                    <p className="text-sm font-medium text-white/50">Menu</p>
+                    <button
+                      type="button"
+                      onClick={() => setMobileOpen(false)}
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white hover:bg-white/10"
+                      aria-label="Close menu"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+                    {navLinks.map((link) => renderLink(link, true))}
+                  </nav>
+
+                  <div
+                    className="shrink-0 space-y-2 border-t border-white/10 px-4 py-4"
+                    style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => openAuth('login')}
+                      className="flex min-h-12 w-full items-center justify-center rounded-xl border border-white/15 text-sm font-medium text-white"
+                    >
+                      Log in
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openAuth('signup')}
+                      className="flex min-h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-white text-sm font-semibold text-black"
+                    >
+                      Get started
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </motion.aside>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+            )}
+          </AnimatePresence>,
+          document.body
+        )
+      : null
+
+  return (
+    <>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+          scrolled || mobileOpen
+            ? 'border-b border-white/[0.06] bg-[#171818]/95 backdrop-blur-2xl'
+            : 'bg-transparent'
+        }`}
+      >
+        <nav className="site-gutter flex items-center justify-between gap-3 py-3 md:gap-6 md:py-4">
+          <Logo light size="nav" />
+
+          <ul className="hidden flex-1 items-center justify-center gap-8 lg:flex">
+            {navLinks.map((link) => (
+              <li key={link.href}>{renderLink(link)}</li>
+            ))}
+          </ul>
+
+          <div className="hidden items-center gap-3 lg:flex">
+            <button
+              type="button"
+              onClick={() => openAuth('login')}
+              className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+            >
+              Log in
+            </button>
+            <button
+              type="button"
+              onClick={() => openAuth('signup')}
+              className="group inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:bg-white/90"
+            >
+              Get started
+              <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 lg:hidden">
+            {!mobileOpen && (
+              <button
+                type="button"
+                onClick={() => openAuth('signup')}
+                className="inline-flex min-h-11 items-center rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-black"
+              >
+                Get started
+              </button>
+            )}
+            <button
+              type="button"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white hover:bg-white/10"
+              onClick={() => setMobileOpen((open) => !open)}
+              aria-expanded={mobileOpen}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {mobileMenu}
+    </>
   )
 }

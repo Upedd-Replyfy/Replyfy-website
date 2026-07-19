@@ -26,22 +26,16 @@ export default function HomePricingCard({ plan, selected = false, onSelect }) {
       layout
       initial={false}
       animate={{
-        y: selected ? -8 : 0,
-        scale: selected ? 1.03 : 1,
-      }}
-      whileHover={{
-        y: selected ? -10 : -6,
-        scale: selected ? 1.04 : 1.02,
-        transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+        scale: selected ? 1.02 : 1,
       }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-      className={`relative flex h-full w-full cursor-pointer flex-col rounded-[20px] border bg-white p-6 text-black outline-none md:p-7 ${
+      className={`relative flex h-full w-full cursor-pointer flex-col rounded-[20px] border bg-white p-5 text-black outline-none sm:p-6 md:p-7 md:transition-transform ${
         selected
-          ? 'border-2 border-black shadow-[0_20px_56px_rgba(0,0,0,0.14)]'
+          ? 'border-2 border-black shadow-[0_20px_56px_rgba(0,0,0,0.14)] md:-translate-y-2'
           : isPopular
-            ? 'border-black/[0.12] shadow-[0_12px_40px_rgba(0,0,0,0.08)] hover:border-black/25'
-            : 'border-black/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.06)] hover:border-black/20 hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]'
+            ? 'border-black/[0.12] shadow-[0_12px_40px_rgba(0,0,0,0.08)] md:hover:-translate-y-1.5 md:hover:border-black/25'
+            : 'border-black/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.06)] md:hover:-translate-y-1.5 md:hover:border-black/20 md:hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]'
       }`}
     >
       {isPopular && (
@@ -99,7 +93,7 @@ export default function HomePricingCard({ plan, selected = false, onSelect }) {
       <Link
         to={`/signup?plan=${plan.id}`}
         onClick={(e) => e.stopPropagation()}
-        className={`mt-7 w-full rounded-2xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
+        className={`mt-7 flex min-h-12 w-full items-center justify-center rounded-2xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
           selected
             ? 'bg-[#272927] text-white hover:bg-[#272927]/90'
             : 'border border-black/20 text-black hover:border-black/40 hover:bg-black/[0.03]'

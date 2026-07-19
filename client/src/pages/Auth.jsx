@@ -223,20 +223,20 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
   if (embedded) {
     return (
       <div className="auth-shell flex h-full w-full overflow-hidden bg-[#EEF0F3]">
-        <div className="relative hidden h-full w-[46%] shrink-0 sm:block">
+        <div className="relative hidden h-full w-[46%] shrink-0 lg:block">
           <AuthVisual compact />
         </div>
 
-        <div className="flex h-full min-w-0 flex-1 items-center justify-center overflow-y-auto px-5 py-4 sm:px-7 sm:py-5">
+        <div className="flex h-full min-w-0 flex-1 items-center justify-center overflow-y-auto px-6 py-5 sm:px-7 sm:py-5">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={transition}
-            className="relative w-full max-w-[380px]"
+            className="relative w-full max-w-md lg:max-w-[380px]"
           >
             <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.08)]">
               <div className="px-6 pb-3 pt-5 sm:px-7 sm:pt-5">
-                <Logo surface="light" size="md" className="mb-3 sm:hidden" />
+                <Logo surface="light" size="md" className="mb-3 lg:hidden" />
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600/80">
                   {isSignup ? 'Get started' : 'Sign in'}
                 </p>
@@ -343,7 +343,7 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
                   <button
                     type="submit"
                     disabled={authBusy}
-                    className="mt-1 w-full rounded-xl bg-[#111827] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50"
+                    className="mt-1 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#111827] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50"
                   >
                     {authBusy
                       ? isSignup
@@ -380,7 +380,7 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
                       <button
                         type="button"
                         onClick={() => switchMode('login')}
-                        className="font-semibold text-[#111827] underline-offset-2 hover:underline"
+                        className="min-h-11 font-semibold text-[#111827] underline-offset-2 hover:underline"
                       >
                         Sign In
                       </button>
@@ -391,7 +391,7 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
                       <button
                         type="button"
                         onClick={() => switchMode('signup')}
-                        className="font-semibold text-[#111827] underline-offset-2 hover:underline"
+                        className="min-h-11 font-semibold text-[#111827] underline-offset-2 hover:underline"
                       >
                         Sign Up
                       </button>
@@ -402,7 +402,7 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="mt-1.5 inline-flex w-full items-center justify-center text-xs font-medium text-[#9CA3AF] transition hover:text-[#111827]"
+                    className="mt-1.5 inline-flex min-h-11 w-full items-center justify-center text-xs font-medium text-[#9CA3AF] transition hover:text-[#111827]"
                   >
                     Back to preview
                   </button>
@@ -417,31 +417,16 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
 
   return (
     <div className="flex min-h-screen bg-[#EEF0F3]">
-      <div className="relative w-full lg:w-[45%]">
+      <div className="relative hidden w-[45%] lg:block">
         <AuthVisual />
-
-        <div className="relative overflow-hidden lg:hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-neutral-900/90 to-black/85" />
-          <img
-            src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=400&fit=crop"
-            alt=""
-            className="h-44 w-full object-cover opacity-30 grayscale"
-          />
-          <div className="relative px-5 py-6">
-            <Logo size="md" />
-            <p className="mt-3 text-lg font-semibold text-white leading-snug">
-              Ask better questions. Get real answers.
-            </p>
-          </div>
-        </div>
       </div>
 
-      <div className="auth-shell relative flex w-full flex-col justify-center bg-[#EEF0F3] px-5 py-8 sm:px-8 lg:w-[55%] lg:px-12 xl:px-16">
+      <div className="auth-shell relative flex w-full flex-col justify-center bg-[#EEF0F3] px-6 py-8 sm:px-8 lg:w-[55%] lg:px-12 xl:px-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={transition}
-          className="relative mx-auto w-full max-w-[420px]"
+          className="relative mx-auto w-full max-w-md lg:max-w-[420px]"
         >
           <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.08)]">
             <div className="px-6 pb-3 pt-6 sm:px-8 sm:pt-7">
@@ -563,7 +548,7 @@ export default function Auth({ initialMode, embedded = false, onClose }) {
                 <button
                   type="submit"
                   disabled={authBusy}
-                  className="mt-1 w-full rounded-xl bg-[#111827] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50"
+                  className="mt-1 flex min-h-12 w-full items-center justify-center rounded-xl bg-[#111827] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50"
                 >
                   {authBusy
                     ? isSignup

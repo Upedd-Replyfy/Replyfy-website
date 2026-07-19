@@ -30,11 +30,12 @@ function getOffset(index, activeIndex, total) {
   return offset
 }
 
-function getLayout(offset, isMobile) {
-  const step = isMobile ? 195 : 300
-  const centerWidth = isMobile ? 300 : 420
-  const sideWidth = isMobile ? 240 : 320
-  const farWidth = isMobile ? 200 : 280
+function getLayout(offset, isMobile, viewportWidth = 390) {
+  const contentW = Math.max(280, viewportWidth - 32)
+  const centerWidth = isMobile ? Math.min(300, contentW) : 420
+  const sideWidth = isMobile ? Math.min(240, contentW * 0.78) : 320
+  const farWidth = isMobile ? Math.min(200, contentW * 0.65) : 280
+  const step = isMobile ? Math.min(195, contentW * 0.58) : 300
   const abs = Math.abs(offset)
 
   if (offset === 0) {
@@ -129,6 +130,7 @@ function CarouselCard({ expert, layout, isCenter, onSelect, reduceMotion, dark }
 export default function ExpertCarousel({ dark = false }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [viewportWidth, setViewportWidth] = useState(390)
   const [isAnimating, setIsAnimating] = useState(false)
   const [dragHint, setDragHint] = useState(0)
   const containerRef = useRef(null)
@@ -145,7 +147,10 @@ export default function ExpertCarousel({ dark = false }) {
   const total = experts.length
 
   useEffect(() => {
-    const update = () => setIsMobile(window.innerWidth < 768)
+    const update = () => {
+      setIsMobile(window.innerWidth < 768)
+      setViewportWidth(window.innerWidth)
+    }
     update()
     window.addEventListener('resize', update, { passive: true })
     return () => window.removeEventListener('resize', update)
@@ -269,7 +274,7 @@ export default function ExpertCarousel({ dark = false }) {
             {experts.map((expert, index) => {
               const offset = getOffset(index, activeIndex, total)
               if (Math.abs(offset) > VISIBLE_RANGE) return null
-              const layout = getLayout(offset, isMobile)
+              const layout = getLayout(offset, isMobile, viewportWidth)
               const isCenter = offset === 0
               return (
                 <CarouselCard
