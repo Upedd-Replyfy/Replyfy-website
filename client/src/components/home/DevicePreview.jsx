@@ -160,7 +160,7 @@ export function PhonePreview({
   onOpenFullscreen,
   children,
   className = '',
-  theme = 'dark',
+  theme = 'light',
   allowInnerScroll = false,
 }) {
   const containerRef = useRef(null)

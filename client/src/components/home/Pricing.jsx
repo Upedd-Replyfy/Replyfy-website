@@ -76,7 +76,7 @@ export default function Pricing() {
             </p>
             <Link
               to={`/signup?plan=${selectedPlan}`}
-              className="inline-flex min-h-12 w-full max-w-[300px] items-center justify-center rounded-2xl bg-[#272927] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#272927]/90 hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)] sm:w-auto"
+              className="inline-flex min-h-12 w-full max-w-[300px] items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-violet-500 px-8 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-[0_8px_24px_rgba(139,92,246,0.35)] sm:w-auto"
             >
               Continue with {selected.name}
             </Link>

@@ -1,13 +1,13 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowUpRight, CirclePlay } from 'lucide-react'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import HeroDashboardPreview from './HeroDashboardPreview'
 import TrustBanner from './TrustBanner'
-import ScrollLink from '../ui/ScrollLink'
 
 const stats = [
-  { value: '12 hrs', label: 'Avg. response' },
+  { value: '12+ hrs', label: 'Avg. response' },
   { value: '98%', label: 'Satisfaction' },
-  { value: '50', label: 'Mentors' },
+  { value: '10', label: 'Mentors' },
 ]
 
 const ease = [0.22, 1, 0.36, 1]
@@ -33,7 +33,7 @@ export default function Hero({ onAuthOpen }) {
         <div className="flex w-full max-w-xl shrink-0 flex-col items-start pr-4 text-left sm:max-w-2xl sm:pr-8 lg:-translate-y-5 lg:max-w-[34rem] lg:justify-center lg:pr-4">
           <motion.h1
             {...reveal(0.1)}
-            className="mt-4 text-balance text-[2.35rem] font-light leading-[1.12] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl md:text-6xl lg:mt-0 lg:text-[clamp(2.25rem,3.6vw,3.25rem)]"
+            className="mt-4 text-balance text-[2.35rem] font-semibold leading-[1.12] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl md:text-6xl lg:mt-0 lg:text-[clamp(2.25rem,3.6vw,3.25rem)]"
           >
             AI Gives Answers.
             <br />
@@ -54,7 +54,7 @@ export default function Hero({ onAuthOpen }) {
 
           <motion.div
             {...reveal(0.22)}
-            className="mt-4 flex w-full flex-col gap-2 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-4"
+            className="mt-4 flex w-full flex-col gap-2 sm:mt-8 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
           >
             <button
               type="button"
@@ -67,13 +67,29 @@ export default function Hero({ onAuthOpen }) {
                 className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </button>
-            <ScrollLink
-              to="/#how-it-works"
-              className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-normal text-white transition hover:text-white/90 sm:min-h-12 sm:w-auto sm:py-3.5 sm:text-base"
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.35, ease }}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.97 }}
             >
-              See how it works
-              <CirclePlay size={14} className="text-white" />
-            </ScrollLink>
+              <Link
+                to="/mentors"
+                className="group inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-base font-semibold sm:min-h-12 sm:w-auto sm:py-3.5 sm:text-lg"
+              >
+                <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent transition group-hover:from-sky-300 group-hover:to-violet-300">
+                  Find mentor
+                </span>
+                <motion.span
+                  className="inline-flex text-violet-400"
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <ArrowRight size={16} />
+                </motion.span>
+              </Link>
+            </motion.div>
           </motion.div>
 
           <motion.div

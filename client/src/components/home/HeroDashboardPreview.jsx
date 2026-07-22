@@ -159,7 +159,7 @@ function DesktopDashboardBody(props) {
             }}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               category === cat
-                ? 'bg-primary text-primary-fg'
+                ? 'bg-gradient-to-r from-sky-500 to-violet-500 text-white shadow-sm'
                 : 'border border-border bg-card text-ink'
             }`}
           >
@@ -184,7 +184,7 @@ function DesktopDashboardBody(props) {
                 onClick={() => setExpertType(type)}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                   expertType === type
-                    ? 'bg-surface text-ink underline decoration-2 underline-offset-4 decoration-charcoal/50'
+                    ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/15 text-ink underline decoration-2 underline-offset-4 decoration-violet-500'
                     : 'text-muted hover:text-ink'
                 }`}
               >
@@ -311,7 +311,7 @@ function MobileAppScreen({
             }}
             className={`inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-[11px] font-medium transition ${
               category === cat
-                ? 'bg-primary text-primary-fg'
+                ? 'bg-gradient-to-r from-sky-500 to-violet-500 text-white shadow-sm'
                 : 'border border-border bg-card text-ink'
             }`}
           >
@@ -332,7 +332,7 @@ function MobileAppScreen({
               onClick={() => setExpertType(type)}
               className={`inline-flex h-7 shrink-0 items-center rounded-md px-2 text-[11px] font-medium transition ${
                 expertType === type
-                  ? 'bg-surface text-ink underline decoration-charcoal/40 decoration-2 underline-offset-2'
+                  ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/15 text-ink underline decoration-violet-500 decoration-2 underline-offset-2'
                   : 'text-muted'
               }`}
             >
@@ -405,8 +405,8 @@ export default function HeroDashboardPreview() {
   const [authMode, setAuthMode] = useState(null)
   const [isNarrow, setIsNarrow] = useState(false)
   const [previewTheme, setPreviewTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'dark'
-    return localStorage.getItem(PREVIEW_THEME_KEY) === 'light' ? 'light' : 'dark'
+    if (typeof window === 'undefined') return 'light'
+    return localStorage.getItem(PREVIEW_THEME_KEY) === 'dark' ? 'dark' : 'light'
   })
 
   const expertTypes = expertTypesByCategory[category] || expertTypesByCategory.Other

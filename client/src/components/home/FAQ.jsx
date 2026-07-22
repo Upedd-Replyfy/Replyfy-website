@@ -101,7 +101,9 @@ export default function FAQ() {
             </span>
             <h2 className="mt-4 text-2xl font-semibold tracking-tight text-black leading-[1.12] md:text-3xl lg:text-[2.125rem]">
               Questions,{' '}
-              <span className="text-black">answered</span>
+              <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+                answered
+              </span>
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-black/50 md:text-base">
               Everything you need to know before asking your first question.

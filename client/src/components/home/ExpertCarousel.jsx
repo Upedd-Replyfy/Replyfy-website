@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { catalogApi } from '../../services/api'
 import ExpertCard from './ExpertCard'
 
-const SNAP_SPRING = { type: 'spring', stiffness: 260, damping: 28, mass: 0.85 }
+const SNAP_SPRING = { type: 'spring', stiffness: 280, damping: 30, mass: 0.85 }
 const ROTATE_MS = 5200
 const VISIBLE_RANGE = 2
 
@@ -19,6 +19,7 @@ function mapExpert(expert) {
     rating: expert.averageRating,
     answers: expert.completedAnswers,
     bio: expert.bio,
+    experience: expert.experience,
     topExpert: expert.isVerified,
   }
 }
@@ -32,21 +33,19 @@ function getOffset(index, activeIndex, total) {
 
 function getLayout(offset, isMobile, viewportWidth = 390) {
   const contentW = Math.max(280, viewportWidth - 32)
-  const centerWidth = isMobile ? Math.min(300, contentW) : 420
-  const sideWidth = isMobile ? Math.min(240, contentW * 0.78) : 320
-  const farWidth = isMobile ? Math.min(200, contentW * 0.65) : 280
-  const step = isMobile ? Math.min(195, contentW * 0.58) : 300
+  const centerWidth = isMobile ? Math.min(240, contentW) : 280
+  const sideWidth = isMobile ? Math.min(200, contentW * 0.72) : 240
+  const farWidth = isMobile ? Math.min(170, contentW * 0.58) : 200
+  const step = isMobile ? Math.min(168, contentW * 0.52) : 210
   const abs = Math.abs(offset)
 
   if (offset === 0) {
     return {
       x: 0,
       width: centerWidth,
-      scale: 1.04,
+      scale: 1,
       opacity: 1,
-      blur: 0,
       zIndex: 40,
-      rotateY: 0,
     }
   }
 
@@ -54,11 +53,9 @@ function getLayout(offset, isMobile, viewportWidth = 390) {
     return {
       x: Math.sign(offset) * step,
       width: sideWidth,
-      scale: 0.88,
-      opacity: 0.78,
-      blur: 2.5,
+      scale: 0.92,
+      opacity: 0.92,
       zIndex: 25,
-      rotateY: Math.sign(offset) * -8,
     }
   }
 
@@ -66,68 +63,57 @@ function getLayout(offset, isMobile, viewportWidth = 390) {
     return {
       x: Math.sign(offset) * step * 1.85,
       width: farWidth,
-      scale: 0.76,
-      opacity: 0.42,
-      blur: 6,
+      scale: 0.86,
+      opacity: 0.7,
       zIndex: 10,
-      rotateY: Math.sign(offset) * -14,
     }
   }
 
   return {
     x: Math.sign(offset) * step * 2.5,
     width: farWidth,
-    scale: 0.65,
+    scale: 0.8,
     opacity: 0,
-    blur: 10,
     zIndex: 0,
-    rotateY: 0,
   }
 }
 
-function CarouselCard({ expert, layout, isCenter, onSelect, reduceMotion, dark }) {
+function CarouselCard({ expert, layout, isCenter, onSelect, reduceMotion }) {
   return (
     <motion.div
-      className="absolute left-1/2 top-1/2 gpu-layer"
+      className="absolute left-1/2 top-1/2"
       style={{
         zIndex: layout.zIndex,
         y: '-50%',
         translateX: '-50%',
-        perspective: 1200,
-        willChange: reduceMotion ? 'auto' : 'transform, filter, opacity',
+        willChange: reduceMotion ? 'auto' : 'transform, opacity',
       }}
       animate={{
         width: layout.width,
         x: layout.x,
         scale: layout.scale,
         opacity: layout.opacity,
-        rotateY: layout.rotateY,
-        filter: `blur(${layout.blur}px)`,
       }}
       transition={reduceMotion ? { duration: 0 } : SNAP_SPRING}
       onClick={onSelect}
     >
       <div
-        className={`overflow-hidden rounded-[22px] transition-shadow duration-500 ${
+        className={`h-[340px] overflow-hidden rounded-[18px] transition-shadow duration-400 sm:h-[360px] ${
           !isCenter ? 'cursor-pointer' : ''
         }`}
         style={{
           boxShadow: isCenter
-            ? dark
-              ? '0 28px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)'
-              : '0 28px 70px rgba(15,23,42,0.16), 0 0 0 1px rgba(15,23,42,0.04)'
-            : dark
-              ? '0 12px 36px rgba(0,0,0,0.4)'
-              : '0 14px 40px rgba(15,23,42,0.08)',
+            ? '0 22px 50px rgba(15,23,42,0.16), 0 0 0 1px rgba(15,23,42,0.04)'
+            : '0 12px 32px rgba(15,23,42,0.1)',
         }}
       >
-        <ExpertCard expert={expert} isCenter={isCenter} dark={dark} />
+        <ExpertCard expert={expert} />
       </div>
     </motion.div>
   )
 }
 
-export default function ExpertCarousel({ dark = false }) {
+export default function ExpertCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [viewportWidth, setViewportWidth] = useState(390)
@@ -163,7 +149,7 @@ export default function ExpertCarousel({ dark = false }) {
       if (nextIndex === activeIndex) return
       setIsAnimating(true)
       setActiveIndex(nextIndex)
-      window.setTimeout(() => setIsAnimating(false), 520)
+      window.setTimeout(() => setIsAnimating(false), 480)
     },
     [activeIndex, total, isAnimating]
   )
@@ -209,34 +195,33 @@ export default function ExpertCarousel({ dark = false }) {
 
   if (!total) return null
 
-  const navBtn = dark
-    ? 'border border-white/15 bg-white/10 backdrop-blur-xl text-white hover:bg-white/15'
-    : 'border border-black/8 bg-white/90 text-black shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl hover:bg-white'
+  const navBtn =
+    'border border-black/8 bg-white/90 text-black shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl hover:bg-white'
 
   return (
-    <div ref={containerRef} className="relative mx-auto w-full max-w-[1400px]">
+    <div ref={containerRef} className="relative mx-auto w-full max-w-[1100px]">
       <button
         type="button"
         onClick={prev}
         disabled={isAnimating}
-        className={`absolute left-2 top-[42%] z-50 flex h-11 w-11 items-center justify-center rounded-full transition duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 md:left-4 md:h-12 md:w-12 ${navBtn}`}
+        className={`absolute left-1 top-[42%] z-50 flex h-10 w-10 items-center justify-center rounded-full transition duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 md:left-2 md:h-11 md:w-11 ${navBtn}`}
         aria-label="Previous mentor"
       >
-        <ChevronLeft size={20} />
+        <ChevronLeft size={18} />
       </button>
       <button
         type="button"
         onClick={next}
         disabled={isAnimating}
-        className={`absolute right-2 top-[42%] z-50 flex h-11 w-11 items-center justify-center rounded-full transition duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 md:right-4 md:h-12 md:w-12 ${navBtn}`}
+        className={`absolute right-1 top-[42%] z-50 flex h-10 w-10 items-center justify-center rounded-full transition duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 md:right-2 md:h-11 md:w-11 ${navBtn}`}
         aria-label="Next mentor"
       >
-        <ChevronRight size={20} />
+        <ChevronRight size={18} />
       </button>
 
       <div
         className="relative mx-auto select-none overflow-hidden"
-        style={{ width: '100%', maxWidth: '1400px', height: isMobile ? '420px' : '480px' }}
+        style={{ width: '100%', height: isMobile ? '380px' : '400px' }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -246,29 +231,10 @@ export default function ExpertCarousel({ dark = false }) {
           setDragHint(0)
         }}
       >
-        {/* Soft edge fades — premium depth hint */}
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-y-0 left-0 z-40 w-16 md:w-28 ${
-            dark
-              ? 'bg-gradient-to-r from-[#0a0a0a] to-transparent'
-              : 'bg-gradient-to-r from-white via-white/80 to-transparent'
-          }`}
-        />
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-y-0 right-0 z-40 w-16 md:w-28 ${
-            dark
-              ? 'bg-gradient-to-l from-[#0a0a0a] to-transparent'
-              : 'bg-gradient-to-l from-white via-white/80 to-transparent'
-          }`}
-        />
-
         <motion.div
           className="absolute inset-0"
           animate={{ x: dragHint }}
           transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-          style={{ perspective: 1400 }}
         >
           <AnimatePresence initial={false}>
             {experts.map((expert, index) => {
@@ -284,7 +250,6 @@ export default function ExpertCarousel({ dark = false }) {
                   isCenter={isCenter}
                   reduceMotion={!isInView}
                   onSelect={() => !isCenter && !isAnimating && goTo(index)}
-                  dark={dark}
                 />
               )
             })}
@@ -292,7 +257,7 @@ export default function ExpertCarousel({ dark = false }) {
         </motion.div>
       </div>
 
-      <div className="mt-5 flex items-center justify-center gap-2">
+      <div className="mt-4 flex items-center justify-center gap-2">
         {experts.map((expert, index) => {
           const active = index === activeIndex
           return (
@@ -306,8 +271,8 @@ export default function ExpertCarousel({ dark = false }) {
               <span
                 className={`block rounded-full transition-all duration-300 ${
                   active
-                    ? `h-2 w-8 ${dark ? 'bg-white' : 'bg-gradient-to-r from-sky-500 to-violet-600'}`
-                    : `h-2 w-2 ${dark ? 'bg-white/25 hover:bg-white/40' : 'bg-black/15 hover:bg-black/30'}`
+                    ? 'h-2 w-8 bg-gradient-to-r from-sky-500 to-violet-600'
+                    : 'h-2 w-2 bg-black/15 hover:bg-black/30'
                 }`}
               />
             </button>

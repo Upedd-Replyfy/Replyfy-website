@@ -8,7 +8,6 @@ import Logo from '../ui/Logo'
 const navLinks = [
   { label: 'How it works', href: '/#how-it-works' },
   { label: 'Mentors', href: '/#experts' },
-  { label: 'Find mentor', href: '/mentors' },
   { label: 'Pricing', href: '/#pricing' },
   { label: 'FAQ', href: '/#faq' },
 ]
@@ -63,8 +62,6 @@ export default function Navbar({ onAuthOpen }) {
     const className = mobile
       ? 'flex min-h-12 w-full items-center rounded-xl px-4 py-3 text-left text-base font-medium text-white/80 transition hover:bg-white/5 hover:text-white'
       : 'text-sm font-medium text-white/60 transition-colors hover:text-white'
-    const activeClass =
-      link.href === '/mentors' && location.pathname === '/mentors' ? ' text-white' : ''
 
     if (isHashLink(link.href)) {
       if (isHome) {
@@ -73,7 +70,7 @@ export default function Navbar({ onAuthOpen }) {
             key={link.href}
             type="button"
             onClick={() => handleHashClick(link.href)}
-            className={`${className}${activeClass}`}
+            className={className}
           >
             {link.label}
           </button>
@@ -84,7 +81,7 @@ export default function Navbar({ onAuthOpen }) {
           key={link.href}
           to={link.href}
           onClick={() => setMobileOpen(false)}
-          className={`${className}${activeClass}`}
+          className={className}
         >
           {link.label}
         </Link>
@@ -96,7 +93,7 @@ export default function Navbar({ onAuthOpen }) {
         key={link.href}
         to={link.href}
         onClick={() => setMobileOpen(false)}
-        className={`${className}${activeClass}`}
+        className={className}
       >
         {link.label}
       </Link>

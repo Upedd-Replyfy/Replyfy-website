@@ -23,8 +23,10 @@ export default function SectionHeader({
     >
       {eyebrow && (
         <span
-          className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${
-            dark ? 'text-white/45' : 'text-black/50'
+          className={`inline-flex rounded-full border px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] ${
+            dark
+              ? 'border-white/15 bg-white/5 text-white/55'
+              : 'border-black/10 bg-[#f5f5f5] text-black/55'
           }`}
         >
           {eyebrow}
