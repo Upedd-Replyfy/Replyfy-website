@@ -14,6 +14,8 @@ export const env = {
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
   jwtExpire: process.env.JWT_EXPIRE || '15m',
   jwtRefreshExpire: process.env.JWT_REFRESH_EXPIRE || '7d',
+  /** Explicit override to allow unpaid checkout when Razorpay keys are missing. */
+  allowDevPayments: process.env.ALLOW_DEV_PAYMENTS === 'true',
   cloudinary: {
     cloudName: process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_KEY || process.env.CLOUDINARY_API_KEY,
@@ -22,6 +24,7 @@ export const env = {
   razorpay: {
     keyId: process.env.RAZORPAY_KEY_ID,
     keySecret: process.env.RAZORPAY_KEY_SECRET,
+    webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET,
   },
   smtp: {
     host: process.env.SMTP_HOST,

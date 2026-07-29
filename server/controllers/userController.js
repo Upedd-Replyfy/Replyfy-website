@@ -1,15 +1,18 @@
 import Question from '../models/Question.js'
 import Payment from '../models/Payment.js'
 import Category from '../models/Category.js'
-import User from '../models/User.js'
 import { ApiError, asyncHandler } from '../utils/ApiError.js'
 import { getPlanAmount, planRequiresExpertSelection } from '../constants/pricing.js'
 import { env } from '../config/env.js'
-import { getRazorpay, verifyPaymentSignature } from '../config/razorpay.js'
+import { getRazorpay, verifyPaymentSignature, allowDevPayments } from '../config/razorpay.js'
 import { uploadFiles } from '../utils/uploadFiles.js'
-import { createNotification, notifyAdmins } from '../services/notificationService.js'
-import { logAudit } from '../services/auditService.js'
-import { validateCoupon, incrementCouponUsage } from '../services/couponService.js'
+import { validateCoupon } from '../services/couponService.js'
+import { clampPagination } from '../utils/pagination.js'
+import { logger } from '../utils/logger.js'
+import {
+  fetchAndAssertRazorpayPayment,
+  finalizeSuccessfulPayment,
+} from '../services/paymentCompletionService.js'
 
 export const initiateQuestion = asyncHandler(async (req, res) => {
   const { title, description, category, expertType, priority, plan, selectedExpert } = req.body
@@ -75,7 +78,12 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Question is not pending payment')
   }
 
-  let payableAmount = question.amount
+  const alreadyPaid = await Payment.findOne({ question: question._id, status: 'paid' })
+  if (alreadyPaid) throw new ApiError(400, 'Question already paid')
+
+  // Always price from the plan table so coupons cannot stack on a reduced amount.
+  const planAmount = getPlanAmount(question.plan)
+  let payableAmount = planAmount
   let discountAmount = 0
   let appliedCouponCode = ''
 
@@ -83,32 +91,55 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
     const coupon = await validateCoupon({
       code: couponCode,
       plan: question.plan,
-      amountPaise: question.amount,
+      amountPaise: planAmount,
     })
     payableAmount = coupon.finalAmount
     discountAmount = coupon.discountAmount
     appliedCouponCode = coupon.code
 
-    question.originalAmount = question.amount
+    question.originalAmount = planAmount
     question.discountAmount = discountAmount
     question.couponCode = appliedCouponCode
     question.amount = payableAmount
     await question.save()
+  } else {
+    // Reset any previous unused coupon draft so abandoned discounts do not stick.
+    question.originalAmount = planAmount
+    question.discountAmount = 0
+    question.couponCode = ''
+    question.amount = planAmount
+    await question.save()
+    payableAmount = planAmount
   }
+
+  // Supersede prior unpaid orders for this question.
+  await Payment.updateMany(
+    { question: question._id, user: req.user._id, status: 'created' },
+    { $set: { status: 'failed' } }
+  )
 
   const razorpay = getRazorpay()
   if (!razorpay) {
-    // Dev mode without Razorpay keys
+    if (!allowDevPayments()) {
+      throw new ApiError(503, 'Payment gateway is not configured')
+    }
     const payment = await Payment.create({
       user: req.user._id,
       question: question._id,
       plan: question.plan,
       amount: payableAmount,
-      originalAmount: question.originalAmount || question.amount,
+      originalAmount: planAmount,
       discountAmount,
       couponCode: appliedCouponCode,
-      razorpayOrderId: `dev_order_${question._id}`,
+      razorpayOrderId: `dev_order_${question._id}_${Date.now()}`,
       status: 'created',
+    })
+    logger.info('payment_order_created', {
+      paymentId: String(payment._id),
+      questionId: String(question._id),
+      orderId: payment.razorpayOrderId,
+      amount: payableAmount,
+      mode: 'dev',
     })
     return res.json({
       success: true,
@@ -125,7 +156,7 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
   const order = await razorpay.orders.create({
     amount: payableAmount,
     currency: 'INR',
-    receipt: `q_${question._id}`,
+    receipt: `q_${question._id}`.slice(0, 40),
     notes: { questionId: question._id.toString(), userId: req.user._id.toString() },
   })
 
@@ -134,11 +165,18 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
     question: question._id,
     plan: question.plan,
     amount: payableAmount,
-    originalAmount: question.originalAmount || payableAmount,
+    originalAmount: planAmount,
     discountAmount,
     couponCode: appliedCouponCode,
     razorpayOrderId: order.id,
     status: 'created',
+  })
+
+  logger.info('payment_order_created', {
+    paymentId: String(payment._id),
+    questionId: String(question._id),
+    orderId: order.id,
+    amount: payableAmount,
   })
 
   res.json({
@@ -155,77 +193,89 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
 export const verifyPayment = asyncHandler(async (req, res) => {
   const { razorpayOrderId, razorpayPaymentId, razorpaySignature, questionId } = req.body
 
+  if (!razorpayOrderId) throw new ApiError(400, 'Order ID is required')
+
   const payment = await Payment.findOne({ razorpayOrderId, user: req.user._id })
   if (!payment) throw new ApiError(404, 'Payment not found')
 
+  logger.info('payment_verify_attempt', {
+    paymentId: String(payment._id),
+    orderId: razorpayOrderId,
+    status: payment.status,
+  })
+
+  // Idempotent: already verified (client or webhook) — same response shape.
+  if (payment.status === 'paid') {
+    const question = await Question.findOne({ _id: payment.question, user: req.user._id })
+    return res.json({
+      success: true,
+      message: 'Payment already verified',
+      question,
+      payment,
+    })
+  }
+
+  if (payment.status !== 'created') {
+    throw new ApiError(400, 'Payment cannot be verified')
+  }
+
+  // Bind verify to the question that created the order (prevents questionId swap).
+  if (questionId && payment.question.toString() !== questionId.toString()) {
+    throw new ApiError(400, 'Payment does not match this question')
+  }
+
   const razorpay = getRazorpay()
   if (razorpay) {
+    if (!razorpayPaymentId || !razorpaySignature) {
+      throw new ApiError(400, 'Payment signature required')
+    }
     const valid = verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature)
-    if (!valid) throw new ApiError(400, 'Invalid payment signature')
+    if (!valid) {
+      logger.warn('payment_signature_failure', {
+        paymentId: String(payment._id),
+        orderId: razorpayOrderId,
+      })
+      throw new ApiError(400, 'Invalid payment signature')
+    }
+
+    // Server-side source of truth after HMAC.
+    await fetchAndAssertRazorpayPayment({
+      razorpayPaymentId,
+      expectedOrderId: payment.razorpayOrderId,
+      expectedAmountPaise: payment.amount,
+      expectedCurrency: payment.currency || 'INR',
+    })
+  } else if (!allowDevPayments()) {
+    throw new ApiError(503, 'Payment gateway is not configured')
   }
 
-  payment.razorpayPaymentId = razorpayPaymentId || 'dev_payment'
-  payment.razorpaySignature = razorpaySignature || 'dev_sig'
-  payment.status = 'paid'
-
-  const question = await Question.findById(questionId || payment.question)
-  if (!question || question.user.toString() !== req.user._id.toString()) {
-    throw new ApiError(404, 'Question not found')
+  const question = await Question.findOne({ _id: payment.question, user: req.user._id })
+  if (!question) throw new ApiError(404, 'Question not found')
+  if (question.status !== 'pending_payment' && question.status !== 'pending_admin_review') {
+    throw new ApiError(400, 'Question is not pending payment')
   }
 
-  question.status = 'pending_admin_review'
-  question.payment = payment._id
-  await question.save()
-  payment.question = question._id
-  await payment.save()
-
-  if (payment.couponCode) {
-    await incrementCouponUsage(payment.couponCode)
-  }
-
-  await createNotification({
-    userId: req.user._id,
-    type: 'payment_success',
-    title: 'Payment Successful',
-    message: `Your payment of ₹${question.amount / 100} was successful. Question is pending admin review.`,
-    link: `/dashboard/questions/${question._id}`,
-    email: req.user.email,
-  })
-
-  await createNotification({
-    userId: req.user._id,
-    type: 'question_submitted',
-    title: 'Question Submitted',
-    message: 'Your question has been submitted and is awaiting admin review.',
-    link: `/dashboard/questions/${question._id}`,
-    email: req.user.email,
-  })
-
-  const admins = await User.find({ role: 'admin', isActive: true })
-  await notifyAdmins({
-    type: 'question_submitted',
-    title: 'New Question for Review',
-    message: `New question "${question.title}" requires admin review.`,
-    link: `/admin/questions/${question._id}`,
-    admins,
-  })
-
-  await logAudit({
-    action: 'payment_verified',
-    entityType: 'Payment',
-    entityId: payment._id,
-    performedBy: req.user._id,
-    metadata: { questionId: question._id },
+  const result = await finalizeSuccessfulPayment({
+    paymentDoc: payment,
+    razorpayPaymentId: razorpayPaymentId || `dev_payment_${Date.now()}`,
+    razorpaySignature: razorpaySignature || 'dev_sig',
+    source: razorpay ? 'client_verify' : 'dev',
     ip: req.ip,
   })
 
-  res.json({ success: true, message: 'Payment verified', question, payment })
+  res.json({
+    success: true,
+    message: result.alreadyProcessed ? 'Payment already verified' : 'Payment verified',
+    question: result.question,
+    payment: result.payment,
+  })
 })
 
 export const getMyQuestions = asyncHandler(async (req, res) => {
-  const { status, page = 1, limit = 10 } = req.query
+  const { status } = req.query
+  const { page, limit, skip } = clampPagination(req.query)
   const query = { user: req.user._id }
-  if (status) query.status = status
+  if (status) query.status = String(status)
 
   const [questions, total] = await Promise.all([
     Question.find(query)
@@ -234,15 +284,15 @@ export const getMyQuestions = asyncHandler(async (req, res) => {
       .populate('assignedExpert', 'name avatar')
       .populate('selectedExpert', 'name avatar')
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit)),
+      .skip(skip)
+      .limit(limit),
     Question.countDocuments(query),
   ])
 
   res.json({
     success: true,
     questions,
-    pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / limit) },
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) || 0 },
   })
 })
 

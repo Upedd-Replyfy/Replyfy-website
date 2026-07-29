@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import ExpertStatCard from '../../components/expert/ExpertStatCard'
 import ExpertPanel from '../../components/expert/ExpertPanel'
-import { StatusBadge } from '../../components/layouts/DashboardShell'
+import StatusBadge from '../../components/ui/StatusBadge'
 import { expertApi } from '../../services/api'
 import { formatPoints, formatPointsFixed } from '../../utils/currency'
 import { useAuth } from '../../context/AuthContext'

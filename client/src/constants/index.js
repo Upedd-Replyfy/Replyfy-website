@@ -1,5 +1,3 @@
-export const PLAN_IDS = ['basic', 'mentor', 'expert_call']
-
 export const PLANS = {
   basic: {
     id: 'basic',

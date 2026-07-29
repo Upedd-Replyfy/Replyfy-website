@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import ExpertPageHeader from '../../components/expert/ExpertPageHeader'
 import ExpertPanel from '../../components/expert/ExpertPanel'
-import { StatusBadge } from '../../components/layouts/DashboardShell'
+import StatusBadge from '../../components/ui/StatusBadge'
 import { expertApi } from '../../services/api'
 
 export default function ExpertQuestions() {

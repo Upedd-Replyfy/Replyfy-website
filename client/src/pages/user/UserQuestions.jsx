@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import { userApi } from '../../services/api'
-import { StatusBadge } from '../../components/layouts/DashboardShell'
+import StatusBadge from '../../components/ui/StatusBadge'
 import { QUESTION_STATUS } from '../../constants'
 import { formatDistanceToNow } from '../../utils/date'
 

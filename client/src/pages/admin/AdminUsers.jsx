@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
-import { DataTable } from '../../components/layouts/DashboardShell'
+import DataTable from '../../components/ui/DataTable'
 import { adminApi } from '../../services/api'
 
 export default function AdminUsers() {

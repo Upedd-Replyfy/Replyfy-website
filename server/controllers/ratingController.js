@@ -9,14 +9,25 @@ import User from '../models/User.js'
 export const submitRating = asyncHandler(async (req, res) => {
   const { questionId, stars, comment } = req.body
 
-  const question = await Question.findOne({
-    _id: questionId,
-    user: req.user._id,
-    status: 'completed',
-  })
-  if (!question) throw new ApiError(404, 'Question not found or not completed')
-  if (question.isRated) throw new ApiError(400, 'Already rated')
-  if (!question.assignedExpert) throw new ApiError(400, 'No mentor assigned')
+  const question = await Question.findOneAndUpdate(
+    {
+      _id: questionId,
+      user: req.user._id,
+      status: 'completed',
+      isRated: false,
+      assignedExpert: { $ne: null },
+    },
+    { $set: { isRated: true } },
+    { new: true }
+  )
+  if (!question) {
+    const existing = await Question.findOne({ _id: questionId, user: req.user._id })
+    if (!existing) throw new ApiError(404, 'Question not found or not completed')
+    if (existing.isRated) throw new ApiError(400, 'Already rated')
+    if (existing.status !== 'completed') throw new ApiError(404, 'Question not found or not completed')
+    if (!existing.assignedExpert) throw new ApiError(400, 'No mentor assigned')
+    throw new ApiError(400, 'Already rated')
+  }
 
   const rating = await Rating.create({
     question: questionId,
@@ -25,9 +36,6 @@ export const submitRating = asyncHandler(async (req, res) => {
     stars,
     comment: comment || '',
   })
-
-  question.isRated = true
-  await question.save()
 
   const profile = await ExpertProfile.findOne({ user: question.assignedExpert })
   if (profile) {

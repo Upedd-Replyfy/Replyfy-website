@@ -10,9 +10,13 @@ cloudinary.config({
 export { cloudinary }
 
 export async function uploadBufferToCloudinary(buffer, folder = 'replyfy', filename = 'file') {
+  const safeName = String(filename || 'file')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .slice(0, 80)
+
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: 'auto', public_id: `${folder}/${Date.now()}-${filename}` },
+      { folder, resource_type: 'auto', public_id: `${Date.now()}-${safeName}` },
       (err, result) => {
         if (err) reject(err)
         else

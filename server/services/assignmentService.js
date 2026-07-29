@@ -53,11 +53,3 @@ export async function assignExpertToQuestion({ question, expertUserId, assignedB
 
   return question
 }
-
-export async function releaseExpertAssignment(expertUserId, session) {
-  const profile = await ExpertProfile.findOne({ user: expertUserId }).session(session || null)
-  if (profile && profile.activeAssignments > 0) {
-    profile.activeAssignments -= 1
-    await profile.save({ session })
-  }
-}

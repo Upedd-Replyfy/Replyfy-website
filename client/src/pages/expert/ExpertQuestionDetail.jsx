@@ -4,7 +4,7 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Calendar, FolderOpen, Paperclip, User2, X } from 'lucide-react'
 import ExpertPanel from '../../components/expert/ExpertPanel'
-import { StatusBadge } from '../../components/layouts/DashboardShell'
+import StatusBadge from '../../components/ui/StatusBadge'
 import { expertApi } from '../../services/api'
 
 export default function ExpertQuestionDetail() {

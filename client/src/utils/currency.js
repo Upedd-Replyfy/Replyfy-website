@@ -6,13 +6,6 @@ export function formatRupee(paise) {
 }
 
 /**
- * Format paise with two decimal places (wallet balances).
- */
-export function formatRupeeFixed(paise) {
-  return `₹${((paise || 0) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
-}
-
-/**
  * Format paise as rupee amount without prefix (payment step adds ₹).
  */
 export function formatRupeeAmount(paise) {

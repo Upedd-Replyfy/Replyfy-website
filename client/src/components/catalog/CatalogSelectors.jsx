@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { Skeleton } from '../ui/Skeleton'
 
 export function CategoryPills({ categories, selectedId, onSelect, loading }) {

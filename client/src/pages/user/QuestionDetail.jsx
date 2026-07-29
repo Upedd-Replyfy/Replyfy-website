@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import { userApi } from '../../services/api'
-import { StatusBadge } from '../../components/layouts/DashboardShell'
+import StatusBadge from '../../components/ui/StatusBadge'
 import { Bookmark, Star } from 'lucide-react'
 import { isQuestionSaved, toggleSavedQuestion } from '../../utils/savedAnswers'
 

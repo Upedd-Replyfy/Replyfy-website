@@ -93,8 +93,6 @@ export function LaptopPreview({
   )
 }
 
-export const LaptopDevicePreview = LaptopPreview
-
 /**
  * Prefer ~94% viewport width. Only shrink if height truly cannot fit.
  */
@@ -232,9 +230,3 @@ export function PhonePreview({
   )
 }
 
-export const PhoneDevicePreview = PhonePreview
-
-export default function DevicePreview({ variant = 'laptop', ...props }) {
-  if (variant === 'phone') return <PhonePreview {...props} />
-  return <LaptopPreview {...props} />
-}

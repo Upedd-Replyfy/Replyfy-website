@@ -4,6 +4,7 @@ import { body } from 'express-validator'
 import { protect, authorize } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
 import { upload } from '../middleware/upload.js'
+import { paymentLimiter } from '../middleware/rateLimiter.js'
 import {
   initiateQuestion,
   createPaymentOrder,
@@ -35,12 +36,30 @@ router.post(
 
 router.post(
   '/payments/validate-coupon',
+  paymentLimiter,
   [body('code').trim().notEmpty(), body('plan').isIn(PLAN_IDS)],
   validate,
   validateCouponCode
 )
-router.post('/payments/create-order', body('questionId').notEmpty(), validate, createPaymentOrder)
-router.post('/payments/verify', verifyPayment)
+router.post(
+  '/payments/create-order',
+  paymentLimiter,
+  body('questionId').notEmpty(),
+  validate,
+  createPaymentOrder
+)
+router.post(
+  '/payments/verify',
+  paymentLimiter,
+  [
+    body('razorpayOrderId').trim().notEmpty(),
+    body('razorpayPaymentId').optional().isString(),
+    body('razorpaySignature').optional().isString(),
+    body('questionId').optional().isString(),
+  ],
+  validate,
+  verifyPayment
+)
 router.get('/questions', getMyQuestions)
 router.get('/questions/:id', getQuestionById)
 router.get('/payments', getPaymentHistory)

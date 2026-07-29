@@ -4,6 +4,10 @@ import User from '../models/User.js'
 import ExpertProfile from '../models/ExpertProfile.js'
 import { ApiError, asyncHandler } from '../utils/ApiError.js'
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/generateToken.js'
+import {
+  hashRefreshToken,
+  matchesRefreshToken,
+} from '../utils/refreshToken.js'
 import { logAudit } from '../services/auditService.js'
 
 const googleClient = process.env.GOOGLE_CLIENT_ID
@@ -31,7 +35,7 @@ export const register = asyncHandler(async (req, res) => {
 
   const token = signAccessToken(user._id, user.role)
   const refreshToken = signRefreshToken(user._id)
-  user.refreshToken = refreshToken
+  user.refreshToken = hashRefreshToken(refreshToken)
   await user.save()
 
   await logAudit({
@@ -67,7 +71,7 @@ export const login = asyncHandler(async (req, res) => {
   user.lastLogin = new Date()
   const token = signAccessToken(user._id, user.role)
   const refreshToken = signRefreshToken(user._id)
-  user.refreshToken = refreshToken
+  user.refreshToken = hashRefreshToken(refreshToken)
   await user.save()
 
   let expertProfile = null
@@ -100,6 +104,16 @@ async function resolveGoogleProfile({ credential, accessToken }) {
   }
 
   if (accessToken) {
+    const tokenInfoRes = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
+    )
+    if (!tokenInfoRes.ok) throw new ApiError(401, 'Invalid Google sign-in')
+    const tokenInfo = await tokenInfoRes.json()
+    const audience = tokenInfo.aud || tokenInfo.azp
+    if (audience !== process.env.GOOGLE_CLIENT_ID) {
+      throw new ApiError(401, 'Invalid Google sign-in')
+    }
+
     const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
@@ -147,7 +161,7 @@ export const googleLogin = asyncHandler(async (req, res) => {
   user.lastLogin = new Date()
   const token = signAccessToken(user._id, user.role)
   const refreshToken = signRefreshToken(user._id)
-  user.refreshToken = refreshToken
+  user.refreshToken = hashRefreshToken(refreshToken)
   await user.save()
 
   let expertProfile = null
@@ -169,15 +183,26 @@ export const refresh = asyncHandler(async (req, res) => {
   const { refreshToken } = req.body
   if (!refreshToken) throw new ApiError(400, 'Refresh token required')
 
-  const decoded = verifyRefreshToken(refreshToken)
-  const user = await User.findById(decoded.id).select('+refreshToken')
-  if (!user || user.refreshToken !== refreshToken) {
+  let decoded
+  try {
+    decoded = verifyRefreshToken(refreshToken)
+  } catch {
     throw new ApiError(401, 'Invalid refresh token')
+  }
+
+  const user = await User.findById(decoded.id).select('+refreshToken')
+  if (!user || !matchesRefreshToken(user.refreshToken, refreshToken)) {
+    throw new ApiError(401, 'Invalid refresh token')
+  }
+  if (!user.isActive) {
+    user.refreshToken = undefined
+    await user.save()
+    throw new ApiError(403, 'Account deactivated')
   }
 
   const token = signAccessToken(user._id, user.role)
   const newRefresh = signRefreshToken(user._id)
-  user.refreshToken = newRefresh
+  user.refreshToken = hashRefreshToken(newRefresh)
   await user.save()
 
   res.json({ success: true, token, refreshToken: newRefresh })
@@ -205,14 +230,22 @@ export const updateProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
   if (name) user.name = name
   if (phone !== undefined) user.phone = phone
-  if (avatar !== undefined) user.avatar = avatar
+  if (avatar !== undefined) {
+    if (avatar === '' || avatar == null) {
+      user.avatar = ''
+    } else if (typeof avatar === 'string' && /^https:\/\//i.test(avatar) && avatar.length < 2048) {
+      user.avatar = avatar
+    } else {
+      throw new ApiError(400, 'Avatar must be an https URL')
+    }
+  }
   await user.save()
   res.json({ success: true, user: sanitizeUser(user) })
 })
 
 export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body
-  const user = await User.findById(req.user._id).select('+password')
+  const user = await User.findById(req.user._id).select('+password +refreshToken')
   if (!user.password) {
     throw new ApiError(400, 'Set a password from account settings before changing it')
   }
@@ -220,6 +253,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Current password is incorrect')
   }
   user.password = newPassword
+  user.refreshToken = undefined
   await user.save()
   res.json({ success: true, message: 'Password updated' })
 })

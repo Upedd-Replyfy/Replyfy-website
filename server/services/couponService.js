@@ -102,8 +102,9 @@ export async function validateCoupon({ code, plan, amountPaise }) {
   }
 }
 
-export async function incrementCouponUsage(code) {
+export async function incrementCouponUsage(code, session = null) {
   const normalized = normalizeCode(code)
   if (!normalized) return
-  await Coupon.updateOne({ code: normalized }, { $inc: { usedCount: 1 } })
+  const opts = session ? { session } : undefined
+  await Coupon.updateOne({ code: normalized }, { $inc: { usedCount: 1 } }, opts)
 }
