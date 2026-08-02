@@ -45,7 +45,6 @@ const features = [
 ]
 
 const CARD_CENTERS = [12.5, 37.5, 62.5, 87.5]
-const DOT_POSITIONS = [16.66, 50, 83.33]
 const POP_PAUSE_MS = 280
 const TRAVEL_MS = 520
 
@@ -53,14 +52,14 @@ function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function StepConnector({ lineProgress, activeCard }) {
+function StepConnector({ lineProgress }) {
   const glowLeft = useTransform(lineProgress, (v) => `${v}%`)
   const trailWidth = useTransform(lineProgress, (v) => `${Math.max(v - CARD_CENTERS[0], 0)}%`)
   const trailLeft = `${CARD_CENTERS[0]}%`
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-[0.5%] top-[80px] hidden lg:block"
+      className="pointer-events-none absolute inset-x-[0.5%] top-1/2 z-0 hidden -translate-y-1/2 lg:block"
       aria-hidden
     >
       <div className="relative h-px w-full">
@@ -77,25 +76,6 @@ function StepConnector({ lineProgress, activeCard }) {
         >
           <span className="absolute inset-0 rounded-full bg-gradient-to-r from-sky-400 to-violet-500" />
         </motion.div>
-
-        {DOT_POSITIONS.map((left, i) => {
-          const lit = activeCard > i
-          return (
-            <motion.span
-              key={left}
-              className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{ left: `${left}%` }}
-              animate={{
-                backgroundColor: lit ? '#8b5cf6' : '#171717',
-                boxShadow: lit
-                  ? '0 0 12px 4px rgba(139,92,246,0.45)'
-                  : '0 0 0 0 rgba(0,0,0,0)',
-                scale: lit ? 1.25 : 1,
-              }}
-              transition={{ type: 'spring', stiffness: 420, damping: 22 }}
-            />
-          )
-        })}
       </div>
     </div>
   )
@@ -200,7 +180,6 @@ export default function HowItWorks() {
   const stepsRef = useRef(null)
   const isInView = useInView(stepsRef, { once: true, amount: 0.35 })
   const [visibleCount, setVisibleCount] = useState(0)
-  const [activeCard, setActiveCard] = useState(-1)
   const lineProgress = useMotionValue(CARD_CENTERS[0])
   const startedRef = useRef(false)
 
@@ -213,7 +192,6 @@ export default function HowItWorks() {
 
     async function runSequence() {
       setVisibleCount(1)
-      setActiveCard(0)
       lineProgress.set(CARD_CENTERS[0])
       await wait(POP_PAUSE_MS)
       if (cancelled) return
@@ -227,7 +205,6 @@ export default function HowItWorks() {
         if (cancelled) return
 
         setVisibleCount(i + 1)
-        setActiveCard(i)
         await wait(POP_PAUSE_MS)
         if (cancelled) return
       }
@@ -270,7 +247,7 @@ export default function HowItWorks() {
           ref={stepsRef}
           className="relative mx-auto w-full max-w-[1650px] px-0 sm:px-6 lg:px-8"
         >
-          <StepConnector lineProgress={lineProgress} activeCard={activeCard} />
+          <StepConnector lineProgress={lineProgress} />
 
           <div className="grid auto-rows-fr gap-5 sm:grid-cols-2 sm:gap-9 lg:grid-cols-4 lg:gap-10 xl:gap-12">
             {steps.map((step, index) => (

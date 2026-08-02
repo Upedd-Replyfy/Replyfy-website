@@ -40,7 +40,9 @@ export default function QuickActionsMenu({ onRegisterExpert }) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setOpen((v) => !v)}
-        className="admin-btn-gradient flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
+        className="admin-btn-gradient inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-white sm:px-4"
+        aria-expanded={open}
+        aria-haspopup="menu"
       >
         <Plus size={16} />
         <span className="hidden sm:inline">Quick Actions</span>
@@ -52,7 +54,8 @@ export default function QuickActionsMenu({ onRegisterExpert }) {
             initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#202323] py-1 shadow-2xl"
+            role="menu"
+            className="absolute right-0 top-full z-50 mt-2 max-h-[min(70vh,360px)] w-[min(15rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-border bg-white py-1.5 shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
           >
             {actions.map((action) => {
               const Icon = action.icon
@@ -60,6 +63,7 @@ export default function QuickActionsMenu({ onRegisterExpert }) {
                 <button
                   key={action.label}
                   type="button"
+                  role="menuitem"
                   onClick={() => {
                     setOpen(false)
                     if (action.to.includes('register=1') && onRegisterExpert) {
@@ -68,9 +72,11 @@ export default function QuickActionsMenu({ onRegisterExpert }) {
                       navigate(action.to)
                     }
                   }}
-                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-ink transition-colors hover:bg-white/[0.06]"
+                  className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700"
                 >
-                  <Icon size={16} className="text-sky-400" />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <Icon size={15} />
+                  </span>
                   {action.label}
                 </button>
               )

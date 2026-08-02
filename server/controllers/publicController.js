@@ -43,8 +43,17 @@ export const getExperts = asyncHandler(async (req, res) => {
 
   const query = { status: 'active' }
 
-  if (category) query.category = category
-  if (expertType || type) query.expertType = expertType || type
+  if (category || expertType || type) {
+    const typeId = expertType || type
+    const and = []
+    if (category) {
+      and.push({ $or: [{ category }, { categories: category }] })
+    }
+    if (typeId) {
+      and.push({ $or: [{ expertType: typeId }, { expertTypes: typeId }] })
+    }
+    if (and.length) query.$and = and
+  }
   if (availability) query.availability = availability
 
   if (rating) query.averageRating = { $gte: Number(rating) }
@@ -69,6 +78,8 @@ export const getExperts = asyncHandler(async (req, res) => {
     .populate('user', 'name avatar isActive')
     .populate('category', 'name slug')
     .populate('expertType', 'name slug description')
+    .populate('categories', 'name slug')
+    .populate('expertTypes', 'name slug description')
     .sort(sortMap[sort] || sortMap.rating)
     .lean()
 
@@ -106,12 +117,16 @@ export const getExpertById = asyncHandler(async (req, res) => {
     .populate('user', 'name avatar isActive')
     .populate('category', 'name slug')
     .populate('expertType', 'name slug description')
+    .populate('categories', 'name slug')
+    .populate('expertTypes', 'name slug description')
 
   if (!profile) {
     profile = await ExpertProfile.findOne({ user: req.params.id })
       .populate('user', 'name avatar isActive')
       .populate('category', 'name slug')
       .populate('expertType', 'name slug description')
+      .populate('categories', 'name slug')
+      .populate('expertTypes', 'name slug description')
   }
 
   if (!profile) return res.status(404).json({ success: false, message: 'Mentor not found' })

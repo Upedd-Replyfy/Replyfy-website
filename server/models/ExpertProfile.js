@@ -5,6 +5,10 @@ const expertProfileSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
     expertType: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpertType', required: true },
+    /** Additional categories this mentor covers (includes primary when set) */
+    categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
+    /** Additional mentor types this mentor covers (includes primary when set) */
+    expertTypes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ExpertType' }],
     experience: { type: String, default: '' },
     bio: { type: String, default: '' },
     languages: [{ type: String }],
@@ -32,6 +36,9 @@ const expertProfileSchema = new mongoose.Schema(
 )
 
 expertProfileSchema.index({ category: 1, expertType: 1, availability: 1, status: 1 })
+// MongoDB cannot compound-index two array fields together ("parallel arrays")
+expertProfileSchema.index({ categories: 1, availability: 1, status: 1 })
+expertProfileSchema.index({ expertTypes: 1, availability: 1, status: 1 })
 expertProfileSchema.index({ averageRating: -1, completedAnswers: -1 })
 
 export default mongoose.model('ExpertProfile', expertProfileSchema)

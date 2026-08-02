@@ -44,7 +44,7 @@ function ExpertLayoutInner() {
 
       <div className="lg:pl-[248px]">
         <ExpertTopbar onMenuOpen={() => setMobileOpen(true)} />
-        <main className="mx-auto max-w-7xl bg-canvas p-4 sm:p-6 lg:p-8">
+        <main className="w-full bg-canvas p-3 sm:p-5 lg:p-6">
           <Outlet />
         </main>
       </div>

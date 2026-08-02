@@ -3,6 +3,14 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import DisplayMentors from './pages/DisplayMentors'
+import MarketingShell from './components/layout/MarketingShell'
+import About from './pages/info/About'
+import Careers from './pages/info/Careers'
+import Contact from './pages/info/Contact'
+import Privacy from './pages/info/Privacy'
+import Terms from './pages/info/Terms'
+import Refund from './pages/info/Refund'
+import Legal from './pages/info/Legal'
 import Dashboard from './pages/Dashboard'
 import AskQuestion from './pages/user/AskQuestion'
 import UserQuestions from './pages/user/UserQuestions'
@@ -39,6 +47,15 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/mentors" element={<DisplayMentors />} />
         <Route path="/displaymentor" element={<Navigate to="/mentors" replace />} />
+        <Route element={<MarketingShell />}>
+          <Route path="/about" element={<About />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/legal" element={<Legal />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/refund" element={<Refund />} />
+        </Route>
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
 

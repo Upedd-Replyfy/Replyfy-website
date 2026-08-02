@@ -2,6 +2,10 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import SectionHeader from '../ui/SectionHeader'
+import zaidPhoto from '../../assets/review/Zaid- KPMG (Analyst - Advisory).jpeg'
+import kritikaPhoto from '../../assets/review/Krittika- Nielsen (HR).jpeg'
+import amanPhoto from '../../assets/review/Aman-  Marelli (QA Intern).jpeg'
+import anushreePhoto from '../../assets/review/Anushree- Founder (Pocket of Joy).jpeg'
 
 const SNAP_SPRING = { type: 'spring', stiffness: 260, damping: 28, mass: 0.85 }
 const ROTATE_MS = 5200
@@ -10,51 +14,31 @@ const VISIBLE_RANGE = 2
 const testimonials = [
   {
     quote:
-      'I spent weeks researching incorporation options. One answer from Replyfy gave me more clarity than 20 blog posts.',
-    name: 'Ananya R.',
-    role: 'Founder, pre-seed startup',
-    image:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=1000&fit=crop&crop=faces',
+      "Getting advice from Replyfy mentors gave me clarity that generic AI responses just couldn't provide.",
+    name: 'Zaid',
+    role: 'KPMG – Analyst, Advisory',
+    image: zaidPhoto,
   },
   {
     quote:
-      'The mentor actually read my full question and addressed my specific situation. Felt like a $500 consultation for a fraction of the price.',
-    name: 'Rahul M.',
-    role: 'Product Manager',
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop&crop=faces',
+      'Every reply felt thoughtful, practical, and written by someone who had actually been through similar situations.',
+    name: 'Kritika',
+    role: 'Nielsen – HR',
+    image: kritikaPhoto,
   },
   {
     quote:
-      'We used Replyfy before our Series A to sanity-check our cap table. The response was detailed, practical, and actionable.',
-    name: 'Sarah K.',
-    role: 'COO, Series A startup',
-    image:
-      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=1000&fit=crop&crop=faces',
+      "The experts didn't just answer my question—they explained the reasoning, which helped me make better decisions.",
+    name: 'Aman',
+    role: 'Marelli – QA Intern',
+    image: amanPhoto,
   },
   {
     quote:
-      'As a first-time founder, legal questions used to freeze me. Replyfy matched me with someone who had done this before — game changer.',
-    name: 'Dev P.',
-    role: 'Solo founder',
-    image:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=1000&fit=crop&crop=faces',
-  },
-  {
-    quote:
-      'Clear, human answers without the agency fluff. We now use Replyfy for marketing and hiring decisions every quarter.',
-    name: 'Meera S.',
-    role: 'Head of Growth',
-    image:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&h=1000&fit=crop&crop=faces',
-  },
-  {
-    quote:
-      'The turnaround was under 12 hours and the advice paid for itself in one meeting. Highly recommend for operators.',
-    name: 'James L.',
-    role: 'Ops lead, B2B SaaS',
-    image:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&h=1000&fit=crop&crop=faces',
+      'The guidance was tailored to my situation, making it far more useful than generic advice I found online.',
+    name: 'Anushree',
+    role: 'Founder, Pocket of Joy',
+    image: anushreePhoto,
   },
 ]
 
@@ -125,31 +109,43 @@ function TestimonialCard({ item, isCenter }) {
     <blockquote className="group relative h-[360px] overflow-hidden rounded-[22px] border border-black/10 md:h-[400px]">
       <img
         src={item.image}
-        alt=""
-        className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out ${
+        alt={item.name}
+        className={`absolute inset-0 h-full w-full object-cover object-top transition-all duration-700 ease-out ${
           isCenter ? 'grayscale-0 scale-100' : 'grayscale scale-[1.02]'
         } group-hover:scale-105 group-hover:grayscale-0`}
         draggable={false}
       />
 
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black via-black/65 to-black/15" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/10"
+        className="absolute inset-0 bg-black/25 transition-colors duration-300 group-hover:bg-black/15"
       />
 
       <div className="relative z-10 flex h-full flex-col justify-end p-5 md:p-6">
         <p
-          className={`leading-relaxed text-white ${
+          className={`leading-relaxed text-white drop-shadow-sm ${
             isCenter ? 'text-sm md:text-[15px]' : 'line-clamp-4 text-xs md:text-[13px]'
           }`}
         >
           &ldquo;{item.quote}&rdquo;
         </p>
 
-        <footer className="mt-4 border-t border-white/20 pt-3">
-          <cite className="not-italic text-sm font-semibold text-white">{item.name}</cite>
-          <p className="mt-0.5 text-[11px] text-white/65">{item.role}</p>
+        <footer className="mt-4 border-t border-white/30 pt-3.5">
+          <cite
+            className={`not-italic font-semibold tracking-tight text-white drop-shadow-md ${
+              isCenter ? 'text-base md:text-lg' : 'text-sm md:text-base'
+            }`}
+          >
+            {item.name}
+          </cite>
+          <p
+            className={`mt-1 font-medium text-white/90 drop-shadow-sm ${
+              isCenter ? 'text-xs md:text-sm' : 'text-[11px] md:text-xs'
+            }`}
+          >
+            {item.role}
+          </p>
         </footer>
       </div>
     </blockquote>
@@ -277,7 +273,7 @@ export default function Testimonials() {
       <div className="page-container">
         <SectionHeader
           eyebrow="Testimonials"
-          title="Founders trust"
+          title="People trust"
           highlight="real answers"
           description="Thousands of professionals use Replyfy when they need clarity, not more noise."
           className="mx-auto mb-10 md:mb-14"

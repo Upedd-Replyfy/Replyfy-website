@@ -2,12 +2,12 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 const ShellThemeContext = createContext(null)
 
-export function ShellThemeProvider({ storageKey, children }) {
+export function ShellThemeProvider({ storageKey, children, defaultTheme = 'dark' }) {
   const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'dark'
+    if (typeof window === 'undefined') return defaultTheme
     const stored = localStorage.getItem(storageKey)
-    if (stored === 'light') return 'light'
-    return 'dark'
+    if (stored === 'light' || stored === 'dark') return stored
+    return defaultTheme
   })
 
   useEffect(() => {

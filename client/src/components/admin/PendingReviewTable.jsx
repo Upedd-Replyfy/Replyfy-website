@@ -50,10 +50,47 @@ export default function PendingReviewTable({ questions = [], loading }) {
     )
   })
 
+  const rows = filtered.slice(0, 5)
+
+  const RowActions = ({ q }) => (
+    <div className="flex flex-wrap gap-1.5">
+      <button
+        type="button"
+        onClick={() => approveMutation.mutate(q._id)}
+        className="admin-btn-success rounded-lg p-2"
+        title="Auto assign"
+      >
+        <Check size={14} />
+      </button>
+      <button
+        type="button"
+        onClick={() => setAssignQuestion(q)}
+        className="admin-btn-gradient rounded-lg p-2 text-black"
+        title="Pick mentor"
+      >
+        <Eye size={14} />
+      </button>
+      <button
+        type="button"
+        onClick={() => setRejectQuestion(q)}
+        className="admin-btn-danger rounded-lg p-2"
+        title="Reject"
+      >
+        <X size={14} />
+      </button>
+      <Link
+        to="/admin/questions"
+        className="rounded-lg border border-white/[0.08] p-2 text-muted hover:text-ink"
+      >
+        <Eye size={14} />
+      </Link>
+    </div>
+  )
+
   return (
     <>
       <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#202323]">
-        <div className="flex flex-col gap-3 border-b border-white/[0.08] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-white/[0.08] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
             <h3 className="text-sm font-semibold text-ink">Pending Review</h3>
             <p className="mt-0.5 text-xs text-muted">Approve, assign, or reject</p>
@@ -66,7 +103,31 @@ export default function PendingReviewTable({ questions = [], loading }) {
             className="w-full rounded-xl border border-white/[0.08] bg-[#272927] px-3 py-2 text-sm sm:w-48"
           />
         </div>
-        <div className="overflow-x-auto">
+
+        <div className="md:hidden">
+          {loading ? (
+            <p className="px-4 py-8 text-center text-muted">Loading...</p>
+          ) : rows.length === 0 ? (
+            <p className="px-4 py-8 text-center text-muted">No pending questions</p>
+          ) : (
+            <div className="divide-y divide-white/[0.06]">
+              {rows.map((q) => (
+                <div key={q._id} className="space-y-3 px-4 py-4">
+                  <div className="min-w-0">
+                    <p className="line-clamp-2 text-sm font-medium text-ink">{q.title}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-muted">{q.category?.name || '—'}</span>
+                      <StatusBadge status={q.status} />
+                    </div>
+                  </div>
+                  <RowActions q={q} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="bg-[#242727] text-xs uppercase tracking-wider text-muted-light">
               <tr>
@@ -79,21 +140,16 @@ export default function PendingReviewTable({ questions = [], loading }) {
             <tbody>
               {loading ? (
                 <tr><td colSpan={4} className="px-5 py-8 text-center text-muted">Loading...</td></tr>
-              ) : filtered.length === 0 ? (
+              ) : rows.length === 0 ? (
                 <tr><td colSpan={4} className="px-5 py-8 text-center text-muted">No pending questions</td></tr>
               ) : (
-                filtered.slice(0, 5).map((q) => (
+                rows.map((q) => (
                   <tr key={q._id} className="border-b border-white/[0.06] hover:bg-white/[0.02]">
                     <td className="max-w-[180px] truncate px-5 py-3 font-medium text-ink">{q.title}</td>
                     <td className="px-5 py-3 text-muted">{q.category?.name}</td>
                     <td className="px-5 py-3"><StatusBadge status={q.status} /></td>
                     <td className="px-5 py-3">
-                      <div className="flex gap-1">
-                        <button type="button" onClick={() => approveMutation.mutate(q._id)} className="admin-btn-success rounded-lg p-1.5" title="Auto assign"><Check size={14} /></button>
-                        <button type="button" onClick={() => setAssignQuestion(q)} className="admin-btn-gradient rounded-lg p-1.5 text-black" title="Pick mentor"><Eye size={14} /></button>
-                        <button type="button" onClick={() => setRejectQuestion(q)} className="admin-btn-danger rounded-lg p-1.5" title="Reject"><X size={14} /></button>
-                        <Link to="/admin/questions" className="rounded-lg border border-white/[0.08] p-1.5 text-muted hover:text-ink"><Eye size={14} /></Link>
-                      </div>
+                      <RowActions q={q} />
                     </td>
                   </tr>
                 ))

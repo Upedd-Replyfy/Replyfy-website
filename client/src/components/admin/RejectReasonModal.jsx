@@ -30,14 +30,14 @@ export default function RejectReasonModal({ open, onClose, onConfirm, title = 'R
             className="admin-input"
           />
         </div>
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={handleClose} className="admin-btn-secondary">
+        <div className="flex justify-end gap-2 max-sm:flex-col-reverse">
+          <button type="button" onClick={handleClose} className="admin-btn-secondary max-sm:w-full">
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading || !reason.trim()}
-            className="admin-btn-danger rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
+            className="admin-btn-danger rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-50 max-sm:w-full"
           >
             {loading ? 'Submitting...' : 'Confirm'}
           </button>

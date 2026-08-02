@@ -27,6 +27,8 @@ export function formatExpert(profile) {
     status: profile.status,
     category: profile.category,
     expertType: profile.expertType,
+    categories: profile.categories || [],
+    expertTypes: profile.expertTypes || [],
     activeAssignments: profile.activeAssignments,
     maxAssignments: profile.maxAssignments,
   }

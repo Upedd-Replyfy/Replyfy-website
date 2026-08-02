@@ -1,29 +1,33 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Menu, X } from 'lucide-react'
 import Logo from '../ui/Logo'
+import { useAuth } from '../../context/AuthContext'
 
 const navLinks = [
-  { label: 'How it works', href: '/#how-it-works' },
-  { label: 'Mentors', href: '/#experts' },
+  { label: 'Ask a question', action: 'ask' },
+  { label: 'Find a mentor', href: '/mentors' },
   { label: 'Pricing', href: '/#pricing' },
-  { label: 'FAQ', href: '/#faq' },
+  { label: "FAQ's", href: '/#faq' },
 ]
 
 function isHashLink(href) {
-  return href.startsWith('/#')
+  return href?.startsWith('/#')
 }
 
-export default function Navbar({ onAuthOpen }) {
+export default function Navbar({ onAuthOpen, solid = false }) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const isHome = location.pathname === '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30)
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -58,10 +62,27 @@ export default function Navbar({ onAuthOpen }) {
     onAuthOpen?.(mode)
   }
 
+  const handleAskClick = () => {
+    setMobileOpen(false)
+    if (isAuthenticated) {
+      navigate('/dashboard/ask')
+      return
+    }
+    onAuthOpen?.('signup')
+  }
+
   const renderLink = (link, mobile = false) => {
     const className = mobile
       ? 'flex min-h-12 w-full items-center rounded-xl px-4 py-3 text-left text-base font-medium text-white/80 transition hover:bg-white/5 hover:text-white'
       : 'text-sm font-medium text-white/60 transition-colors hover:text-white'
+
+    if (link.action === 'ask') {
+      return (
+        <button key={link.label} type="button" onClick={handleAskClick} className={className}>
+          {link.label}
+        </button>
+      )
+    }
 
     if (isHashLink(link.href)) {
       if (isHome) {
@@ -99,6 +120,8 @@ export default function Navbar({ onAuthOpen }) {
       </Link>
     )
   }
+
+  const showSolid = solid || scrolled || mobileOpen
 
   const mobileMenu =
     typeof document !== 'undefined'
@@ -175,7 +198,7 @@ export default function Navbar({ onAuthOpen }) {
     <>
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled || mobileOpen
+          showSolid
             ? 'border-b border-white/[0.06] bg-[#171818]/95 backdrop-blur-2xl'
             : 'bg-transparent'
         }`}
@@ -185,7 +208,7 @@ export default function Navbar({ onAuthOpen }) {
 
           <ul className="hidden flex-1 items-center justify-center gap-8 lg:flex">
             {navLinks.map((link) => (
-              <li key={link.href}>{renderLink(link)}</li>
+              <li key={link.label}>{renderLink(link)}</li>
             ))}
           </ul>
 

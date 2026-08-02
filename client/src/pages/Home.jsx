@@ -41,7 +41,7 @@ export default function Home() {
         <Pricing />
         <FAQ />
       </main>
-      <Footer />
+      <Footer onAuthOpen={setAuthMode} />
       <AuthPreviewModal mode={authMode} onClose={() => setAuthMode(null)} />
       {googleClientId ? <GoogleOneTapPrompt /> : null}
     </div>

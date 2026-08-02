@@ -459,7 +459,7 @@ export default function DisplayMentors() {
         </div>
       </main>
 
-      <Footer />
+      <Footer onAuthOpen={setAuthMode} />
       <AuthPreviewModal mode={authMode} onClose={() => setAuthMode(null)} />
     </div>
   )

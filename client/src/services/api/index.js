@@ -82,6 +82,7 @@ export const adminApi = {
   approveWithdrawal: (id) => api.post(`/admin/withdrawals/${id}/approve`),
   rejectWithdrawal: (id, reason) => api.post(`/admin/withdrawals/${id}/reject`, { reason }),
   sendNotification: (data) => api.post('/admin/notifications', data),
+  getNotifications: (params) => api.get('/admin/notifications', { params }),
 }
 
 export const notificationApi = {

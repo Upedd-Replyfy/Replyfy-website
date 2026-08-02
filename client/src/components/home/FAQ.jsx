@@ -5,29 +5,29 @@ import { fadeUp } from '../../utils/animations'
 
 const faqs = [
   {
-    question: 'How is this different from asking ChatGPT?',
+    question: 'How is Replyfy different from AI tools?',
     answer:
-      'AI gives generic answers from public data. Replyfy connects you with a verified human mentor who reviews your specific situation and writes a tailored response.',
+      'AI provides information. Replyfy connects you with verified professionals who offer personalized guidance based on real-world experience—not just publicly available knowledge.',
   },
   {
-    question: "What if I'm not satisfied with the answer?",
+    question: 'Who will answer my question?',
     answer:
-      "Priority and Consultation plans include revision rounds. If the response doesn't address your question, request a clarification within your plan limits.",
+      'Your question is matched with a verified expert based on its category and complexity. Our network includes founders, CAs, lawyers, marketers, engineers, HR professionals, and other experienced specialists.',
   },
   {
-    question: 'How are payments handled?',
+    question: 'How long does it take to reply?',
     answer:
-      'We use Razorpay for secure payment processing. Your payment is confirmed only after signature verification. We never store card details.',
+      'Most questions receive a response within 12 hours. For more complex queries, it may take longer. We prioritize the quality of every response over speed to ensure you receive meaningful guidance.',
   },
   {
-    question: 'Can I choose a specific mentor?',
+    question: 'Are all experts verified?',
     answer:
-      'Mentors are matched based on category and availability. Consultation-tier questions are assigned to senior mentors in the relevant field.',
+      'Yes. Every expert on Replyfy goes through a verification process. We review their professional background and expertise before they can respond to user questions.',
   },
   {
-    question: 'What types of questions can I ask?',
+    question: 'Is my information kept confidential?',
     answer:
-      "Business, finance, legal, product, engineering, and career questions are welcome. We don't handle medical diagnoses or emergency situations.",
+      'Yes. Your privacy is important to us. The information you share is used only to process your request and deliver the best possible response. We never publish your questions or personal information without your consent.',
   },
 ]
 
@@ -48,13 +48,14 @@ function FAQItem({ question, answer, isOpen, onToggle }) {
         </span>
         <motion.span
           animate={{
-            backgroundColor: isOpen ? '#272927' : 'rgba(0,0,0,0.05)',
-            color: isOpen ? '#ffffff' : 'rgba(0,0,0,0.55)',
+            backgroundColor: isOpen ? '#7c3aed' : 'rgba(124,58,237,0.12)',
+            color: isOpen ? '#ffffff' : '#7c3aed',
+            borderColor: isOpen ? '#7c3aed' : 'rgba(124,58,237,0.25)',
           }}
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
           transition={{ duration: 0.2 }}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/[0.08]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border"
         >
           {isOpen ? <Minus size={15} strokeWidth={2} /> : <Plus size={15} strokeWidth={2} />}
         </motion.span>

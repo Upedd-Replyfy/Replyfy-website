@@ -305,62 +305,65 @@
   }
 
   .admin-btn-gradient {
-    background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 50%, #22d3ee 100%);
-    color: #1A1C1C;
-    box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: linear-gradient(135deg, #4F46E5 0%, #6366F1 55%, #3B82F6 100%);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   }
 
   .admin-btn-gradient:hover {
-    box-shadow: 0 0 32px rgba(167, 139, 250, 0.35);
+    filter: brightness(1.05);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.32);
   }
 
   .admin-btn-success {
-    border: 1px solid rgba(52, 211, 153, 0.25);
-    background: rgba(52, 211, 153, 0.1);
-    color: #6ee7b7;
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    background: rgba(34, 197, 94, 0.1);
+    color: #15803d;
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
 
   .admin-btn-success:hover {
-    background: rgba(52, 211, 153, 0.18);
-    box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
+    background: rgba(34, 197, 94, 0.16);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
   }
 
   .admin-btn-danger {
-    border: 1px solid rgba(251, 113, 133, 0.25);
-    background: rgba(251, 113, 133, 0.1);
-    color: #fda4af;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    background: rgba(239, 68, 68, 0.08);
+    color: #b91c1c;
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
 
   .admin-btn-danger:hover {
-    background: rgba(251, 113, 133, 0.18);
-    box-shadow: 0 0 20px rgba(251, 113, 133, 0.15);
+    background: rgba(239, 68, 68, 0.14);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
   }
 
   .admin-nav-active {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: #4F46E5;
   }
 
   .admin-stat-card {
-    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
   }
 
   .admin-stat-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 48px rgba(56, 189, 248, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    border-color: #E0E7FF;
   }
 
   .admin-panel {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.04);
   }
 
   .admin-input {
-    @apply w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none;
+    @apply w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-ink placeholder:text-muted-light focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10;
   }
 
   .admin-btn-secondary {
-    @apply rounded-xl border border-border px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface;
+    @apply rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-all hover:bg-surface;
   }
 }
 
@@ -368,27 +371,73 @@
 .dashboard-shell[data-theme='light'],
 .admin-shell[data-theme='light'],
 .expert-shell[data-theme='light'] {
-  --color-ink: #1A1C1C;
-  --color-ink-secondary: #18181b;
-  --color-charcoal: #52525b;
-  --color-muted: #71717a;
-  --color-muted-light: #a1a1aa;
-  --color-border: #e4e4e7;
-  --color-canvas: #f8f8f8;
-  --color-canvas-2: #f4f4f5;
-  --color-surface: #f4f4f5;
-  --color-card: #ffffff;
-  --color-line: #e4e4e7;
-  --color-accent: #1A1C1C;
-  --color-accent-light: #3f3f46;
-  --color-accent-glow: rgba(0, 0, 0, 0.04);
-  --color-primary: #1A1C1C;
-  --color-primary-fg: #fafafa;
+  --color-ink: #0F172A;
+  --color-ink-secondary: #1E293B;
+  --color-charcoal: #475569;
+  --color-muted: #64748B;
+  --color-muted-light: #94A3B8;
+  --color-border: #E5E7EB;
+  --color-canvas: #F8FAFC;
+  --color-canvas-2: #F1F5F9;
+  --color-surface: #F1F5F9;
+  --color-card: #FFFFFF;
+  --color-line: #E5E7EB;
+  --color-accent: #4F46E5;
+  --color-accent-light: #6366F1;
+  --color-accent-glow: rgba(79, 70, 229, 0.12);
+  --color-primary: #4F46E5;
+  --color-primary-fg: #ffffff;
 
-  --shadow-luxury-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-luxury-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.05);
-  --shadow-luxury-lg: 0 8px 20px rgba(0, 0, 0, 0.08), 0 16px 48px rgba(0, 0, 0, 0.06);
-  --shadow-luxury-hover: 0 12px 28px rgba(0, 0, 0, 0.1), 0 24px 64px rgba(0, 0, 0, 0.08);
+  --shadow-luxury-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04);
+  --shadow-luxury-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 12px 28px rgba(15, 23, 42, 0.06);
+  --shadow-luxury-lg: 0 8px 20px rgba(15, 23, 42, 0.08), 0 20px 48px rgba(15, 23, 42, 0.08);
+  --shadow-luxury-hover: 0 12px 28px rgba(15, 23, 42, 0.1), 0 24px 64px rgba(15, 23, 42, 0.08);
+}
+
+/* Premium admin shell — indigo SaaS system */
+.admin-shell {
+  --admin-sidebar-w: 268px;
+  --admin-sidebar-collapsed: 84px;
+  --admin-gap: 12px;
+  font-feature-settings: "ss01" on, "cv11" on;
+}
+
+.admin-shell[data-theme='light'] .admin-sidebar {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid #E5E7EB !important;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.06) !important;
+}
+
+.admin-shell[data-theme='light'] .admin-topbar {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(229, 231, 235, 0.9) !important;
+  backdrop-filter: blur(16px);
+}
+
+.admin-shell[data-theme='light'] .admin-search {
+  background: #F8FAFC !important;
+  border-color: #E5E7EB !important;
+}
+
+.admin-shell[data-theme='light'] .admin-search:focus {
+  border-color: #A5B4FC !important;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.admin-shell[data-theme='light'] .admin-nav-active {
+  color: #4F46E5 !important;
+}
+
+.admin-shell[data-theme='light'] .admin-sidebar nav a:hover {
+  background-color: #EEF2FF !important;
+  color: #4338CA !important;
+}
+
+.admin-shell[data-theme='light'] .text-gradient-accent {
+  background: linear-gradient(90deg, #4F46E5, #3B82F6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .dashboard-shell[data-theme='light'] .replyfy-logo-adaptive.replyfy-logo-dark,
@@ -453,17 +502,24 @@
   background-color: var(--color-card) !important;
 }
 
-.admin-shell[data-theme='light'] .admin-topbar,
+.admin-shell[data-theme='light'] .admin-topbar {
+  background-color: rgba(255, 255, 255, 0.78) !important;
+}
+
 .admin-shell[data-theme='light'] .admin-sidebar {
-  background-color: color-mix(in srgb, var(--color-card) 92%, transparent) !important;
+  background-color: rgba(255, 255, 255, 0.94) !important;
 }
 
 .admin-shell[data-theme='light'] .admin-search {
-  background-color: var(--color-surface) !important;
+  background-color: #F8FAFC !important;
 }
 
 .admin-shell[data-theme='light'] .admin-nav-active {
-  color: var(--color-ink) !important;
+  color: #4F46E5 !important;
+}
+
+.admin-shell[data-theme='light'] .admin-sidebar nav a:hover {
+  background-color: #EEF2FF;
 }
 
 /* Remap hardcoded dark admin surfaces in light mode */
@@ -503,15 +559,15 @@
 }
 
 .admin-shell[data-theme='light'] .admin-btn-success {
-  color: #047857;
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.25);
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
 }
 
 .admin-shell[data-theme='light'] .admin-btn-danger {
-  color: #be123c;
-  background: rgba(244, 63, 94, 0.1);
-  border-color: rgba(244, 63, 94, 0.25);
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
 }
 
 .expert-shell[data-theme='light'] .expert-sidebar,

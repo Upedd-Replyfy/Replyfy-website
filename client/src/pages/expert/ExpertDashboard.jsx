@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -12,7 +13,8 @@ import {
 } from 'lucide-react'
 import ExpertStatCard from '../../components/expert/ExpertStatCard'
 import ExpertPanel from '../../components/expert/ExpertPanel'
-import StatusBadge from '../../components/ui/StatusBadge'
+import ExpertUserCard from '../../components/expert/ExpertUserCard'
+import ExpertQuestionPreviewModal from '../../components/expert/ExpertQuestionPreviewModal'
 import { expertApi } from '../../services/api'
 import { formatPoints, formatPointsFixed } from '../../utils/currency'
 import { useAuth } from '../../context/AuthContext'
@@ -26,6 +28,7 @@ const listLinkClass =
 export default function ExpertDashboard() {
   const { user } = useAuth()
   const firstName = user?.name?.split(' ')[0] || 'Mentor'
+  const [preview, setPreview] = useState(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['expert-dashboard'],
@@ -151,7 +154,7 @@ export default function ExpertDashboard() {
         <div className="lg:col-span-2">
           <ExpertPanel
             title="Active Questions"
-            subtitle="Questions currently assigned to you"
+            subtitle="Click a user card for question and plan details"
             noPadding
             action={
               <Link to="/expert/questions" className={actionLinkClass}>
@@ -160,28 +163,15 @@ export default function ExpertDashboard() {
             }
           >
             {questionsLoading ? (
-              <div className="space-y-3 px-6 py-5">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 animate-pulse rounded-xl bg-surface" />
+              <div className="grid gap-3 p-4 sm:grid-cols-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-44 animate-pulse rounded-2xl bg-surface" />
                 ))}
               </div>
             ) : questions.length ? (
-              <div className="divide-y divide-border">
+              <div className="grid gap-3 p-4 sm:grid-cols-2">
                 {questions.map((q) => (
-                  <Link
-                    key={q._id}
-                    to={`/expert/questions/${q._id}`}
-                    className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-surface"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-medium text-ink">{q.title}</p>
-                      <p className="mt-1 text-sm text-muted">
-                        {q.category?.name || 'General'}
-                        {q.deadline ? ` · Due ${new Date(q.deadline).toLocaleDateString()}` : ''}
-                      </p>
-                    </div>
-                    <StatusBadge status={q.status} />
-                  </Link>
+                  <ExpertUserCard key={q._id} question={q} onOpen={setPreview} />
                 ))}
               </div>
             ) : (
@@ -225,6 +215,12 @@ export default function ExpertDashboard() {
           </ExpertPanel>
         </div>
       </div>
+
+      <ExpertQuestionPreviewModal
+        open={!!preview}
+        question={preview}
+        onClose={() => setPreview(null)}
+      />
     </div>
   )
 }

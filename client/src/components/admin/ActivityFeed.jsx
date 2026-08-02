@@ -9,12 +9,12 @@ import {
 } from 'lucide-react'
 
 const typeConfig = {
-  user_joined: { icon: UserPlus, color: 'text-sky-400 bg-sky-500/10' },
-  expert_verified: { icon: BadgeCheck, color: 'text-violet-400 bg-violet-500/10' },
-  question_submitted: { icon: HelpCircle, color: 'text-cyan-400 bg-cyan-500/10' },
-  answer_approved: { icon: CheckCircle2, color: 'text-emerald-400 bg-emerald-500/10' },
-  withdrawal_requested: { icon: Wallet, color: 'text-amber-400 bg-amber-500/10' },
-  payment_completed: { icon: CreditCard, color: 'text-blue-400 bg-blue-500/10' },
+  user_joined: { icon: UserPlus, color: 'text-indigo-600 bg-indigo-50' },
+  expert_verified: { icon: BadgeCheck, color: 'text-violet-600 bg-violet-50' },
+  question_submitted: { icon: HelpCircle, color: 'text-blue-600 bg-blue-50' },
+  answer_approved: { icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50' },
+  withdrawal_requested: { icon: Wallet, color: 'text-amber-600 bg-amber-50' },
+  payment_completed: { icon: CreditCard, color: 'text-sky-600 bg-sky-50' },
 }
 
 function formatTime(date) {
@@ -33,11 +33,11 @@ export default function ActivityFeed({ activity = [], loading }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.15 }}
-      className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323]"
+      className="admin-panel rounded-[20px] border border-border bg-card"
     >
-      <div className="border-b border-white/[0.08] px-5 py-4">
-        <h3 className="text-sm font-semibold text-ink">Recent Activity</h3>
-        <p className="mt-0.5 text-xs text-muted">Live platform events</p>
+      <div className="border-b border-border px-5 py-4">
+        <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
+        <p className="mt-0.5 text-xs text-slate-500">Live platform events</p>
       </div>
 
       <div className="max-h-[420px] overflow-y-auto p-3">

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Outlet, useSearchParams } from 'react-router-dom'
+import { Outlet, useLocation, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import AdminSidebar from '../components/admin/AdminSidebar'
 import AdminTopbar from '../components/admin/AdminTopbar'
 import RegisterExpertModal from '../components/admin/RegisterExpertModal'
+import AdminPageTransition from '../components/admin/ui/AdminPageTransition'
 import { ShellThemeProvider, useShellTheme } from '../context/ShellThemeContext'
 
 function AdminLayoutInner() {
@@ -12,6 +13,7 @@ function AdminLayoutInner() {
   const [registerOpen, setRegisterOpen] = useState(false)
   const { theme } = useShellTheme()
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
 
   useEffect(() => {
     if (searchParams.get('register') === '1') {
@@ -30,9 +32,21 @@ function AdminLayoutInner() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
+
+  const contentPad = collapsed
+    ? 'lg:pl-[calc(84px+24px)]'
+    : 'lg:pl-[calc(268px+24px)]'
+
   return (
     <div className="admin-shell min-h-screen bg-canvas text-ink" data-theme={theme}>
-      <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_rgba(99,102,241,0.08),_transparent_55%)]" />
+
+      <div className="hidden lg:block">
+        <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} floating />
+      </div>
 
       <AnimatePresence>
         {mobileOpen && (
@@ -41,27 +55,23 @@ function AdminLayoutInner() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-              className="fixed inset-y-0 left-0 z-40 w-[260px] lg:hidden"
+              initial={{ x: -300, opacity: 0.6 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -300, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 34 }}
+              className="fixed inset-y-3 left-3 z-50 w-[268px] lg:hidden"
             >
-              <AdminSidebar collapsed={false} onToggle={() => setMobileOpen(false)} />
+              <AdminSidebar collapsed={false} onToggle={() => setMobileOpen(false)} floating />
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      <div
-        className={`flex min-h-screen flex-col transition-all duration-300 ${
-          collapsed ? 'lg:pl-[72px]' : 'lg:pl-[260px]'
-        }`}
-      >
+      <div className={`flex min-h-screen flex-col transition-all duration-300 ${contentPad}`}>
         <AdminTopbar
           sidebarCollapsed={collapsed}
           onMenuOpen={() => setMobileOpen(true)}
@@ -69,8 +79,12 @@ function AdminLayoutInner() {
           onRegisterExpert={() => setRegisterOpen(true)}
         />
 
-        <main className="flex-1 bg-canvas p-4 lg:p-6 xl:p-8">
-          <Outlet context={{ openRegisterExpert: () => setRegisterOpen(true) }} />
+        <main className="flex-1 px-3 pb-6 pt-3 sm:px-5 sm:pb-8 sm:pt-4 lg:px-6 xl:px-8">
+          <AnimatePresence mode="wait">
+            <AdminPageTransition key={location.pathname}>
+              <Outlet context={{ openRegisterExpert: () => setRegisterOpen(true) }} />
+            </AdminPageTransition>
+          </AnimatePresence>
         </main>
       </div>
 
@@ -81,7 +95,7 @@ function AdminLayoutInner() {
 
 export default function AdminLayout() {
   return (
-    <ShellThemeProvider storageKey="admin-theme">
+    <ShellThemeProvider storageKey="admin-theme" defaultTheme="light">
       <AdminLayoutInner />
     </ShellThemeProvider>
   )

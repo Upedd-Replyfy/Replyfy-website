@@ -32,10 +32,10 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
 
   if (planRequiresExpertSelection(plan) && selectedExpert) {
     const ExpertProfile = (await import('../models/ExpertProfile.js')).default
+    const { expertMatchesCategoryType } = await import('../utils/expertMatch.js')
     const profile = await ExpertProfile.findOne({
       user: selectedExpert,
-      category,
-      expertType,
+      ...expertMatchesCategoryType(category, expertType),
       availability: 'available',
       status: 'active',
     })

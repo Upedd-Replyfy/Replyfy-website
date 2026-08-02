@@ -5,9 +5,9 @@ import HeroDashboardPreview from './HeroDashboardPreview'
 import TrustBanner from './TrustBanner'
 
 const stats = [
-  { value: '12+ hrs', label: 'Avg. response' },
-  { value: '98%', label: 'Satisfaction' },
-  { value: '10', label: 'Mentors' },
+  { value: '12 hrs', label: 'Avg. Turnaround' },
+  { value: '98%', label: 'Satisfaction Rate' },
+  { value: '100%', label: 'Human Responses' },
 ]
 
 const ease = [0.22, 1, 0.36, 1]

@@ -1,11 +1,15 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { CircleHelp } from 'lucide-react'
 import ExpertPageHeader from '../../components/expert/ExpertPageHeader'
 import ExpertPanel from '../../components/expert/ExpertPanel'
-import StatusBadge from '../../components/ui/StatusBadge'
+import ExpertUserCard from '../../components/expert/ExpertUserCard'
+import ExpertQuestionPreviewModal from '../../components/expert/ExpertQuestionPreviewModal'
 import { expertApi } from '../../services/api'
 
 export default function ExpertQuestions() {
+  const [preview, setPreview] = useState(null)
+
   const { data, isLoading } = useQuery({
     queryKey: ['expert-questions'],
     queryFn: () => expertApi.getQuestions({ limit: 50 }),
@@ -14,49 +18,49 @@ export default function ExpertQuestions() {
   const questions = data?.questions || []
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-8">
       <ExpertPageHeader
         title="Assigned Questions"
         description={`${questions.length} active assignment${questions.length !== 1 ? 's' : ''} requiring your attention.`}
         badge={
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm font-medium text-ink">
+          <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-700 sm:px-4 sm:py-2 sm:text-sm dark:text-sky-300">
             {questions.length} total
           </span>
         }
       />
 
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-white/[0.04]" />
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-44 animate-pulse rounded-2xl border border-border bg-card sm:h-48" />
           ))}
         </div>
       ) : questions.length ? (
-        <ExpertPanel title="Your assignments" subtitle="Click a question to view details and submit your answer" noPadding>
-          <div className="divide-y divide-white/[0.06]">
+        <ExpertPanel
+          title="Your assignments"
+          subtitle="Tap a card to preview details, then open to answer"
+        >
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {questions.map((q) => (
-              <Link
-                key={q._id}
-                to={`/expert/questions/${q._id}`}
-                className="flex items-center justify-between gap-6 px-6 py-5 transition-colors hover:bg-white/[0.03]"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-base font-semibold text-ink">{q.title}</p>
-                  <p className="mt-1.5 text-sm text-muted">
-                    {q.category?.name} · {q.user?.name || 'User'}
-                    {q.deadline ? ` · Due ${new Date(q.deadline).toLocaleDateString()}` : ''}
-                  </p>
-                </div>
-                <StatusBadge status={q.status} />
-              </Link>
+              <ExpertUserCard key={q._id} question={q} onOpen={setPreview} />
             ))}
           </div>
         </ExpertPanel>
       ) : (
         <ExpertPanel>
-          <p className="py-12 text-center text-base text-muted">No assigned questions right now. Check back later.</p>
+          <div className="py-14 text-center">
+            <CircleHelp className="mx-auto text-muted" size={28} />
+            <p className="mt-3 text-base font-medium text-ink">No assigned questions</p>
+            <p className="mt-1 text-sm text-muted">Check back later for new assignments.</p>
+          </div>
         </ExpertPanel>
       )}
+
+      <ExpertQuestionPreviewModal
+        open={!!preview}
+        question={preview}
+        onClose={() => setPreview(null)}
+      />
     </div>
   )
 }

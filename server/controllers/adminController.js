@@ -1,3 +1,4 @@
+import Notification from '../models/Notification.js'
 import User from '../models/User.js'
 import ExpertProfile from '../models/ExpertProfile.js'
 import Category from '../models/Category.js'
@@ -14,6 +15,7 @@ import { logAudit } from '../services/auditService.js'
 import { planRequiresExpertSelection } from '../constants/pricing.js'
 import ExpertType from '../models/ExpertType.js'
 import { slugify } from '../utils/slug.js'
+import { parseIdList } from '../utils/expertMatch.js'
 import {
   aggregateByDay,
   getLastNDays,
@@ -281,6 +283,8 @@ export const createExpert = asyncHandler(async (req, res) => {
     skills,
     category,
     expertType,
+    categories: categoriesRaw,
+    expertTypes: expertTypesRaw,
     responseTime,
     hourlyPrice,
     questionPrice,
@@ -292,13 +296,30 @@ export const createExpert = asyncHandler(async (req, res) => {
   const exists = await User.findOne({ email })
   if (exists) throw new ApiError(400, 'Email already exists')
 
-  const cat = await Category.findById(category)
-  if (!cat) throw new ApiError(400, 'Invalid category')
+  let categoryIds = parseIdList(categoriesRaw)
+  let typeIds = parseIdList(expertTypesRaw)
+  if (!categoryIds.length && category) categoryIds = parseIdList(category)
+  if (!typeIds.length && expertType) typeIds = parseIdList(expertType)
 
-  const type = await ExpertType.findById(expertType)
-  if (!type || type.category.toString() !== category.toString()) {
-    throw new ApiError(400, 'Invalid mentor type for this category')
+  if (!categoryIds.length || !typeIds.length) {
+    throw new ApiError(400, 'Select at least one category and mentor type')
   }
+
+  const cats = await Category.find({ _id: { $in: categoryIds } })
+  if (cats.length !== categoryIds.length) throw new ApiError(400, 'Invalid category selection')
+
+  const types = await ExpertType.find({ _id: { $in: typeIds } })
+  if (types.length !== typeIds.length) throw new ApiError(400, 'Invalid mentor type selection')
+
+  const categorySet = new Set(categoryIds.map(String))
+  for (const t of types) {
+    if (!categorySet.has(String(t.category))) {
+      throw new ApiError(400, `Mentor type "${t.name}" does not belong to a selected category`)
+    }
+  }
+
+  const primaryCategory = categoryIds[0]
+  const primaryType = typeIds[0]
 
   let profilePhoto = ''
   if (req.file) {
@@ -317,8 +338,10 @@ export const createExpert = asyncHandler(async (req, res) => {
 
   const profile = await ExpertProfile.create({
     user: user._id,
-    category,
-    expertType,
+    category: primaryCategory,
+    expertType: primaryType,
+    categories: categoryIds,
+    expertTypes: typeIds,
     bio: bio || '',
     experience: experience || '',
     languages: Array.isArray(languages) ? languages : (languages || '').split(',').map((s) => s.trim()).filter(Boolean),
@@ -355,6 +378,8 @@ export const getExperts = asyncHandler(async (req, res) => {
     .populate('user', 'name email avatar isActive')
     .populate('category', 'name slug')
     .populate('expertType', 'name slug')
+    .populate('categories', 'name slug')
+    .populate('expertTypes', 'name slug')
     .sort({ createdAt: -1 })
   res.json({ success: true, experts: profiles })
 })
@@ -370,6 +395,8 @@ export const updateExpert = asyncHandler(async (req, res) => {
     skills,
     category,
     expertType,
+    categories: categoriesRaw,
+    expertTypes: expertTypesRaw,
     availability,
     responseTime,
     hourlyPrice,
@@ -380,8 +407,32 @@ export const updateExpert = asyncHandler(async (req, res) => {
     isActive,
   } = req.body
 
-  if (category !== undefined) profile.category = category
-  if (expertType !== undefined) profile.expertType = expertType
+  if (categoriesRaw !== undefined || expertTypesRaw !== undefined || category !== undefined || expertType !== undefined) {
+    let categoryIds = parseIdList(categoriesRaw ?? category)
+    let typeIds = parseIdList(expertTypesRaw ?? expertType)
+    if (!categoryIds.length && category) categoryIds = parseIdList(category)
+    if (!typeIds.length && expertType) typeIds = parseIdList(expertType)
+
+    if (categoryIds.length && typeIds.length) {
+      const cats = await Category.find({ _id: { $in: categoryIds } })
+      if (cats.length !== categoryIds.length) throw new ApiError(400, 'Invalid category selection')
+      const types = await ExpertType.find({ _id: { $in: typeIds } })
+      if (types.length !== typeIds.length) throw new ApiError(400, 'Invalid mentor type selection')
+      const categorySet = new Set(categoryIds.map(String))
+      for (const t of types) {
+        if (!categorySet.has(String(t.category))) {
+          throw new ApiError(400, `Mentor type "${t.name}" does not belong to a selected category`)
+        }
+      }
+      profile.categories = categoryIds
+      profile.expertTypes = typeIds
+      profile.category = categoryIds[0]
+      profile.expertType = typeIds[0]
+    } else {
+      if (category !== undefined) profile.category = category
+      if (expertType !== undefined) profile.expertType = expertType
+    }
+  }
   if (bio !== undefined) profile.bio = bio
   if (experience !== undefined) profile.experience = experience
   if (languages !== undefined) {
@@ -575,6 +626,7 @@ export const approveQuestion = asyncHandler(async (req, res) => {
   }
 
   let expertId = overrideExpertId || question.selectedExpert
+  const isAdminOverride = Boolean(overrideExpertId)
 
   if (!expertId && question.plan === 'basic') {
     const expert = await findAvailableExpert(question.category, question.expertType)
@@ -588,7 +640,12 @@ export const approveQuestion = asyncHandler(async (req, res) => {
     question,
     expertUserId: expertId,
     assignedBy: req.user._id,
-    assignmentType: planRequiresExpertSelection(question.plan) ? 'user_selected' : 'auto',
+    assignmentType: isAdminOverride
+      ? 'manual'
+      : planRequiresExpertSelection(question.plan)
+        ? 'user_selected'
+        : 'auto',
+    relaxAvailability: isAdminOverride,
   })
 
   question.adminReviewedBy = req.user._id
@@ -652,6 +709,7 @@ export const assignExpertManual = asyncHandler(async (req, res) => {
     expertUserId: expertId,
     assignedBy: req.user._id,
     assignmentType: 'manual',
+    relaxAvailability: true,
   })
 
   res.json({ success: true, question })
@@ -807,19 +865,69 @@ export const rejectWithdrawal = asyncHandler(async (req, res) => {
   res.json({ success: true, request })
 })
 
-export const sendNotification = asyncHandler(async (req, res) => {
-  const { userId, title, message, link } = req.body
-  const user = await User.findById(userId)
-  if (!user) throw new ApiError(404, 'User not found')
+export const getAllNotifications = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 40, type } = req.query
+  const query = type ? { type } : {}
+  const pageNum = Math.max(1, Number(page) || 1)
+  const limitNum = Math.min(100, Math.max(1, Number(limit) || 40))
 
-  const notification = await createNotification({
-    userId,
-    type: 'general',
-    title,
-    message,
-    link,
-    email: user.email,
+  const [notifications, total] = await Promise.all([
+    Notification.find(query)
+      .populate('user', 'name email role')
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum),
+    Notification.countDocuments(query),
+  ])
+
+  res.json({
+    success: true,
+    notifications,
+    pagination: { page: pageNum, limit: limitNum, total },
   })
+})
 
-  res.json({ success: true, notification })
+export const sendNotification = asyncHandler(async (req, res) => {
+  const { userId, title, message, link, audience = 'one' } = req.body
+  if (!title?.trim() || !message?.trim()) {
+    throw new ApiError(400, 'Title and message are required')
+  }
+
+  let recipients = []
+  if (audience === 'all_users') {
+    recipients = await User.find({ role: 'user', isActive: { $ne: false } }).select('_id email name')
+  } else if (audience === 'all_mentors') {
+    recipients = await User.find({ role: 'expert', isActive: { $ne: false } }).select('_id email name')
+  } else {
+    if (!userId) throw new ApiError(400, 'User is required')
+    const user = await User.findById(userId).select('_id email name')
+    if (!user) throw new ApiError(404, 'User not found')
+    recipients = [user]
+  }
+
+  if (!recipients.length) throw new ApiError(404, 'No recipients found')
+
+  // Email only for single personal sends to avoid bulk SMTP load
+  const sendMail = audience === 'one'
+
+  const notifications = await Promise.all(
+    recipients.map((u) =>
+      createNotification({
+        userId: u._id,
+        type: 'general',
+        title: title.trim(),
+        message: message.trim(),
+        link: link || '',
+        email: u.email,
+        sendMail,
+        metadata: { audience, broadcast: audience !== 'one' },
+      })
+    )
+  )
+
+  res.json({
+    success: true,
+    count: notifications.length,
+    notification: notifications[0],
+  })
 })

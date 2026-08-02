@@ -31,6 +31,7 @@ import {
   getWithdrawals,
   approveWithdrawal,
   rejectWithdrawal,
+  getAllNotifications,
   sendNotification,
 } from '../controllers/adminController.js'
 
@@ -45,7 +46,7 @@ router.patch('/users/:id/toggle', toggleUserStatus)
 router.post(
   '/experts',
   upload.single('photo'),
-  [body('name').notEmpty(), body('email').isEmail(), body('password').isLength({ min: 6 }), body('category').notEmpty(), body('expertType').notEmpty()],
+  [body('name').notEmpty(), body('email').isEmail(), body('password').isLength({ min: 6 })],
   validate,
   createExpert
 )
@@ -78,6 +79,7 @@ router.get('/withdrawals', getWithdrawals)
 router.post('/withdrawals/:id/approve', approveWithdrawal)
 router.post('/withdrawals/:id/reject', rejectWithdrawal)
 
+router.get('/notifications', getAllNotifications)
 router.post('/notifications', sendNotification)
 
 export default router

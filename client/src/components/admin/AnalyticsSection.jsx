@@ -20,13 +20,13 @@ function ChartCard({ title, subtitle, children, delay = 0, compact = false }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] p-5"
+      className="admin-panel rounded-[20px] border border-white/[0.08] bg-[#202323] p-4 sm:p-5"
     >
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-ink">{title}</h3>
         {subtitle && <p className="mt-0.5 text-xs text-muted">{subtitle}</p>}
       </div>
-      <div className={`w-full ${compact ? 'h-[200px]' : 'h-[240px]'}`}>{children}</div>
+      <div className={`w-full ${compact ? 'h-[180px] sm:h-[200px]' : 'h-[200px] sm:h-[240px]'}`}>{children}</div>
     </motion.div>
   )
 }
