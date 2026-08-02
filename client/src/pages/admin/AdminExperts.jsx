@@ -169,7 +169,12 @@ export default function AdminExperts() {
                   toast.success(res.message || 'Catalog synced')
                   queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
                 } catch (err) {
-                  toast.error(err.message)
+                  const msg = err.message || 'Sync failed'
+                  toast.error(
+                    /Route not found/i.test(msg)
+                      ? 'Sync API missing on server — redeploy the backend, then try again'
+                      : msg
+                  )
                 }
               }}
             >

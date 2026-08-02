@@ -40,20 +40,32 @@ const router = Router()
 
 router.use(protect, authorize('admin'))
 
+/** Multer only for multipart; JSON create/update must keep array fields intact. */
+function optionalExpertPhoto(req, res, next) {
+  const contentType = String(req.headers['content-type'] || '')
+  if (contentType.includes('multipart/form-data')) {
+    return upload.single('photo')(req, res, next)
+  }
+  return next()
+}
+
 router.get('/dashboard', getDashboardStats)
 router.get('/users', getUsers)
 router.patch('/users/:id/toggle', toggleUserStatus)
 
+// Sync registered early (before /experts/:id) so deploys never miss it
+router.post('/sync-expert-catalog', syncExpertCatalog)
+router.post('/experts/sync-catalog', syncExpertCatalog)
+
 router.post(
   '/experts',
-  upload.single('photo'),
+  optionalExpertPhoto,
   [body('name').notEmpty(), body('email').isEmail(), body('password').isLength({ min: 6 })],
   validate,
   createExpert
 )
 router.get('/experts', getExperts)
-router.post('/experts/sync-catalog', syncExpertCatalog)
-router.put('/experts/:id', upload.single('photo'), updateExpert)
+router.put('/experts/:id', optionalExpertPhoto, updateExpert)
 router.delete('/experts/:id', deleteExpert)
 
 router.post('/categories', body('name').notEmpty(), validate, createCategory)

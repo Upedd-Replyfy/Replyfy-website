@@ -51,7 +51,8 @@ export const adminApi = {
   createExpert: (data) => api.post('/admin/experts', data),
   getExperts: () => api.get('/admin/experts'),
   updateExpert: (id, data) => api.put(`/admin/experts/${id}`, data),
-  syncExpertCatalog: () => api.post('/admin/experts/sync-catalog'),
+  // Prefer path without :id segment so older proxies never treat "sync-catalog" as an id
+  syncExpertCatalog: () => api.post('/admin/sync-expert-catalog'),
   deleteExpert: (id) => api.delete(`/admin/experts/${id}`),
   getCategories: () => api.get('/admin/categories'),
   createCategory: (data) => api.post('/admin/categories', data),
