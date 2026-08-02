@@ -103,7 +103,21 @@ export default function ExpertPicker({
                       )}
                     </div>
                     <p className="mt-0.5 text-xs text-muted">
-                      {expert.expertType?.name} · {expert.category?.name}
+                      {(() => {
+                        const types = [...(expert.expertTypes || []), expert.expertType]
+                          .map((t) => t?.name)
+                          .filter(Boolean)
+                        const cats = [...(expert.categories || []), expert.category]
+                          .map((c) => c?.name)
+                          .filter(Boolean)
+                        const typeLabel = [...new Set(types)].slice(0, 2).join(', ') || 'Mentor'
+                        const catLabel = [...new Set(cats)].slice(0, 2).join(', ')
+                        const extra =
+                          types.length + cats.length > 4
+                            ? ` +${Math.max(0, [...new Set(types)].length + [...new Set(cats)].length - 4)}`
+                            : ''
+                        return `${typeLabel}${catLabel ? ` · ${catLabel}` : ''}${extra}`
+                      })()}
                     </p>
                     <p className="text-xs text-muted-light">{expert.experience} experience</p>
                   </div>

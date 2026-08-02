@@ -148,7 +148,6 @@ export default function RegisterExpertModal({ open, onClose }) {
       const categoryIds = [...selectedCategories.map(String)]
       const typeIds = selectedTypes.map(String)
 
-      // Auto-include parent category for every selected type
       typeIds.forEach((typeId) => {
         const t = allTypes.find((x) => String(x._id) === typeId)
         const catId = String(t?.category?._id || t?.category || '')
@@ -160,22 +159,37 @@ export default function RegisterExpertModal({ open, onClose }) {
         primaryType?.category?._id || primaryType?.category || categoryIds[0] || ''
       )
 
-      const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => {
-        if (k === 'isVerified') fd.append(k, v ? 'true' : 'false')
-        else fd.append(k, String(v))
-      })
-      // Send multi-select in several formats for reliable multipart parsing on all hosts
-      fd.append('categoriesJson', JSON.stringify(categoryIds))
-      fd.append('expertTypesJson', JSON.stringify(typeIds))
-      fd.append('categoryIds', categoryIds.join(','))
-      fd.append('expertTypeIds', typeIds.join(','))
-      categoryIds.forEach((id) => fd.append('categories', id))
-      typeIds.forEach((id) => fd.append('expertTypes', id))
-      fd.append('category', primaryCategory)
-      fd.append('expertType', typeIds[0] || '')
-      if (photo) fd.append('photo', photo)
-      return adminApi.createExpert(fd)
+      const payload = {
+        ...form,
+        isVerified: !!form.isVerified,
+        categories: categoryIds,
+        expertTypes: typeIds,
+        categoriesJson: JSON.stringify(categoryIds),
+        expertTypesJson: JSON.stringify(typeIds),
+        categoryIds: categoryIds.join(','),
+        expertTypeIds: typeIds.join(','),
+        category: primaryCategory,
+        expertType: typeIds[0] || '',
+      }
+
+      // Prefer JSON body so multi-select arrays survive on all hosts; use FormData only for photos
+      if (photo) {
+        const fd = new FormData()
+        Object.entries(payload).forEach(([k, v]) => {
+          if (v === undefined || v === null) return
+          if (Array.isArray(v)) {
+            fd.append(`${k}Json`, JSON.stringify(v))
+            fd.append(k === 'categories' ? 'categoryIds' : k === 'expertTypes' ? 'expertTypeIds' : k, v.join(','))
+            return
+          }
+          if (typeof v === 'boolean') fd.append(k, v ? 'true' : 'false')
+          else fd.append(k, String(v))
+        })
+        fd.append('photo', photo)
+        return adminApi.createExpert(fd)
+      }
+
+      return adminApi.createExpert(payload)
     },
     onSuccess: () => {
       toast.success('Mentor registered successfully')

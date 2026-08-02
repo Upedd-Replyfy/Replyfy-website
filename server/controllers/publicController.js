@@ -5,6 +5,19 @@ import Rating from '../models/Rating.js'
 import { asyncHandler } from '../utils/ApiError.js'
 import { formatExpert } from '../utils/formatExpert.js'
 
+function normalizeExpertDoc(profile) {
+  const doc = typeof profile.toObject === 'function' ? profile.toObject() : { ...profile }
+  const withName = (item) => (item && typeof item === 'object' && item.name ? item : null)
+
+  doc.category = withName(doc.category) || doc.category
+  doc.expertType = withName(doc.expertType) || doc.expertType
+  doc.categories = (doc.categories || []).map(withName).filter(Boolean)
+  doc.expertTypes = (doc.expertTypes || []).map(withName).filter(Boolean)
+  if (!doc.categories.length && withName(doc.category)) doc.categories = [doc.category]
+  if (!doc.expertTypes.length && withName(doc.expertType)) doc.expertTypes = [doc.expertType]
+  return doc
+}
+
 export const getCategories = asyncHandler(async (req, res) => {
   const categories = await Category.find({ isActive: true })
     .select('name slug description placeholder suggestions icon sortOrder')
@@ -83,17 +96,22 @@ export const getExperts = asyncHandler(async (req, res) => {
     .sort(sortMap[sort] || sortMap.rating)
     .lean()
 
-  profiles = profiles.filter((p) => p.user?.isActive)
+  profiles = profiles.filter((p) => p.user?.isActive).map(normalizeExpertDoc)
 
   if (search) {
     const s = search.toLowerCase()
-    profiles = profiles.filter(
-      (p) =>
-        p.user.name.toLowerCase().includes(s) ||
+    profiles = profiles.filter((p) => {
+      const categoryNames = [...(p.categories || []), p.category].map((c) => c?.name).filter(Boolean)
+      const typeNames = [...(p.expertTypes || []), p.expertType].map((t) => t?.name).filter(Boolean)
+      return (
+        p.user?.name?.toLowerCase().includes(s) ||
         (p.skills || []).some((skill) => skill.toLowerCase().includes(s)) ||
         (p.languages || []).some((lang) => lang.toLowerCase().includes(s)) ||
-        p.bio.toLowerCase().includes(s)
-    )
+        p.bio?.toLowerCase().includes(s) ||
+        categoryNames.some((name) => name.toLowerCase().includes(s)) ||
+        typeNames.some((name) => name.toLowerCase().includes(s))
+      )
+    })
   }
 
   const total = profiles.length
@@ -136,7 +154,7 @@ export const getExpertById = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(10)
 
-  res.json({ success: true, expert: formatExpert(profile), ratings })
+  res.json({ success: true, expert: formatExpert(normalizeExpertDoc(profile)), ratings })
 })
 
 export const getPlatformStats = asyncHandler(async (req, res) => {

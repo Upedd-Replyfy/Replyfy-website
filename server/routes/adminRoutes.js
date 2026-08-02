@@ -9,6 +9,7 @@ import {
   toggleUserStatus,
   createExpert,
   getExperts,
+  syncExpertCatalog,
   updateExpert,
   deleteExpert,
   createCategory,
@@ -51,6 +52,7 @@ router.post(
   createExpert
 )
 router.get('/experts', getExperts)
+router.post('/experts/sync-catalog', syncExpertCatalog)
 router.put('/experts/:id', upload.single('photo'), updateExpert)
 router.delete('/experts/:id', deleteExpert)
 

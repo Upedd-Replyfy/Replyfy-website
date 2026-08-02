@@ -52,6 +52,20 @@ function StatCell({ label, children }) {
   )
 }
 
+function mentorCategoryLabels(mentor) {
+  const names = [...(mentor.categories || []), mentor.category]
+    .map((c) => (typeof c === 'object' ? c?.name : null))
+    .filter(Boolean)
+  return [...new Set(names)]
+}
+
+function mentorTypeLabels(mentor) {
+  const names = [...(mentor.expertTypes || []), mentor.expertType]
+    .map((t) => (typeof t === 'object' ? t?.name : null))
+    .filter(Boolean)
+  return [...new Set(names)]
+}
+
 function MentorProfileCard({ mentor, onAsk, index = 0 }) {
   const skills = mentor.skills || []
   const languages = mentor.languages || []
@@ -60,6 +74,10 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
   const rating = mentor.averageRating ?? 0
   const reviews = mentor.totalRatings || mentor.reviewCount || 0
   const responseHrs = mentor.responseTime || 12
+  const categoryLabels = mentorCategoryLabels(mentor)
+  const typeLabels = mentorTypeLabels(mentor)
+  const primaryType = typeLabels[0] || 'Mentor'
+  const primaryCategory = categoryLabels[0] || ''
 
   return (
     <motion.article
@@ -96,8 +114,9 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
           <div className="min-w-0">
             <h3 className="truncate text-xl font-semibold tracking-tight text-white">{mentor.name}</h3>
             <p className="mt-1 truncate text-sm text-white/75">
-              {mentor.expertType?.name || 'Mentor'}
-              {mentor.category?.name ? ` · ${mentor.category.name}` : ''}
+              {primaryType}
+              {primaryCategory ? ` · ${primaryCategory}` : ''}
+              {categoryLabels.length > 1 ? ` +${categoryLabels.length - 1}` : ''}
             </p>
           </div>
           <div className="shrink-0 rounded-full bg-white px-3 py-1.5 shadow-sm">
@@ -114,6 +133,40 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
           {mentor.bio?.trim() ||
             'Experienced mentor ready to help with practical, situation-specific guidance.'}
         </p>
+
+        {(categoryLabels.length > 0 || typeLabels.length > 0) && (
+          <div className="mt-4 space-y-2">
+            {categoryLabels.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {categoryLabels.map((name) => (
+                  <span
+                    key={`cat-${name}`}
+                    className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700 ring-1 ring-sky-100"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            )}
+            {typeLabels.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {typeLabels.slice(0, 6).map((name) => (
+                  <span
+                    key={`type-${name}`}
+                    className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
+                  >
+                    {name}
+                  </span>
+                ))}
+                {typeLabels.length > 6 && (
+                  <span className="rounded-full bg-[#F3F4F6] px-2.5 py-1 text-[11px] font-medium text-[#6B7280]">
+                    +{typeLabels.length - 6} more
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-5 grid grid-cols-2 gap-2.5">
           <StatCell label="Background">{experience}</StatCell>

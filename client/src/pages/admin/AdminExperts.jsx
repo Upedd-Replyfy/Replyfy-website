@@ -160,9 +160,25 @@ export default function AdminExperts() {
         title="Mentors"
         description="Register, verify, and manage mentor accounts"
         actions={
-          <AdminButton icon={UserPlus} onClick={openRegisterExpert}>
-            Register Mentor
-          </AdminButton>
+          <div className="flex flex-wrap items-center gap-2">
+            <AdminButton
+              variant="secondary"
+              onClick={async () => {
+                try {
+                  const res = await adminApi.syncExpertCatalog()
+                  toast.success(res.message || 'Catalog synced')
+                  queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
+                } catch (err) {
+                  toast.error(err.message)
+                }
+              }}
+            >
+              Sync catalog
+            </AdminButton>
+            <AdminButton icon={UserPlus} onClick={openRegisterExpert}>
+              Register Mentor
+            </AdminButton>
+          </div>
         }
       />
 

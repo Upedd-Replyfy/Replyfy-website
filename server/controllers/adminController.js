@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Notification from '../models/Notification.js'
 import User from '../models/User.js'
 import ExpertProfile from '../models/ExpertProfile.js'
@@ -297,20 +298,27 @@ export const createExpert = asyncHandler(async (req, res) => {
   if (exists) throw new ApiError(400, 'Email already exists')
 
   let categoryIds = resolveIdList(
-    categoriesRaw,
     req.body.categoriesJson,
     req.body.categoryIds,
+    categoriesRaw,
     category
   )
   let typeIds = resolveIdList(
-    expertTypesRaw,
     req.body.expertTypesJson,
     req.body.expertTypeIds,
+    expertTypesRaw,
     expertType
   )
 
   if (!typeIds.length) {
     throw new ApiError(400, 'Select at least one mentor type')
+  }
+
+  const invalidIds = [...categoryIds, ...typeIds].filter(
+    (id) => !mongoose.Types.ObjectId.isValid(id) || String(new mongoose.Types.ObjectId(id)) !== String(id)
+  )
+  if (invalidIds.length) {
+    throw new ApiError(400, 'Invalid category or mentor type id received')
   }
 
   const types = await ExpertType.find({ _id: { $in: typeIds } })
@@ -365,6 +373,12 @@ export const createExpert = asyncHandler(async (req, res) => {
     status: 'active',
     createdBy: req.user._id,
   })
+
+  // Force-persist multi arrays (guards against hosts that drop array fields on insert)
+  await ExpertProfile.updateOne(
+    { _id: profile._id },
+    { $set: { categories: categoryIds, expertTypes: typeIds, category: primaryCategory, expertType: primaryType } }
+  )
 
   await Wallet.create({ expert: user._id })
 
@@ -451,6 +465,43 @@ export const getExperts = asyncHandler(async (req, res) => {
   res.json({ success: true, experts })
 })
 
+/** Backfill empty categories/expertTypes arrays from primary fields (safe repair). */
+export const syncExpertCatalog = asyncHandler(async (req, res) => {
+  const profiles = await ExpertProfile.find()
+  let updated = 0
+
+  for (const profile of profiles) {
+    let dirty = false
+    const categoryIds = [...new Set(
+      [profile.category, ...(profile.categories || [])]
+        .map((c) => String(c?._id || c || ''))
+        .filter((id) => mongoose.Types.ObjectId.isValid(id))
+    )]
+    const typeIds = [...new Set(
+      [profile.expertType, ...(profile.expertTypes || [])]
+        .map((t) => String(t?._id || t || ''))
+        .filter((id) => mongoose.Types.ObjectId.isValid(id))
+    )]
+
+    if (categoryIds.length && JSON.stringify(categoryIds) !== JSON.stringify((profile.categories || []).map((c) => String(c)))) {
+      profile.categories = categoryIds
+      if (!profile.category) profile.category = categoryIds[0]
+      dirty = true
+    }
+    if (typeIds.length && JSON.stringify(typeIds) !== JSON.stringify((profile.expertTypes || []).map((t) => String(t)))) {
+      profile.expertTypes = typeIds
+      if (!profile.expertType) profile.expertType = typeIds[0]
+      dirty = true
+    }
+    if (dirty) {
+      await profile.save()
+      updated += 1
+    }
+  }
+
+  res.json({ success: true, updated, message: `Synced catalog arrays on ${updated} mentors` })
+})
+
 export const updateExpert = asyncHandler(async (req, res) => {
   const profile = await ExpertProfile.findById(req.params.id).populate('user')
   if (!profile) throw new ApiError(404, 'Mentor not found')
@@ -477,15 +528,15 @@ export const updateExpert = asyncHandler(async (req, res) => {
   if (categoriesRaw !== undefined || expertTypesRaw !== undefined || category !== undefined || expertType !== undefined
     || req.body.categoriesJson !== undefined || req.body.expertTypesJson !== undefined) {
     let categoryIds = resolveIdList(
-      categoriesRaw,
       req.body.categoriesJson,
       req.body.categoryIds,
+      categoriesRaw,
       category
     )
     let typeIds = resolveIdList(
-      expertTypesRaw,
       req.body.expertTypesJson,
       req.body.expertTypeIds,
+      expertTypesRaw,
       expertType
     )
 
