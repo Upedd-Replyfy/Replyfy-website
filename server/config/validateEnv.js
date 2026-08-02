@@ -7,15 +7,12 @@ export function validateEnv() {
   const missing = requiredInProduction.filter((key) => !env[key])
 
   const razorpayConfigured = Boolean(env.razorpay.keyId && env.razorpay.keySecret)
-  if (env.nodeEnv === 'production' && !razorpayConfigured && !env.allowDevPayments) {
-    missing.push('RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET')
-  }
-
-  if (
-    env.nodeEnv === 'production' &&
-    razorpayConfigured &&
-    !env.razorpay.webhookSecret
-  ) {
+  if (!razorpayConfigured) {
+    logger.warn(
+      'Razorpay keys not set — payments disabled until RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are configured' +
+        (env.allowDevPayments ? ' (ALLOW_DEV_PAYMENTS=true: unpaid checkout enabled)' : '')
+    )
+  } else if (env.nodeEnv === 'production' && !env.razorpay.webhookSecret) {
     logger.warn(
       'RAZORPAY_WEBHOOK_SECRET is not set — webhooks will be rejected until configured'
     )
