@@ -31,13 +31,21 @@ function availabilityTone(availability) {
   return 'offline'
 }
 
+/** Prefer populated `.name`; never show raw Mongo ids in the UI. */
 function labelList(multi, primary, key = 'name') {
   const fromMulti = (Array.isArray(multi) ? multi : [])
-    .map((item) => (typeof item === 'string' ? item : item?.[key]))
+    .map((item) => {
+      if (item && typeof item === 'object') return item[key] || null
+      return null
+    })
     .filter(Boolean)
   if (fromMulti.length) return fromMulti
-  const single = typeof primary === 'string' ? primary : primary?.[key]
-  return single ? [single] : []
+
+  if (primary && typeof primary === 'object') {
+    const name = primary[key]
+    return name ? [name] : []
+  }
+  return []
 }
 
 function RatingStars({ value = 0 }) {

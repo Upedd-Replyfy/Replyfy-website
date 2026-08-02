@@ -397,7 +397,58 @@ export const getExperts = asyncHandler(async (req, res) => {
     .populate('categories', 'name slug')
     .populate('expertTypes', 'name slug')
     .sort({ createdAt: -1 })
-  res.json({ success: true, experts: profiles })
+
+  // Hydrate any refs that failed to populate (orphaned / unpopulated ObjectIds)
+  const unresolvedCategoryIds = new Set()
+  const unresolvedTypeIds = new Set()
+  for (const profile of profiles) {
+    for (const item of profile.categories || []) {
+      if (!item?.name) unresolvedCategoryIds.add(String(item?._id || item))
+    }
+    if (profile.category && !profile.category.name) {
+      unresolvedCategoryIds.add(String(profile.category._id || profile.category))
+    }
+    for (const item of profile.expertTypes || []) {
+      if (!item?.name) unresolvedTypeIds.add(String(item?._id || item))
+    }
+    if (profile.expertType && !profile.expertType.name) {
+      unresolvedTypeIds.add(String(profile.expertType._id || profile.expertType))
+    }
+  }
+
+  const [extraCats, extraTypes] = await Promise.all([
+    unresolvedCategoryIds.size
+      ? Category.find({ _id: { $in: [...unresolvedCategoryIds] } }).select('name slug')
+      : [],
+    unresolvedTypeIds.size
+      ? ExpertType.find({ _id: { $in: [...unresolvedTypeIds] } }).select('name slug')
+      : [],
+  ])
+  const catMap = new Map(extraCats.map((c) => [String(c._id), c]))
+  const typeMap = new Map(extraTypes.map((t) => [String(t._id), t]))
+
+  const experts = profiles.map((profile) => {
+    const doc = profile.toObject()
+    const resolveCat = (item) => {
+      if (item?.name) return item
+      const id = String(item?._id || item || '')
+      return catMap.get(id) || null
+    }
+    const resolveType = (item) => {
+      if (item?.name) return item
+      const id = String(item?._id || item || '')
+      return typeMap.get(id) || null
+    }
+    doc.category = resolveCat(doc.category)
+    doc.expertType = resolveType(doc.expertType)
+    doc.categories = (doc.categories || []).map(resolveCat).filter(Boolean)
+    doc.expertTypes = (doc.expertTypes || []).map(resolveType).filter(Boolean)
+    if (!doc.categories.length && doc.category) doc.categories = [doc.category]
+    if (!doc.expertTypes.length && doc.expertType) doc.expertTypes = [doc.expertType]
+    return doc
+  })
+
+  res.json({ success: true, experts })
 })
 
 export const updateExpert = asyncHandler(async (req, res) => {
