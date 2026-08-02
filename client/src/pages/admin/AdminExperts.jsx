@@ -31,6 +31,15 @@ function availabilityTone(availability) {
   return 'offline'
 }
 
+function labelList(multi, primary, key = 'name') {
+  const fromMulti = (Array.isArray(multi) ? multi : [])
+    .map((item) => (typeof item === 'string' ? item : item?.[key]))
+    .filter(Boolean)
+  if (fromMulti.length) return fromMulti
+  const single = typeof primary === 'string' ? primary : primary?.[key]
+  return single ? [single] : []
+}
+
 function RatingStars({ value = 0 }) {
   const rating = Number(value) || 0
   return (
@@ -179,15 +188,9 @@ export default function AdminExperts() {
             <p className="px-5 py-12 text-center text-slate-500">No mentors match your search.</p>
           ) : (
             <div className="divide-y divide-border">
-              {filtered.map((e) => {
-                const categories = (e.categories?.length
-                  ? e.categories.map((c) => c.name).filter(Boolean)
-                  : [e.category?.name]
-                ).filter(Boolean)
-                const types = (e.expertTypes?.length
-                  ? e.expertTypes.map((t) => t.name).filter(Boolean)
-                  : [e.expertType?.name]
-                ).filter(Boolean)
+              {                filtered.map((e) => {
+                const categories = labelList(e.categories, e.category)
+                const types = labelList(e.expertTypes, e.expertType)
 
                 return (
                   <div key={e._id} className="space-y-3 p-4">
@@ -207,10 +210,12 @@ export default function AdminExperts() {
                           </AdminBadge>
                           <RatingStars value={e.averageRating || 0} />
                         </div>
-                        <p className="mt-2 truncate text-xs font-medium text-slate-700">
+                        <p className="mt-2 text-xs font-medium text-slate-700">
                           {categories.join(', ') || '—'}
                         </p>
-                        <p className="truncate text-[11px] text-slate-500">{types.join(', ')}</p>
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">
+                          {types.join(', ') || '—'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -275,14 +280,8 @@ export default function AdminExperts() {
                 <tr><td colSpan={5} className="px-5 py-12 text-center text-slate-500">No mentors match your search.</td></tr>
               ) : (
                 filtered.map((e, index) => {
-                  const categories = (e.categories?.length
-                    ? e.categories.map((c) => c.name).filter(Boolean)
-                    : [e.category?.name]
-                  ).filter(Boolean)
-                  const types = (e.expertTypes?.length
-                    ? e.expertTypes.map((t) => t.name).filter(Boolean)
-                    : [e.expertType?.name]
-                  ).filter(Boolean)
+                  const categories = labelList(e.categories, e.category)
+                  const types = labelList(e.expertTypes, e.expertType)
 
                   return (
                     <tr
@@ -312,11 +311,19 @@ export default function AdminExperts() {
                           <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                             <FolderTree size={13} />
                           </span>
-                          <div className="min-w-0">
-                            <p className="truncate font-medium text-slate-800">
+                          <div className="min-w-0 max-w-[280px]">
+                            <p className="font-medium leading-snug text-slate-800">
                               {categories.join(', ') || '—'}
                             </p>
-                            <p className="truncate text-xs text-slate-500">{types.join(', ')}</p>
+                            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                              {types.join(', ') || '—'}
+                            </p>
+                            {(categories.length > 1 || types.length > 1) && (
+                              <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-500">
+                                {categories.length} categor{categories.length === 1 ? 'y' : 'ies'} · {types.length} type
+                                {types.length === 1 ? '' : 's'}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

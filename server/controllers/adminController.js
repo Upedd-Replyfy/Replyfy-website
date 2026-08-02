@@ -15,7 +15,7 @@ import { logAudit } from '../services/auditService.js'
 import { planRequiresExpertSelection } from '../constants/pricing.js'
 import ExpertType from '../models/ExpertType.js'
 import { slugify } from '../utils/slug.js'
-import { parseIdList } from '../utils/expertMatch.js'
+import { resolveIdList, mergeCategoryIdsWithTypes } from '../utils/expertMatch.js'
 import {
   aggregateByDay,
   getLastNDays,
@@ -296,30 +296,39 @@ export const createExpert = asyncHandler(async (req, res) => {
   const exists = await User.findOne({ email })
   if (exists) throw new ApiError(400, 'Email already exists')
 
-  let categoryIds = parseIdList(categoriesRaw)
-  let typeIds = parseIdList(expertTypesRaw)
-  if (!categoryIds.length && category) categoryIds = parseIdList(category)
-  if (!typeIds.length && expertType) typeIds = parseIdList(expertType)
+  let categoryIds = resolveIdList(
+    categoriesRaw,
+    req.body.categoriesJson,
+    req.body.categoryIds,
+    category
+  )
+  let typeIds = resolveIdList(
+    expertTypesRaw,
+    req.body.expertTypesJson,
+    req.body.expertTypeIds,
+    expertType
+  )
 
-  if (!categoryIds.length || !typeIds.length) {
+  if (!typeIds.length) {
+    throw new ApiError(400, 'Select at least one mentor type')
+  }
+
+  const types = await ExpertType.find({ _id: { $in: typeIds } })
+  if (types.length !== typeIds.length) throw new ApiError(400, 'Invalid mentor type selection')
+
+  // Include parent categories of every selected type so multi-select never fails mismatch checks
+  categoryIds = mergeCategoryIdsWithTypes(categoryIds, types)
+  if (!categoryIds.length) {
     throw new ApiError(400, 'Select at least one category and mentor type')
   }
 
   const cats = await Category.find({ _id: { $in: categoryIds } })
   if (cats.length !== categoryIds.length) throw new ApiError(400, 'Invalid category selection')
 
-  const types = await ExpertType.find({ _id: { $in: typeIds } })
-  if (types.length !== typeIds.length) throw new ApiError(400, 'Invalid mentor type selection')
-
-  const categorySet = new Set(categoryIds.map(String))
-  for (const t of types) {
-    if (!categorySet.has(String(t.category))) {
-      throw new ApiError(400, `Mentor type "${t.name}" does not belong to a selected category`)
-    }
-  }
-
-  const primaryCategory = categoryIds[0]
-  const primaryType = typeIds[0]
+  // Primary pair: first type + its own category (always consistent)
+  const primaryTypeDoc = types.find((t) => String(t._id) === String(typeIds[0])) || types[0]
+  const primaryType = String(primaryTypeDoc._id)
+  const primaryCategory = String(primaryTypeDoc.category)
 
   let profilePhoto = ''
   if (req.file) {
@@ -367,9 +376,16 @@ export const createExpert = asyncHandler(async (req, res) => {
     ip: req.ip,
   })
 
+  const populated = await ExpertProfile.findById(profile._id)
+    .populate('user', 'name email avatar isActive')
+    .populate('category', 'name slug')
+    .populate('expertType', 'name slug')
+    .populate('categories', 'name slug')
+    .populate('expertTypes', 'name slug')
+
   res.status(201).json({
     success: true,
-    expert: { user: { _id: user._id, name: user.name, email: user.email }, profile },
+    expert: populated,
   })
 })
 
@@ -407,27 +423,36 @@ export const updateExpert = asyncHandler(async (req, res) => {
     isActive,
   } = req.body
 
-  if (categoriesRaw !== undefined || expertTypesRaw !== undefined || category !== undefined || expertType !== undefined) {
-    let categoryIds = parseIdList(categoriesRaw ?? category)
-    let typeIds = parseIdList(expertTypesRaw ?? expertType)
-    if (!categoryIds.length && category) categoryIds = parseIdList(category)
-    if (!typeIds.length && expertType) typeIds = parseIdList(expertType)
+  if (categoriesRaw !== undefined || expertTypesRaw !== undefined || category !== undefined || expertType !== undefined
+    || req.body.categoriesJson !== undefined || req.body.expertTypesJson !== undefined) {
+    let categoryIds = resolveIdList(
+      categoriesRaw,
+      req.body.categoriesJson,
+      req.body.categoryIds,
+      category
+    )
+    let typeIds = resolveIdList(
+      expertTypesRaw,
+      req.body.expertTypesJson,
+      req.body.expertTypeIds,
+      expertType
+    )
 
-    if (categoryIds.length && typeIds.length) {
-      const cats = await Category.find({ _id: { $in: categoryIds } })
-      if (cats.length !== categoryIds.length) throw new ApiError(400, 'Invalid category selection')
+    if (typeIds.length) {
       const types = await ExpertType.find({ _id: { $in: typeIds } })
       if (types.length !== typeIds.length) throw new ApiError(400, 'Invalid mentor type selection')
-      const categorySet = new Set(categoryIds.map(String))
-      for (const t of types) {
-        if (!categorySet.has(String(t.category))) {
-          throw new ApiError(400, `Mentor type "${t.name}" does not belong to a selected category`)
-        }
-      }
+      categoryIds = mergeCategoryIdsWithTypes(categoryIds, types)
+      if (!categoryIds.length) throw new ApiError(400, 'Select at least one category and mentor type')
+      const cats = await Category.find({ _id: { $in: categoryIds } })
+      if (cats.length !== categoryIds.length) throw new ApiError(400, 'Invalid category selection')
+      const primaryTypeDoc = types.find((t) => String(t._id) === String(typeIds[0])) || types[0]
       profile.categories = categoryIds
       profile.expertTypes = typeIds
+      profile.category = primaryTypeDoc.category
+      profile.expertType = primaryTypeDoc._id
+    } else if (categoryIds.length) {
+      profile.categories = categoryIds
       profile.category = categoryIds[0]
-      profile.expertType = typeIds[0]
     } else {
       if (category !== undefined) profile.category = category
       if (expertType !== undefined) profile.expertType = expertType

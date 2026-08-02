@@ -19,10 +19,7 @@ export const catalogApi = {
 }
 
 export const userApi = {
-  createQuestion: (formData) =>
-    api.post('/users/questions', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+  createQuestion: (formData) => api.post('/users/questions', formData),
   createPaymentOrder: (questionId, couponCode) =>
     api.post('/users/payments/create-order', { questionId, couponCode }),
   validateCoupon: (data) => api.post('/users/payments/validate-coupon', data),
@@ -38,10 +35,7 @@ export const expertApi = {
   getQuestions: (params) => api.get('/expert/questions', { params }),
   getQuestion: (id) => api.get(`/expert/questions/${id}`),
   startQuestion: (id) => api.patch(`/expert/questions/${id}/start`),
-  submitAnswer: (id, formData) =>
-    api.post(`/expert/questions/${id}/answer`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+  submitAnswer: (id, formData) => api.post(`/expert/questions/${id}/answer`, formData),
   getWallet: () => api.get('/expert/wallet'),
   withdraw: (data) => api.post('/expert/wallet/withdraw', data),
   getRatings: () => api.get('/expert/ratings'),
@@ -54,11 +48,9 @@ export const adminApi = {
   getDashboard: () => api.get('/admin/dashboard'),
   getUsers: (params) => api.get('/admin/users', { params }),
   toggleUser: (id) => api.patch(`/admin/users/${id}/toggle`),
-  createExpert: (formData) =>
-    api.post('/admin/experts', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  createExpert: (formData) => api.post('/admin/experts', formData),
   getExperts: () => api.get('/admin/experts'),
-  updateExpert: (id, formData) =>
-    api.put(`/admin/experts/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  updateExpert: (id, formData) => api.put(`/admin/experts/${id}`, formData),
   deleteExpert: (id) => api.delete(`/admin/experts/${id}`),
   getCategories: () => api.get('/admin/categories'),
   createCategory: (data) => api.post('/admin/categories', data),

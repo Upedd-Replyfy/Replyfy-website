@@ -122,7 +122,17 @@ export default function RegisterExpertModal({ open, onClose }) {
     const key = String(id)
     setSelectedTypes((prev) => {
       const current = prev.map(String)
-      return current.includes(key) ? current.filter((x) => x !== key) : [...current, key]
+      if (current.includes(key)) {
+        return current.filter((x) => x !== key)
+      }
+      const type = allTypes.find((x) => String(x._id) === key)
+      const catId = String(type?.category?._id || type?.category || '')
+      if (catId) {
+        setSelectedCategories((cats) =>
+          cats.map(String).includes(catId) ? cats.map(String) : [...cats.map(String), catId]
+        )
+      }
+      return [...current, key]
     })
   }
 
@@ -135,16 +145,35 @@ export default function RegisterExpertModal({ open, onClose }) {
 
   const createMutation = useMutation({
     mutationFn: () => {
+      const categoryIds = [...selectedCategories.map(String)]
+      const typeIds = selectedTypes.map(String)
+
+      // Auto-include parent category for every selected type
+      typeIds.forEach((typeId) => {
+        const t = allTypes.find((x) => String(x._id) === typeId)
+        const catId = String(t?.category?._id || t?.category || '')
+        if (catId && !categoryIds.includes(catId)) categoryIds.push(catId)
+      })
+
+      const primaryType = allTypes.find((t) => String(t._id) === typeIds[0])
+      const primaryCategory = String(
+        primaryType?.category?._id || primaryType?.category || categoryIds[0] || ''
+      )
+
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => {
         if (k === 'isVerified') fd.append(k, v ? 'true' : 'false')
         else fd.append(k, String(v))
       })
-      fd.append('categories', JSON.stringify(selectedCategories))
-      fd.append('expertTypes', JSON.stringify(selectedTypes))
-      // Primary fields for older tooling
-      fd.append('category', selectedCategories[0] || '')
-      fd.append('expertType', selectedTypes[0] || '')
+      // Send multi-select in several formats for reliable multipart parsing on all hosts
+      fd.append('categoriesJson', JSON.stringify(categoryIds))
+      fd.append('expertTypesJson', JSON.stringify(typeIds))
+      fd.append('categoryIds', categoryIds.join(','))
+      fd.append('expertTypeIds', typeIds.join(','))
+      categoryIds.forEach((id) => fd.append('categories', id))
+      typeIds.forEach((id) => fd.append('expertTypes', id))
+      fd.append('category', primaryCategory)
+      fd.append('expertType', typeIds[0] || '')
       if (photo) fd.append('photo', photo)
       return adminApi.createExpert(fd)
     },
