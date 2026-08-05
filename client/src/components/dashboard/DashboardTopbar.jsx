@@ -1,10 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
-  Bell,
   Menu,
   ChevronDown,
   Sparkles,
@@ -17,39 +15,20 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useDashboardTheme } from '../../context/DashboardThemeContext'
-import { notificationApi } from '../../services/api'
-import { formatDistanceToNow } from '../../utils/date'
+import NotificationBell from '../shared/NotificationBell'
 
 export default function DashboardTopbar({ onMenuOpen }) {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useDashboardTheme()
-  const [notifOpen, setNotifOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const notifRef = useRef(null)
   const profileRef = useRef(null)
   const quickRef = useRef(null)
 
-  const { data: notificationsData } = useQuery({
-    queryKey: ['dashboard-notifications'],
-    queryFn: () => notificationApi.getAll({ limit: 10 }),
-    refetchInterval: 60000,
-  })
-
-  const markReadMutation = useMutation({
-    mutationFn: (id) => notificationApi.markRead(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dashboard-notifications'] }),
-  })
-
-  const notifications = notificationsData?.notifications || []
-  const unreadCount = notificationsData?.unreadCount || 0
-
   useEffect(() => {
     const handleClick = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false)
       if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false)
       if (quickRef.current && !quickRef.current.contains(e.target)) setQuickOpen(false)
     }
@@ -67,16 +46,6 @@ export default function DashboardTopbar({ onMenuOpen }) {
     const query = searchQuery.trim()
     if (!query) return
     navigate(`/dashboard/experts?search=${encodeURIComponent(query)}`)
-  }
-
-  const handleNotificationClick = (notification) => {
-    if (!notification.isRead) {
-      markReadMutation.mutate(notification._id)
-    }
-    setNotifOpen(false)
-    if (notification.link) {
-      navigate(notification.link)
-    }
   }
 
   const avatarSrc =
@@ -138,7 +107,11 @@ export default function DashboardTopbar({ onMenuOpen }) {
                 className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-2xl border border-border bg-card p-1.5 shadow-[var(--shadow-luxury-lg)]"
               >
                 {[
-                  { icon: MessageSquarePlus, label: 'New question', action: () => navigate('/dashboard', { state: { reset: true } }) },
+                  {
+                    icon: MessageSquarePlus,
+                    label: 'New question',
+                    action: () => navigate('/dashboard', { state: { reset: true } }),
+                  },
                   { icon: Search, label: 'Find mentor', action: () => navigate('/dashboard/experts') },
                   { icon: Sparkles, label: 'Go to workspace', action: () => navigate('/dashboard') },
                 ].map((action) => (
@@ -171,57 +144,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </motion.button>
 
-        <div className="relative" ref={notifRef}>
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setNotifOpen(!notifOpen)}
-            className="relative rounded-xl p-2.5 text-muted transition-colors hover:bg-surface hover:text-ink"
-            aria-label="Notifications"
-          >
-            <Bell size={18} />
-            {unreadCount > 0 && (
-              <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-fg ring-2 ring-card">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </motion.button>
-          <AnimatePresence>
-            {notifOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-luxury-lg)]"
-              >
-                <div className="border-b border-border px-4 py-3">
-                  <p className="text-sm font-semibold text-ink">Notifications</p>
-                </div>
-                <div className="max-h-72 overflow-y-auto p-2">
-                  {notifications.length === 0 ? (
-                    <p className="px-3 py-6 text-center text-xs text-muted-light">No notifications yet</p>
-                  ) : (
-                    notifications.map((n) => (
-                      <button
-                        key={n._id}
-                        type="button"
-                        onClick={() => handleNotificationClick(n)}
-                        className={`w-full rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-surface ${
-                          !n.isRead ? 'bg-surface' : ''
-                        }`}
-                      >
-                        <p className="text-xs font-medium text-ink">{n.title}</p>
-                        <p className="mt-1 text-xs leading-relaxed text-muted">{n.message}</p>
-                        <p className="mt-1 text-[10px] text-muted-light">{formatDistanceToNow(n.createdAt)}</p>
-                      </button>
-                    ))
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <NotificationBell />
 
         <div className="relative shrink-0" ref={profileRef}>
           <motion.button

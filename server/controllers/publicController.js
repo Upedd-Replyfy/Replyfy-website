@@ -27,12 +27,12 @@ export const getCategories = asyncHandler(async (req, res) => {
 
 export const getExpertTypes = asyncHandler(async (req, res) => {
   const { category } = req.query
-  if (!category) {
-    return res.status(400).json({ success: false, message: 'category query parameter is required' })
-  }
+  const query = { isActive: true }
+  if (category) query.category = category
 
-  const expertTypes = await ExpertType.find({ category, isActive: true })
+  const expertTypes = await ExpertType.find(query)
     .select('name slug description placeholder suggestions category sortOrder')
+    .populate('category', 'name slug')
     .sort({ sortOrder: 1, name: 1 })
 
   res.json({ success: true, expertTypes })

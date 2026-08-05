@@ -3,14 +3,14 @@ import { motion } from 'framer-motion'
 
 const variants = {
   primary:
-    'admin-btn-gradient text-white shadow-[0_8px_20px_rgba(79,70,229,0.25)] hover:shadow-[0_10px_28px_rgba(99,102,241,0.35)]',
+    'admin-btn-gradient text-white shadow-[0_8px_20px_rgba(91,76,255,0.25)] hover:shadow-[0_10px_28px_rgba(91,76,255,0.35)]',
   secondary:
-    'border border-border bg-card text-ink shadow-sm hover:bg-surface hover:border-[#D1D5DB]',
+    'border border-border bg-card text-ink shadow-sm hover:bg-surface hover:border-[#5B4CFF]/30',
   ghost: 'text-muted hover:bg-surface hover:text-ink',
   success:
-    'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
-  danger: 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
-  soft: 'border border-indigo-100 bg-indigo-50 text-indigo-700 hover:bg-indigo-100',
+    'border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15',
+  danger: 'border border-rose-500/25 bg-rose-500/10 text-rose-400 hover:bg-rose-500/15',
+  soft: 'border border-[#5B4CFF]/25 bg-[#5B4CFF]/10 text-[#a5a0ff] hover:bg-[#5B4CFF]/15',
 }
 
 const sizes = {

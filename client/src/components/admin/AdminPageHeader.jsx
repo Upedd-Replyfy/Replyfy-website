@@ -7,11 +7,11 @@ export default function AdminPageHeader({ eyebrow, title, description, actions }
             {eyebrow}
           </p>
         )}
-        <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-[1.75rem]">
+        <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-ink sm:text-[1.75rem]">
           {title}
         </h1>
         {description && (
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-500">{description}</p>
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted">{description}</p>
         )}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}

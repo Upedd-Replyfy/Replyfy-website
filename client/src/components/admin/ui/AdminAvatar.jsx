@@ -24,18 +24,18 @@ export default function AdminAvatar({
         <img
           src={src}
           alt=""
-          className={`${sizes[size]} rounded-2xl object-cover ring-2 ring-white shadow-sm`}
+          className={`${sizes[size]} rounded-2xl object-cover ring-2 ring-card shadow-sm`}
         />
       ) : (
         <span
-          className={`flex ${sizes[size]} items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F46E5] to-[#6366F1] font-semibold text-white shadow-sm ring-2 ring-white`}
+          className={`flex ${sizes[size]} items-center justify-center rounded-2xl bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] font-semibold text-white shadow-sm ring-2 ring-card`}
         >
           {initials}
         </span>
       )}
       {verified ? (
         <span
-          className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#4F46E5] text-white ring-2 ring-white"
+          className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#5B4CFF] text-white ring-2 ring-card"
           title="Verified"
           aria-label="Verified"
         >

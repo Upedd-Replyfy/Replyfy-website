@@ -1,13 +1,13 @@
 const tones = {
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  warning: 'border-amber-200 bg-amber-50 text-amber-700',
-  danger: 'border-rose-200 bg-rose-50 text-rose-700',
-  info: 'border-blue-200 bg-blue-50 text-blue-700',
-  violet: 'border-indigo-200 bg-indigo-50 text-indigo-700',
-  neutral: 'border-border bg-slate-50 text-slate-600',
-  available: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  busy: 'border-amber-200 bg-amber-50 text-amber-700',
-  offline: 'border-slate-200 bg-slate-100 text-slate-500',
+  success: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400',
+  warning: 'border-amber-500/25 bg-amber-500/10 text-amber-400',
+  danger: 'border-rose-500/25 bg-rose-500/10 text-rose-400',
+  info: 'border-sky-500/25 bg-sky-500/10 text-sky-400',
+  violet: 'border-[#5B4CFF]/25 bg-[#5B4CFF]/10 text-[#a5a0ff]',
+  neutral: 'border-border bg-surface text-muted',
+  available: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400',
+  busy: 'border-amber-500/25 bg-amber-500/10 text-amber-400',
+  offline: 'border-border bg-surface text-muted',
 }
 
 export default function AdminBadge({ children, tone = 'neutral', className = '', dot = false }) {
@@ -19,14 +19,14 @@ export default function AdminBadge({ children, tone = 'neutral', className = '',
         <span
           className={`h-1.5 w-1.5 rounded-full ${
             tone === 'success' || tone === 'available'
-              ? 'bg-emerald-500'
+              ? 'bg-emerald-400'
               : tone === 'warning' || tone === 'busy'
-                ? 'bg-amber-500'
+                ? 'bg-amber-400'
                 : tone === 'danger'
-                  ? 'bg-rose-500'
+                  ? 'bg-rose-400'
                   : tone === 'info' || tone === 'violet'
-                    ? 'bg-indigo-500'
-                    : 'bg-slate-400'
+                    ? 'bg-[#7C6CFF]'
+                    : 'bg-muted-light'
           }`}
         />
       ) : null}

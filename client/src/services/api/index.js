@@ -39,6 +39,7 @@ export const expertApi = {
   getWallet: () => api.get('/expert/wallet'),
   withdraw: (data) => api.post('/expert/wallet/withdraw', data),
   getRatings: () => api.get('/expert/ratings'),
+  getProfile: () => api.get('/expert/profile'),
   updateProfile: (data) => api.put('/expert/profile', data),
   getAvailability: () => api.get('/expert/availability'),
   updateAvailability: (data) => api.patch('/expert/availability', data),

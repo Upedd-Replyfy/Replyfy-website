@@ -24,6 +24,7 @@ import ExpertDashboard from './pages/expert/ExpertDashboard'
 import ExpertQuestions from './pages/expert/ExpertQuestions'
 import ExpertQuestionDetail from './pages/expert/ExpertQuestionDetail'
 import ExpertWallet from './pages/expert/ExpertWallet'
+import ExpertSettings from './pages/expert/ExpertSettings'
 import AdminLayout from './layouts/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminAnalytics from './pages/admin/AdminAnalytics'
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="questions" element={<ExpertQuestions />} />
             <Route path="questions/:id" element={<ExpertQuestionDetail />} />
             <Route path="wallet" element={<ExpertWallet />} />
+            <Route path="settings" element={<ExpertSettings />} />
           </Route>
         </Route>
 

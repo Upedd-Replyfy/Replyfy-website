@@ -394,7 +394,7 @@
   --shadow-luxury-hover: 0 12px 28px rgba(15, 23, 42, 0.1), 0 24px 64px rgba(15, 23, 42, 0.08);
 }
 
-/* Premium admin shell — indigo SaaS system */
+/* Premium admin shell ? indigo SaaS system */
 .admin-shell {
   --admin-sidebar-w: 268px;
   --admin-sidebar-collapsed: 84px;
@@ -583,7 +583,7 @@
   background-color: color-mix(in srgb, var(--color-card) 92%, transparent) !important;
 }
 
-/* Auth page — force light form controls over the global dark palette */
+/* Auth page ? force light form controls over the global dark palette */
 .auth-shell label {
   color: rgba(0, 0, 0, 0.78) !important;
   font-size: 13px;
@@ -610,4 +610,147 @@
 
 .auth-shell .space-y-2 > p.text-xs {
   color: #b91c1c !important;
+}
+
+/* Premium bluish cards ? dark by default, light override */
+.premium-surface {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(124, 108, 255, 0.28);
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(91, 76, 255, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(124, 108, 255, 0.14), transparent 50%),
+    linear-gradient(145deg, #2a2d3a 0%, #22252e 45%, #1c1e26 100%);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.premium-surface::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(91, 76, 255, 0.08), transparent 40%);
+}
+
+.premium-surface-inner {
+  border: 1px solid rgba(124, 108, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dashboard-shell[data-theme='light'] .premium-surface,
+.admin-shell[data-theme='light'] .premium-surface,
+.expert-shell[data-theme='light'] .premium-surface {
+  border-color: rgba(199, 210, 254, 0.7);
+  background:
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(91, 76, 255, 0.12), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(124, 108, 255, 0.1), transparent 50%),
+    linear-gradient(145deg, #eef2ff 0%, #f5f3ff 45%, #f8fafc 100%);
+  box-shadow: 0 8px 28px rgba(91, 76, 255, 0.08);
+}
+
+.dashboard-shell[data-theme='light'] .premium-surface-inner,
+.admin-shell[data-theme='light'] .premium-surface-inner,
+.expert-shell[data-theme='light'] .premium-surface-inner {
+  border-color: rgba(199, 210, 254, 0.55);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.premium-filter {
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-card) 88%, transparent);
+  box-shadow: var(--shadow-luxury-sm);
+  backdrop-filter: blur(12px);
+}
+
+.dashboard-shell[data-theme='light'] .premium-filter,
+.admin-shell[data-theme='light'] .premium-filter,
+.expert-shell[data-theme='light'] .premium-filter {
+  border-color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+}
+
+/* Question detail timeline � green progress animation */
+.question-timeline {
+  position: relative;
+  margin-left: 0.35rem;
+  padding-left: 1.35rem;
+}
+
+.question-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.2rem;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 185, 129, 0.15),
+    rgba(16, 185, 129, 0.55),
+    rgba(52, 211, 153, 0.9)
+  );
+  overflow: hidden;
+}
+
+.question-timeline::after {
+  content: '';
+  position: absolute;
+  left: 0.2rem;
+  top: 0.35rem;
+  width: 2px;
+  height: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #34d399, #10b981);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.55);
+  animation: timeline-grow 1.1s ease-out forwards;
+}
+
+.question-timeline-item {
+  position: relative;
+  padding-bottom: 1.15rem;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: timeline-item-in 0.45s ease-out forwards;
+}
+
+.question-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.question-timeline-dot {
+  position: absolute;
+  left: -1.28rem;
+  top: 0.2rem;
+  height: 0.7rem;
+  width: 0.7rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-card);
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+  animation: timeline-pulse 2s ease-out infinite;
+}
+
+.question-timeline-item:last-child .question-timeline-dot {
+  background: linear-gradient(135deg, #34d399, #059669);
+  animation: timeline-pulse 1.6s ease-out infinite;
+}
+
+@keyframes timeline-grow {
+  from { height: 0; }
+  to { height: calc(100% - 0.7rem); }
+}
+
+@keyframes timeline-item-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes timeline-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }

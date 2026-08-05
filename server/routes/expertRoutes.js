@@ -9,6 +9,7 @@ import {
   getQuestionDetail,
   startQuestion,
   submitAnswer,
+  getExpertProfile,
   updateExpertProfile,
   getWallet,
   requestWithdrawal,
@@ -16,6 +17,15 @@ import {
   getAvailability,
   updateAvailability,
 } from '../controllers/expertController.js'
+
+/** Multer only for multipart; JSON create/update must keep array fields intact. */
+function optionalExpertPhoto(req, res, next) {
+  const contentType = String(req.headers['content-type'] || '')
+  if (contentType.includes('multipart/form-data')) {
+    return upload.single('photo')(req, res, next)
+  }
+  return next()
+}
 
 const router = Router()
 
@@ -26,7 +36,8 @@ router.get('/questions', getAssignedQuestions)
 router.get('/questions/:id', getQuestionDetail)
 router.patch('/questions/:id/start', startQuestion)
 router.post('/questions/:id/answer', upload.array('files', 5), body('content').trim().notEmpty(), validate, submitAnswer)
-router.put('/profile', updateExpertProfile)
+router.get('/profile', getExpertProfile)
+router.put('/profile', optionalExpertPhoto, updateExpertProfile)
 router.get('/wallet', getWallet)
 router.post('/wallet/withdraw', body('amount').isInt({ min: 1 }), validate, requestWithdrawal)
 router.get('/ratings', getRatings)

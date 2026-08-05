@@ -1,12 +1,80 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { Bell, Search, UserCheck, UserX, Users } from 'lucide-react'
+import { Bell, Mail, Search, UserCheck, UserX, Users } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminStatStrip from '../../components/admin/AdminStatStrip'
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge'
 import SendNotificationModal from '../../components/admin/SendNotificationModal'
 import { adminApi } from '../../services/api'
+
+function UserAdminCard({ user, index, onNotify, onToggle, toggling }) {
+  const initial = (user.name || '?').charAt(0).toUpperCase()
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: Math.min(index * 0.04, 0.2) }}
+      whileHover={{ y: -2 }}
+      className="premium-surface group relative rounded-[14px] px-3 py-2.5 transition hover:border-[#5B4CFF]/50"
+    >
+      <div className="relative z-[1] flex items-center gap-2.5">
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt=""
+            className="h-10 w-10 shrink-0 rounded-xl object-cover ring-1 ring-border"
+          />
+        ) : (
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] text-xs font-semibold text-white">
+            {initial}
+          </span>
+        )}
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-[14px] font-semibold tracking-tight text-ink">
+              {user.name}
+            </h3>
+            <AdminStatusBadge tone={user.isActive ? 'success' : 'neutral'}>
+              {user.isActive ? 'Active' : 'Inactive'}
+            </AdminStatusBadge>
+          </div>
+          <p className="mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-[11px] text-muted">
+            <Mail size={11} className="shrink-0 text-muted-light" />
+            <span className="truncate">{user.email}</span>
+          </p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => onNotify(user)}
+            className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#5B4CFF]/25 bg-[#5B4CFF]/10 px-2.5 text-[11px] font-semibold text-[#a5a0ff] transition hover:bg-[#5B4CFF]/15"
+            title="Send personal notification"
+          >
+            <Bell size={12} />
+            <span className="hidden sm:inline">Notify</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onToggle(user._id)}
+            disabled={toggling}
+            className={`inline-flex h-8 items-center rounded-lg border px-2.5 text-[11px] font-semibold transition disabled:opacity-50 ${
+              user.isActive
+                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400 hover:bg-rose-500/15'
+                : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15'
+            }`}
+          >
+            {user.isActive ? 'Disable' : 'Enable'}
+          </button>
+        </div>
+      </div>
+    </motion.article>
+  )
+}
 
 export default function AdminUsers() {
   const queryClient = useQueryClient()
@@ -44,31 +112,6 @@ export default function AdminUsers() {
     onError: (err) => toast.error(err.message),
   })
 
-  const UserActions = ({ u }) => (
-    <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={() => setNotifyUser({ userId: u._id, name: u.name, email: u.email })}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/25 px-3 py-1.5 text-xs font-semibold text-sky-600 transition hover:bg-sky-500/10"
-        title="Send personal notification"
-      >
-        <Bell size={13} /> Notify
-      </button>
-      <button
-        type="button"
-        onClick={() => toggleMutation.mutate(u._id)}
-        disabled={toggleMutation.isPending}
-        className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-          u.isActive
-            ? 'border-rose-500/25 text-rose-600 hover:bg-rose-500/10'
-            : 'border-emerald-500/25 text-emerald-600 hover:bg-emerald-500/10'
-        }`}
-      >
-        {u.isActive ? 'Deactivate' : 'Activate'}
-      </button>
-    </div>
-  )
-
   return (
     <div className="space-y-6">
       <AdminPageHeader
@@ -79,95 +122,54 @@ export default function AdminUsers() {
 
       <AdminStatStrip items={stats} />
 
-      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#202323]">
-        <div className="flex flex-col gap-3 border-b border-white/[0.08] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div>
-            <p className="text-sm font-semibold text-ink">User accounts</p>
-            <p className="text-xs text-muted">{filtered.length} shown</p>
-          </div>
-          <label className="relative block w-full sm:max-w-xs">
-            <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name or email..."
-              className="w-full rounded-xl border border-white/[0.08] bg-[#272927] py-2 pl-9 pr-3 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none"
-            />
-          </label>
+      <div className="premium-filter flex flex-col gap-2.5 rounded-[16px] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-ink">User accounts</p>
+          <p className="text-xs text-muted">{filtered.length} shown</p>
         </div>
-
-        <div className="md:hidden">
-          {isLoading ? (
-            <p className="px-4 py-10 text-center text-muted">Loading users...</p>
-          ) : filtered.length === 0 ? (
-            <p className="px-4 py-10 text-center text-muted">No users found</p>
-          ) : (
-            <div className="divide-y divide-white/[0.06]">
-              {filtered.map((u) => (
-                <div key={u._id} className="space-y-3 px-4 py-4">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-500/15 to-violet-500/15 text-sm font-semibold text-sky-600">
-                      {(u.name || '?').charAt(0).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate font-medium text-ink">{u.name}</p>
-                        <AdminStatusBadge tone={u.isActive ? 'success' : 'neutral'}>
-                          {u.isActive ? 'Active' : 'Inactive'}
-                        </AdminStatusBadge>
-                      </div>
-                      <p className="mt-0.5 truncate text-xs text-muted">{u.email}</p>
-                    </div>
-                  </div>
-                  <UserActions u={u} />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="bg-[#242727]">
-              <tr className="border-b border-white/[0.08] text-[11px] uppercase tracking-wider text-muted-light">
-                <th className="px-5 py-3 font-semibold">User</th>
-                <th className="px-5 py-3 font-semibold">Email</th>
-                <th className="px-5 py-3 font-semibold">Status</th>
-                <th className="px-5 py-3 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={4} className="px-5 py-10 text-center text-muted">Loading users...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={4} className="px-5 py-10 text-center text-muted">No users found</td></tr>
-              ) : (
-                filtered.map((u) => (
-                  <tr key={u._id} className="border-b border-white/[0.06] transition-colors hover:bg-white/[0.02]">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500/15 to-violet-500/15 text-sm font-semibold text-sky-600">
-                          {(u.name || '?').charAt(0).toUpperCase()}
-                        </span>
-                        <p className="min-w-0 truncate font-medium text-ink">{u.name}</p>
-                      </div>
-                    </td>
-                    <td className="max-w-[220px] truncate px-5 py-4 text-muted">{u.email}</td>
-                    <td className="px-5 py-4">
-                      <AdminStatusBadge tone={u.isActive ? 'success' : 'neutral'}>
-                        {u.isActive ? 'Active' : 'Inactive'}
-                      </AdminStatusBadge>
-                    </td>
-                    <td className="px-5 py-4">
-                      <UserActions u={u} />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <label className="relative block w-full sm:max-w-xs">
+          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name or email..."
+            className="h-9 w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-3 text-sm text-ink outline-none placeholder:text-muted-light focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10"
+          />
+        </label>
       </div>
+
+      {isLoading ? (
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="premium-surface h-[68px] animate-pulse rounded-[14px]" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center rounded-[20px] border border-dashed border-border bg-card px-6 py-14 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5B4CFF]/15 text-[#7C6CFF]">
+            <Users size={22} />
+          </span>
+          <h2 className="mt-4 text-lg font-semibold text-ink">No users found</h2>
+          <p className="mt-1.5 max-w-md text-sm text-muted">
+            Try another search or check back later.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((u, index) => (
+            <UserAdminCard
+              key={u._id}
+              user={u}
+              index={index}
+              onNotify={(user) =>
+                setNotifyUser({ userId: user._id, name: user.name, email: user.email })
+              }
+              onToggle={(id) => toggleMutation.mutate(id)}
+              toggling={toggleMutation.isPending}
+            />
+          ))}
+        </div>
+      )}
 
       <SendNotificationModal
         open={!!notifyUser}

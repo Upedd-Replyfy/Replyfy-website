@@ -11,6 +11,7 @@ import {
   Settings,
   X,
   Briefcase,
+  Sparkles,
 } from 'lucide-react'
 import Logo from '../ui/Logo'
 import { userApi } from '../../services/api'
@@ -29,10 +30,10 @@ const bottomItems = [
 ]
 
 const statusDotClass = {
-  answered: 'bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]',
-  in_review: 'bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.2)]',
-  matched: 'bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.2)]',
-  pending: 'bg-red-500 shadow-[0_0_0_3px_rgba(239,68,68,0.2)]',
+  answered: 'bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]',
+  in_review: 'bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.18)]',
+  matched: 'bg-sky-500 shadow-[0_0_0_3px_rgba(14,165,233,0.18)]',
+  pending: 'bg-rose-500 shadow-[0_0_0_3px_rgba(244,63,94,0.18)]',
 }
 
 const statusLabel = {
@@ -56,10 +57,14 @@ function NavItem({ item, onNavigate, onReset }) {
           }
           onNavigate?.()
         }}
-        className="mb-5 flex items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-fg shadow-[var(--shadow-luxury-md)] transition hover:opacity-90 active:scale-[0.99]"
+        className="group relative mb-5 flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-[#5B4CFF] to-[#7C6CFF] px-4 py-3.5 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(91,76,255,0.35)] transition hover:shadow-[0_14px_34px_rgba(91,76,255,0.45)] active:scale-[0.99]"
       >
-        <Icon size={18} strokeWidth={2} />
-        {item.label}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent_30%,rgba(255,255,255,0.22)_50%,transparent_70%)] opacity-0 transition duration-500 group-hover:translate-x-full group-hover:opacity-100"
+        />
+        <Icon size={18} strokeWidth={2.25} className="relative z-10" />
+        <span className="relative z-10">{item.label}</span>
       </NavLink>
     )
   }
@@ -70,25 +75,30 @@ function NavItem({ item, onNavigate, onReset }) {
       end={item.href === '/dashboard'}
       onClick={onNavigate}
       className={({ isActive }) =>
-        `group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
-          isActive ? 'text-ink' : 'text-muted hover:bg-surface hover:text-ink'
+        `group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] font-medium transition-all duration-200 ${
+          isActive ? 'text-ink' : 'text-muted hover:text-ink'
         }`
       }
     >
       {({ isActive }) => (
         <>
           {isActive && (
-            <>
-              <motion.span
-                layoutId="sidebar-active"
-                className="absolute inset-0 rounded-xl bg-surface ring-1 ring-border"
-                transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-              />
-              <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
-            </>
+            <motion.span
+              layoutId="sidebar-active"
+              className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#5B4CFF]/14 via-[#7C6CFF]/08 to-transparent shadow-[inset_0_0_0_1px_rgba(91,76,255,0.22)]"
+              transition={{ type: 'spring', stiffness: 400, damping: 34 }}
+            />
           )}
-          <Icon size={18} strokeWidth={1.75} className="relative z-10 shrink-0 opacity-90" />
-          <span className="relative z-10">{item.label}</span>
+          <span
+            className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${
+              isActive
+                ? 'bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] text-white shadow-[0_8px_16px_rgba(91,76,255,0.3)]'
+                : 'bg-surface text-muted ring-1 ring-border group-hover:bg-card group-hover:text-[#5B4CFF] group-hover:shadow-sm'
+            }`}
+          >
+            <Icon size={15} strokeWidth={isActive ? 2.25 : 1.85} />
+          </span>
+          <span className="relative z-10 tracking-tight">{item.label}</span>
         </>
       )}
     </NavLink>
@@ -97,13 +107,18 @@ function NavItem({ item, onNavigate, onReset }) {
 
 function WorkspaceBadge() {
   return (
-    <div className="mb-6 flex items-center gap-3 rounded-2xl border border-border bg-surface/60 px-3.5 py-3">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted">
-        <Briefcase size={16} strokeWidth={1.75} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-ink">Personal workspace</p>
-        <p className="text-[11px] text-muted-light">Ask mentors privately</p>
+    <div className="premium-surface relative mb-5 overflow-hidden rounded-2xl px-3.5 py-3.5">
+      <div className="relative z-10 flex items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] text-white shadow-[0_8px_18px_rgba(91,76,255,0.35)]">
+          <Briefcase size={16} strokeWidth={2} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold tracking-tight text-ink">Personal workspace</p>
+          <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted">
+            <Sparkles size={10} className="text-[#7C6CFF]" />
+            Ask mentors privately
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -130,69 +145,93 @@ export default function DashboardSidebar({ open, onClose }) {
   }
 
   const sidebar = (
-    <aside className="flex h-screen w-full shrink-0 flex-col overflow-hidden border-r border-border bg-card px-4 py-5 md:px-5">
-      <div className="mb-6 flex items-center justify-between">
+    <aside className="relative flex h-screen w-full shrink-0 flex-col overflow-hidden border-r border-border bg-card/95 px-4 py-5 backdrop-blur-xl md:px-5">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top_left,rgba(91,76,255,0.12),transparent_60%)]"
+      />
+
+      <div className="relative z-10 mb-5 flex items-center justify-between">
         <Logo dashboard surface="adaptive" size="md" />
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-1.5 text-muted transition hover:bg-surface hover:text-ink lg:hidden"
+          className="rounded-xl border border-border bg-surface/80 p-1.5 text-muted transition hover:bg-surface hover:text-ink lg:hidden"
           aria-label="Close sidebar"
         >
-          <X size={18} />
+          <X size={16} />
         </button>
       </div>
 
-      <WorkspaceBadge />
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        <WorkspaceBadge />
 
-      <nav className="flex flex-col gap-0.5">
-        {navItems.map((item) => (
-          <NavItem
-            key={item.label}
-            item={item}
-            onNavigate={onClose}
-            onReset={handleNewQuestion}
-          />
-        ))}
-      </nav>
+        <nav className="flex flex-col gap-1">
+          {navItems.map((item) => (
+            <NavItem
+              key={item.label}
+              item={item}
+              onNavigate={onClose}
+              onReset={handleNewQuestion}
+            />
+          ))}
+        </nav>
 
-      <div className="mt-6 min-h-0 flex-1 overflow-hidden">
-        <p className="mb-3 px-3.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-light">
-          Recent activity
-        </p>
-        <div className="space-y-2 overflow-y-auto px-1">
-          {sidebarQuestions.length > 0 ? (
-            sidebarQuestions.map((q) => (
+        <div className="mt-6 min-h-0 flex-1 overflow-hidden">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-light">
+              Recent activity
+            </p>
+            {sidebarQuestions.length > 0 ? (
               <NavLink
-                key={q.id}
-                to={`/dashboard/questions/${q.id}`}
+                to="/dashboard/questions"
                 onClick={onClose}
-                className="group block rounded-xl border border-transparent bg-surface/80 p-3 transition hover:border-border hover:bg-card"
+                className="text-[10px] font-semibold text-[#5B4CFF] transition hover:text-[#7C6CFF]"
               >
-                <p className="line-clamp-2 text-xs font-medium leading-snug text-ink">{q.title}</p>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-muted-light">{q.time}</span>
-                  <span
-                    className="inline-flex items-center gap-1.5"
-                    title={statusLabel[q.status] || 'Pending'}
-                  >
-                    <span
-                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${statusDotClass[q.status] || statusDotClass.pending}`}
-                    />
-                  </span>
-                </div>
+                View all
               </NavLink>
-            ))
-          ) : (
-            <p className="px-3.5 text-xs text-muted-light">No questions yet</p>
-          )}
+            ) : null}
+          </div>
+          <div className="space-y-2 overflow-y-auto overscroll-contain px-0.5 pb-2">
+            {sidebarQuestions.length > 0 ? (
+              sidebarQuestions.map((q) => (
+                <NavLink
+                  key={q.id}
+                  to={`/dashboard/questions/${q.id}`}
+                  onClick={onClose}
+                  className="premium-surface-inner group relative block overflow-hidden rounded-xl p-3 transition hover:border-[#5B4CFF]/40"
+                >
+                  <p className="line-clamp-2 text-xs font-medium leading-snug text-ink transition group-hover:text-[#5B4CFF]">
+                    {q.title}
+                  </p>
+                  <div className="mt-2.5 flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-muted-light">{q.time}</span>
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full bg-card/70 px-2 py-0.5 text-[10px] font-medium text-muted"
+                      title={statusLabel[q.status] || 'Pending'}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusDotClass[q.status] || statusDotClass.pending}`}
+                      />
+                      {statusLabel[q.status] || 'Pending'}
+                    </span>
+                  </div>
+                </NavLink>
+              ))
+            ) : (
+              <div className="premium-surface-inner rounded-xl px-3.5 py-4 text-center">
+                <p className="text-xs text-muted-light">No questions yet</p>
+                <p className="mt-1 text-[10px] text-muted-light/80">Start with a new question</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="mt-auto border-t border-border pt-4">
-        {bottomItems.map((item) => (
-          <NavItem key={item.label} item={item} onNavigate={onClose} />
-        ))}
+        <div className="mt-auto border-t border-border/80 pt-3">
+          {bottomItems.map((item) => (
+            <NavItem key={item.label} item={item} onNavigate={onClose} />
+          ))}
+        </div>
       </div>
     </aside>
   )

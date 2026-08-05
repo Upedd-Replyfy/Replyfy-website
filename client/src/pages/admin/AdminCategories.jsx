@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
   FolderTree,
@@ -14,6 +15,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminStatStrip from '../../components/admin/AdminStatStrip'
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge'
+import AdminButton from '../../components/admin/ui/AdminButton'
 import { adminApi } from '../../services/api'
 
 const emptyForm = {
@@ -25,7 +27,10 @@ const emptyForm = {
 }
 
 const fieldClass =
-  'w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none focus:ring-2 focus:ring-sky-500/10'
+  'w-full h-9 rounded-xl border border-border bg-surface px-3.5 text-sm text-ink placeholder:text-muted-light focus:border-[#5B4CFF]/40 focus:outline-none focus:ring-4 focus:ring-[#5B4CFF]/10'
+
+const selectClass =
+  'h-9 rounded-xl border border-border bg-surface px-3 text-sm text-ink outline-none focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10'
 
 function Field({ label, hint, children }) {
   return (
@@ -37,85 +42,74 @@ function Field({ label, hint, children }) {
   )
 }
 
-function CategoryRow({ cat, isNew, onEdit, onToggle, togglePending }) {
+function CategoryCard({ cat, index, isNew, onEdit, onToggle, togglePending }) {
   return (
-    <li
-      className={`flex flex-col gap-4 px-5 py-4 transition-colors sm:flex-row sm:items-center sm:justify-between ${
-        isNew ? 'bg-sky-500/10 ring-1 ring-inset ring-sky-500/25' : 'hover:bg-white/[0.02]'
+    <motion.article
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: Math.min(index * 0.04, 0.2) }}
+      whileHover={{ y: -2 }}
+      className={`premium-surface group relative rounded-[14px] px-3 py-2.5 transition hover:border-[#5B4CFF]/50 ${
+        isNew ? 'ring-1 ring-[#5B4CFF]/40 bg-[#5B4CFF]/5' : ''
       }`}
     >
-      <div className="flex min-w-0 items-start gap-3.5">
-        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500/15 to-violet-500/15 text-sky-600">
+      <div className="relative z-[1] flex items-center gap-2.5">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5B4CFF]/15 to-[#7C6CFF]/15 text-[#7C6CFF]">
           <FolderTree size={18} />
         </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-[15px] font-semibold text-ink">{cat.name}</p>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <h3 className="truncate text-[14px] font-semibold tracking-tight text-ink">{cat.name}</h3>
             <AdminStatusBadge tone={cat.isActive ? 'success' : 'neutral'}>
               {cat.isActive ? 'Active' : 'Disabled'}
             </AdminStatusBadge>
-            {isNew && <AdminStatusBadge tone="info">Just created</AdminStatusBadge>}
+            {isNew ? (
+              <AdminStatusBadge tone="info">Just created</AdminStatusBadge>
+            ) : null}
           </div>
-          <p className="mt-1 line-clamp-2 text-sm text-muted">
+          <p className="mt-0.5 line-clamp-1 text-[11px] text-muted">
             {cat.description || 'No description'}
           </p>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-light">
-            <span className="inline-flex items-center gap-1">
-              <Hash size={11} /> {cat.slug}
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-light">
+            <span className="inline-flex items-center gap-0.5">
+              <Hash size={10} /> {cat.slug}
             </span>
-            <span className="inline-flex items-center gap-1">
-              <Lightbulb size={11} /> {(cat.suggestions || []).length} suggestions
+            <span className="inline-flex items-center gap-0.5">
+              <Lightbulb size={10} /> {(cat.suggestions || []).length} suggestions
             </span>
             <span>Order {cat.sortOrder ?? 0}</span>
           </div>
         </div>
-      </div>
 
-      <div className="flex shrink-0 items-center gap-2 sm:pl-4">
-        <button
-          type="button"
-          onClick={() => onEdit(cat)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold text-ink shadow-sm transition hover:border-sky-500/30 hover:bg-sky-500/5"
-        >
-          <Pencil size={13} /> Edit
-        </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          disabled={togglePending}
-          className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition ${
-            cat.isActive
-              ? 'border-border text-muted hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-600'
-              : 'border-emerald-500/25 text-emerald-600 hover:bg-emerald-500/10'
-          }`}
-        >
-          <Power size={13} /> {cat.isActive ? 'Disable' : 'Enable'}
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <AdminButton
+            variant="secondary"
+            size="icon"
+            className="!h-8 !w-8"
+            aria-label="Edit category"
+            title="Edit"
+            onClick={() => onEdit(cat)}
+          >
+            <Pencil size={13} />
+          </AdminButton>
+          <button
+            type="button"
+            onClick={onToggle}
+            disabled={togglePending}
+            className={`inline-flex h-8 items-center gap-1 rounded-lg border px-2.5 text-[11px] font-semibold transition disabled:opacity-50 ${
+              cat.isActive
+                ? 'border-rose-500/25 bg-rose-500/10 text-rose-400 hover:bg-rose-500/15'
+                : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15'
+            }`}
+            title={cat.isActive ? 'Disable' : 'Enable'}
+          >
+            <Power size={12} />
+            <span className="hidden sm:inline">{cat.isActive ? 'Disable' : 'Enable'}</span>
+          </button>
+        </div>
       </div>
-    </li>
-  )
-}
-
-function CategoryGroup({ title, count, tone, items, highlightId, onEdit, onToggle, togglePending }) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 border-b border-white/[0.06] bg-surface/60 px-5 py-2.5">
-        <AdminStatusBadge tone={tone}>{title}</AdminStatusBadge>
-        <span className="text-[11px] font-medium text-muted-light">{count}</span>
-      </div>
-      <ul className="divide-y divide-white/[0.06]">
-        {items.map((cat) => (
-          <CategoryRow
-            key={cat._id}
-            cat={cat}
-            isNew={highlightId === cat._id}
-            onEdit={onEdit}
-            onToggle={() => onToggle(cat)}
-            togglePending={togglePending}
-          />
-        ))}
-      </ul>
-    </div>
+    </motion.article>
   )
 }
 
@@ -129,7 +123,7 @@ export default function AdminCategories() {
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all') // all | active | disabled
+  const [statusFilter, setStatusFilter] = useState('all')
   const [highlightId, setHighlightId] = useState(null)
 
   const { data, isLoading } = useQuery({
@@ -142,7 +136,7 @@ export default function AdminCategories() {
   const activeCount = useMemo(() => categories.filter((c) => c.isActive).length, [categories])
   const disabledCount = categories.length - activeCount
 
-  const { filtered, activeGroup, disabledGroup } = useMemo(() => {
+  const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     let list = categories
     if (q) {
@@ -159,12 +153,7 @@ export default function AdminCategories() {
 
     const active = list.filter((c) => c.isActive).sort(sortByOrder)
     const disabled = list.filter((c) => !c.isActive).sort(sortByOrder)
-    // Active always on top
-    return {
-      filtered: [...active, ...disabled],
-      activeGroup: active,
-      disabledGroup: disabled,
-    }
+    return [...active, ...disabled]
   }, [categories, query, statusFilter])
 
   const stats = useMemo(() => {
@@ -175,6 +164,7 @@ export default function AdminCategories() {
       { label: 'Suggestions', value: suggestions, icon: Lightbulb },
     ]
   }, [categories, activeCount])
+
   const closeModal = () => {
     setModalOpen(false)
     setEditingId(null)
@@ -248,145 +238,107 @@ export default function AdminCategories() {
         title="Categories"
         description="Organize questions with clear topics, placeholders, and suggestions"
         actions={
-          <button
-            type="button"
-            onClick={openCreate}
-            className="admin-btn-gradient inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
-          >
-            <Plus size={16} /> New Category
-          </button>
+          <AdminButton icon={Plus} onClick={openCreate}>
+            New Category
+          </AdminButton>
         }
       />
 
       <AdminStatStrip items={stats} />
 
-      <div className="admin-panel overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#202323]">
-        <div className="flex flex-col gap-3 border-b border-white/[0.08] px-5 py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-ink">Category directory</p>
-              <p className="text-xs text-muted">
-                {filtered.length} of {categories.length} shown · active first
-              </p>
-            </div>
-            <label className="relative block w-full sm:max-w-xs">
-              <Search
-                size={15}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
-              />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search categories..."
-                className="w-full rounded-xl border border-white/[0.08] bg-[#272927] py-2 pl-9 pr-3 text-sm text-ink placeholder:text-muted-light focus:border-sky-500/40 focus:outline-none"
-              />
-            </label>
+      <div className="premium-filter space-y-2.5 rounded-[16px] px-3.5 py-3">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-ink">Category directory</p>
+            <p className="text-xs text-muted">
+              {filtered.length} of {categories.length} shown · active first
+            </p>
           </div>
-
-          <div className="flex flex-wrap gap-1.5 rounded-xl bg-surface p-1">
-            {[
-              { id: 'all', label: 'All', count: categories.length },
-              { id: 'active', label: 'Active', count: activeCount },
-              { id: 'disabled', label: 'Disabled', count: disabledCount },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setStatusFilter(tab.id)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  statusFilter === tab.id
-                    ? 'bg-card text-ink shadow-sm ring-1 ring-border'
-                    : 'text-muted hover:text-ink'
-                }`}
-              >
-                {tab.label}
-                <span
-                  className={`rounded-md px-1.5 py-0.5 text-[10px] ${
-                    statusFilter === tab.id ? 'bg-sky-500/15 text-sky-600' : 'bg-black/5 text-muted-light'
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+          <label className="relative block w-full sm:max-w-xs">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search categories..."
+              className="h-9 w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-3 text-sm text-ink outline-none placeholder:text-muted-light focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10"
+            />
+          </label>
         </div>
 
-        {isLoading ? (
-          <div className="space-y-3 p-5">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 animate-pulse rounded-2xl bg-surface" />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-500">
-              <FolderTree size={24} />
-            </span>
-            <p className="mt-4 text-base font-semibold text-ink">
-              {categories.length === 0 ? 'No categories yet' : 'No matches'}
-            </p>
-            <p className="mt-1 max-w-sm text-sm text-muted">
-              {categories.length === 0
-                ? 'Create your first category to structure mentor questions.'
-                : 'Try a different search or status filter.'}
-            </p>
-            {categories.length === 0 && (
-              <button
-                type="button"
-                onClick={openCreate}
-                className="admin-btn-gradient mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { id: 'all', label: 'All', count: categories.length },
+            { id: 'active', label: 'Active', count: activeCount },
+            { id: 'disabled', label: 'Disabled', count: disabledCount },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setStatusFilter(tab.id)}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                statusFilter === tab.id
+                  ? 'border border-[#5B4CFF]/25 bg-[#5B4CFF]/10 text-[#a5a0ff]'
+                  : 'border border-transparent text-muted hover:bg-surface hover:text-ink'
+              }`}
+            >
+              {tab.label}
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[10px] ${
+                  statusFilter === tab.id
+                    ? 'bg-[#5B4CFF]/20 text-[#a5a0ff]'
+                    : 'bg-surface text-muted-light'
+                }`}
               >
-                <Plus size={16} /> Create category
-              </button>
-            )}
-          </div>
-        ) : (
-          <div>
-            {statusFilter === 'all' ? (
-              <>
-                {activeGroup.length > 0 && (
-                  <CategoryGroup
-                    title="Active"
-                    count={activeGroup.length}
-                    tone="success"
-                    items={activeGroup}
-                    highlightId={highlightId}
-                    onEdit={openEdit}
-                    onToggle={(cat) => toggleMutation.mutate(cat)}
-                    togglePending={toggleMutation.isPending}
-                  />
-                )}
-                {disabledGroup.length > 0 && (
-                  <CategoryGroup
-                    title="Disabled"
-                    count={disabledGroup.length}
-                    tone="neutral"
-                    items={disabledGroup}
-                    highlightId={highlightId}
-                    onEdit={openEdit}
-                    onToggle={(cat) => toggleMutation.mutate(cat)}
-                    togglePending={toggleMutation.isPending}
-                  />
-                )}
-              </>
-            ) : (
-              <ul className="divide-y divide-white/[0.06]">
-                {filtered.map((cat) => (
-                  <CategoryRow
-                    key={cat._id}
-                    cat={cat}
-                    isNew={highlightId === cat._id}
-                    onEdit={openEdit}
-                    onToggle={() => toggleMutation.mutate(cat)}
-                    togglePending={toggleMutation.isPending}
-                  />
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
+
+      {isLoading ? (
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="premium-surface h-[68px] animate-pulse rounded-[14px]" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center rounded-[20px] border border-dashed border-border bg-card px-6 py-14 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5B4CFF]/15 text-[#7C6CFF]">
+            <FolderTree size={22} />
+          </span>
+          <h2 className="mt-4 text-lg font-semibold text-ink">
+            {categories.length === 0 ? 'No categories yet' : 'No matches'}
+          </h2>
+          <p className="mt-1.5 max-w-md text-sm text-muted">
+            {categories.length === 0
+              ? 'Create your first category to structure mentor questions.'
+              : 'Try a different search or status filter.'}
+          </p>
+          {categories.length === 0 && (
+            <AdminButton icon={Plus} className="mt-5" onClick={openCreate}>
+              Create category
+            </AdminButton>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((cat, index) => (
+            <CategoryCard
+              key={cat._id}
+              cat={cat}
+              index={index}
+              isNew={highlightId === cat._id}
+              onEdit={openEdit}
+              onToggle={() => toggleMutation.mutate(cat)}
+              togglePending={toggleMutation.isPending}
+            />
+          ))}
+        </div>
+      )}
 
       <AdminModal
         open={modalOpen}
@@ -451,25 +403,22 @@ export default function AdminCategories() {
               value={form.suggestions}
               onChange={(e) => setForm((p) => ({ ...p, suggestions: e.target.value }))}
               placeholder={'How do I validate my idea?\nWhat should I pitch first?'}
-              className={`${fieldClass} resize-y`}
+              className={`${fieldClass} h-auto resize-y py-2.5`}
             />
           </Field>
 
           <div className="flex justify-end gap-2 border-t border-border pt-4 max-sm:flex-col-reverse">
-            <button type="button" onClick={closeModal} className="admin-btn-secondary max-sm:w-full">
+            <AdminButton variant="secondary" type="button" onClick={closeModal} className="max-sm:w-full">
               Cancel
-            </button>
-            <button
+            </AdminButton>
+            <AdminButton
               type="submit"
-              disabled={saveMutation.isPending || !form.name.trim()}
-              className="admin-btn-gradient rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50 max-sm:w-full"
+              loading={saveMutation.isPending}
+              disabled={!form.name.trim()}
+              className="max-sm:w-full"
             >
-              {saveMutation.isPending
-                ? 'Saving...'
-                : editingId
-                  ? 'Save changes'
-                  : 'Create category'}
-            </button>
+              {editingId ? 'Save changes' : 'Create category'}
+            </AdminButton>
           </div>
         </form>
       </AdminModal>

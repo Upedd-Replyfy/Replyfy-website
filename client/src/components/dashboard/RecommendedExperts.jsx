@@ -1,35 +1,54 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Star, BadgeCheck, Clock } from 'lucide-react'
-import { fadeUp, staggerContainer } from '../../utils/animations'
-import { Skeleton } from '../ui/Skeleton'
+import { Sparkles } from 'lucide-react'
+import MentorDetailModal from '../mentors/MentorDetailModal'
+import MentorCard, { MentorCardSkeleton } from '../mentors/MentorCard'
 
-function avatarUrl(expert) {
-  return (
-    expert.profilePhoto ||
-    expert.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(expert.name || 'E')}&background=111&color=fff`
-  )
-}
+export default function RecommendedExperts({
+  experts,
+  loading,
+  categoryName,
+  expertTypeName,
+  onSelectExpert,
+}) {
+  const [selected, setSelected] = useState(null)
+  const [favorites, setFavorites] = useState(() => new Set())
+  const [bookmarks, setBookmarks] = useState(() => new Set())
 
-export default function RecommendedExperts({ experts, loading, categoryName, expertTypeName }) {
   if (!loading && !experts.length) return null
+
+  const toggleSet = (setter) => (expert) => {
+    const id = expert._id
+    setter((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   return (
     <motion.section
-      initial="hidden"
-      whileInView="visible"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      variants={staggerContainer}
+      transition={{ duration: 0.25 }}
       className="mt-16 md:mt-20"
     >
-      <div className="mb-8">
-        <h2 className="font-display text-2xl font-semibold tracking-tight text-ink md:text-3xl">
-          Recommended mentors
-        </h2>
-        <p className="mt-2 text-sm text-muted md:text-base">
-          Top matches for {categoryName || 'your selection'}
-          {expertTypeName ? ` · ${expertTypeName}` : ''}
-        </p>
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#5B4CFF]/25 bg-[#5B4CFF]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a5a0ff]">
+            <Sparkles size={12} />
+            Matched for you
+          </p>
+          <h2 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">
+            Recommended mentors
+          </h2>
+          <p className="mt-2 text-sm text-muted md:text-base">
+            Top matches for {categoryName || 'your selection'}
+            {expertTypeName ? ` · ${expertTypeName}` : ''}
+          </p>
+        </div>
       </div>
 
       <AnimatePresence mode="popLayout">
@@ -38,65 +57,35 @@ export default function RecommendedExperts({ experts, loading, categoryName, exp
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid gap-4 sm:gap-5 lg:grid-cols-2"
         >
           {loading
-            ? [1, 2, 3, 4].map((i) => (
-                <div key={i} className="luxury-card p-5">
-                  <Skeleton className="mb-4 h-16 w-16 rounded-2xl" />
-                  <Skeleton className="h-4 w-28" />
-                  <Skeleton className="mt-2 h-3 w-20" />
-                </div>
-              ))
-            : experts.map((expert, index) => (
-                <motion.div
+            ? [1, 2].map((i) => <MentorCardSkeleton key={i} />)
+            : experts.slice(0, 4).map((expert, index) => (
+                <MentorCard
                   key={expert._id}
-                  variants={fadeUp}
-                  custom={index * 0.06}
-                  whileHover={{ y: -4 }}
-                  className="luxury-card luxury-card-hover p-5 text-left"
-                >
-                  <div className="relative mb-4 inline-block">
-                    <img
-                      src={avatarUrl(expert)}
-                      alt=""
-                      className="h-16 w-16 rounded-2xl object-cover ring-2 ring-surface"
-                    />
-                    {expert.isVerified && (
-                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-fg ring-2 ring-card">
-                        <BadgeCheck size={11} />
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm font-semibold text-ink">{expert.name}</p>
-                  <p className="text-xs text-muted">{expert.expertType?.name}</p>
-                  <p className="mt-2 line-clamp-2 text-[11px] leading-relaxed text-muted-light">
-                    {expert.bio}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {(expert.skills || []).slice(0, 2).map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-md bg-surface px-2 py-0.5 text-[10px] font-medium text-muted"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                    <span className="flex items-center gap-1 text-xs font-semibold text-ink">
-                      <Star size={11} fill="currentColor" />
-                      {expert.averageRating}
-                    </span>
-                    <span className="flex items-center gap-1 text-[10px] text-muted-light">
-                      <Clock size={10} />
-                      {expert.completedAnswers} answers
-                    </span>
-                  </div>
-                </motion.div>
+                  expert={expert}
+                  index={index}
+                  onOpen={setSelected}
+                  onAsk={(mentor, planId) => onSelectExpert?.(mentor, planId || 'mentor')}
+                  favorited={favorites.has(expert._id)}
+                  bookmarked={bookmarks.has(expert._id)}
+                  onToggleFavorite={toggleSet(setFavorites)}
+                  onToggleBookmark={toggleSet(setBookmarks)}
+                />
               ))}
         </motion.div>
       </AnimatePresence>
+
+      <MentorDetailModal
+        open={!!selected}
+        mentor={selected}
+        onClose={() => setSelected(null)}
+        onAsk={(mentor, plan) => {
+          setSelected(null)
+          onSelectExpert?.(mentor, plan)
+        }}
+      />
     </motion.section>
   )
 }

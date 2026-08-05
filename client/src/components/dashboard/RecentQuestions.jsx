@@ -40,10 +40,11 @@ export default function RecentQuestions({ questions, onSelect }) {
               custom={index * 0.05}
               whileHover={{ y: -4 }}
               onClick={() => onSelect?.(q)}
-              className="luxury-card luxury-card-hover group flex flex-col p-6 text-left"
+              className="premium-surface group relative flex flex-col rounded-[16px] p-5 text-left transition hover:border-[#5B4CFF]/50"
             >
+              <div className="relative z-[1] flex flex-1 flex-col">
               <div className="flex items-start justify-between gap-2">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface text-ink">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-[#7C6CFF]">
                   <MessageSquare size={18} />
                 </span>
                 <ArrowUpRight
@@ -61,12 +62,12 @@ export default function RecentQuestions({ questions, onSelect }) {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {q.categoryLabel && (
-                  <span className="rounded-lg bg-surface px-2.5 py-1 text-[10px] font-medium text-muted">
+                  <span className="rounded-lg border border-border bg-surface px-2.5 py-1 text-[10px] font-medium text-muted">
                     {q.categoryLabel}
                   </span>
                 )}
                 {q.expertTypeLabel && (
-                  <span className="rounded-lg bg-surface px-2.5 py-1 text-[10px] font-medium text-muted">
+                  <span className="rounded-lg border border-border bg-surface px-2.5 py-1 text-[10px] font-medium text-muted">
                     {q.expertTypeLabel}
                   </span>
                 )}
@@ -81,6 +82,7 @@ export default function RecentQuestions({ questions, onSelect }) {
                   <Clock size={10} />
                   {q.time}
                 </span>
+              </div>
               </div>
             </motion.button>
           )

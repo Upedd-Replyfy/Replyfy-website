@@ -299,19 +299,82 @@ export const getMyQuestions = asyncHandler(async (req, res) => {
 export const getQuestionById = asyncHandler(async (req, res) => {
   const question = await Question.findOne({ _id: req.params.id, user: req.user._id })
     .populate('category')
-    .populate('assignedExpert', 'name avatar')
-    .populate('selectedExpert', 'name avatar')
+    .populate('expertType', 'name slug')
+    .populate('assignedExpert', 'name avatar email')
+    .populate('selectedExpert', 'name avatar email')
     .populate('payment')
 
   if (!question) throw new ApiError(404, 'Question not found')
 
+  const Answer = (await import('../models/Answer.js')).default
+  const rawAnswer = await Answer.findOne({ question: question._id }).populate(
+    'expert',
+    'name avatar'
+  )
+
   let answer = null
-  if (question.status === 'completed') {
-    const Answer = (await import('../models/Answer.js')).default
-    answer = await Answer.findOne({ question: question._id, status: 'approved' })
+  if (rawAnswer && (rawAnswer.status === 'approved' || question.status === 'completed')) {
+    answer = rawAnswer
   }
 
-  res.json({ success: true, question, answer })
+  const timeline = []
+  const push = (at, label, detail) => {
+    if (!at) return
+    timeline.push({ at, label, detail })
+  }
+
+  push(question.createdAt, 'Question submitted', 'Your question was created')
+  if (question.status !== 'pending_payment' || question.payment) {
+    push(
+      question.payment?.paidAt || question.payment?.createdAt || question.createdAt,
+      'Payment received',
+      question.amount != null ? `₹${(question.amount / 100).toLocaleString('en-IN')}` : undefined
+    )
+  }
+  if (question.status === 'rejected') {
+    push(question.adminReviewedAt || question.updatedAt, 'Question rejected', question.rejectionReason || undefined)
+  } else {
+    push(question.adminReviewedAt, 'Admin reviewed', 'Passed moderation')
+  }
+  push(
+    question.assignedAt,
+    'Mentor assigned',
+    question.assignedExpert?.name ? `Assigned to ${question.assignedExpert.name}` : undefined
+  )
+  if (rawAnswer?.submittedAt) {
+    push(
+      rawAnswer.submittedAt,
+      rawAnswer.status === 'approved' ? 'Answer delivered' : 'Answer submitted',
+      rawAnswer.status === 'pending_review'
+        ? 'Waiting for admin review'
+        : rawAnswer.status === 'rejected'
+          ? 'Revision requested from mentor'
+          : 'Approved and shared with you'
+    )
+  }
+  if (question.status === 'completed' && !rawAnswer?.submittedAt) {
+    push(question.updatedAt, 'Completed', 'Question marked complete')
+  }
+  if (question.status === 'cancelled') {
+    push(question.updatedAt, 'Cancelled', undefined)
+  }
+
+  timeline.sort((a, b) => new Date(a.at) - new Date(b.at))
+
+  res.json({
+    success: true,
+    question,
+    answer,
+    answerMeta: rawAnswer
+      ? {
+          status: rawAnswer.status,
+          submittedAt: rawAnswer.submittedAt,
+          reviewedAt: rawAnswer.reviewedAt,
+          rejectionReason: rawAnswer.rejectionReason || '',
+        }
+      : null,
+    timeline,
+  })
 })
 
 export const getPaymentHistory = asyncHandler(async (req, res) => {

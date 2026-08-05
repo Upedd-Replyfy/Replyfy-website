@@ -17,6 +17,7 @@ import {
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import AuthPreviewModal from '../components/auth/AuthPreviewModal'
+import MentorDetailModal from '../components/mentors/MentorDetailModal'
 import { useCategories, useExpertTypes, useExperts } from '../hooks/useCatalog'
 
 function avatarUrl(mentor) {
@@ -66,7 +67,7 @@ function mentorTypeLabels(mentor) {
   return [...new Set(names)]
 }
 
-function MentorProfileCard({ mentor, onAsk, index = 0 }) {
+function MentorProfileCard({ mentor, onAsk, onOpen, index = 0 }) {
   const skills = mentor.skills || []
   const languages = mentor.languages || []
   const experience = mentor.experience?.trim() || 'Background on request'
@@ -78,6 +79,9 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
   const typeLabels = mentorTypeLabels(mentor)
   const primaryType = typeLabels[0] || 'Mentor'
   const primaryCategory = categoryLabels[0] || ''
+  const educationCount = mentor.education?.length || 0
+  const certCount = mentor.certificates?.length || 0
+  const achievementCount = mentor.achievements?.length || 0
 
   return (
     <motion.article
@@ -86,7 +90,11 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
       transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.3), ease: [0.22, 1, 0.36, 1] }}
       className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition duration-300 hover:border-violet-200/80 md:hover:-translate-y-1 md:hover:shadow-[0_24px_60px_rgba(99,102,241,0.12)]"
     >
-      <div className="relative h-48 overflow-hidden sm:h-56">
+      <button
+        type="button"
+        onClick={() => onOpen?.(mentor)}
+        className="relative h-48 w-full overflow-hidden text-left sm:h-56"
+      >
         <img
           src={avatarUrl(mentor)}
           alt={mentor.name}
@@ -126,9 +134,10 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
       <div className="flex flex-1 flex-col p-6">
+        <button type="button" onClick={() => onOpen?.(mentor)} className="flex flex-1 flex-col text-left">
         <p className="line-clamp-3 text-[15px] leading-relaxed text-[#6B7280]">
           {mentor.bio?.trim() ||
             'Experienced mentor ready to help with practical, situation-specific guidance.'}
@@ -221,6 +230,21 @@ function MentorProfileCard({ mentor, onAsk, index = 0 }) {
             {languages.join(' · ')}
           </p>
         )}
+
+        {(educationCount > 0 || certCount > 0 || achievementCount > 0) && (
+          <p className="mt-3 text-[11px] font-medium text-violet-600">
+            {[
+              educationCount ? `${educationCount} education` : null,
+              certCount ? `${certCount} certificates` : null,
+              achievementCount ? `${achievementCount} achievements` : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+            {' · '}
+            <span className="underline-offset-2 group-hover:underline">View full profile</span>
+          </p>
+        )}
+        </button>
 
         <button
           type="button"
@@ -318,6 +342,7 @@ export default function DisplayMentors() {
   const [categoryId, setCategoryId] = useState(null)
   const [expertTypeId, setExpertTypeId] = useState(null)
   const [sort, setSort] = useState('rating')
+  const [selectedMentor, setSelectedMentor] = useState(null)
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
   const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(categoryId)
@@ -505,6 +530,7 @@ export default function DisplayMentors() {
                   mentor={mentor}
                   index={index}
                   onAsk={handleAsk}
+                  onOpen={setSelectedMentor}
                 />
               ))}
             </div>
@@ -513,6 +539,20 @@ export default function DisplayMentors() {
       </main>
 
       <Footer onAuthOpen={setAuthMode} />
+      <MentorDetailModal
+        open={!!selectedMentor}
+        mentor={selectedMentor}
+        onClose={() => setSelectedMentor(null)}
+        onAsk={(_mentor, planId) => {
+          setSelectedMentor(null)
+          try {
+            if (planId) sessionStorage.setItem('replyfy_preferred_plan', planId)
+          } catch {
+            /* ignore */
+          }
+          handleAsk()
+        }}
+      />
       <AuthPreviewModal mode={authMode} onClose={() => setAuthMode(null)} />
     </div>
   )

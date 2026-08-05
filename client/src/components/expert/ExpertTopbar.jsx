@@ -4,6 +4,7 @@ import { HelpCircle, LogOut, Menu, Moon, Sun, Video } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useShellTheme } from '../../context/ShellThemeContext'
 import { expertApi } from '../../services/api'
+import NotificationBell from '../shared/NotificationBell'
 
 function PremiumAvailabilitySwitch({
   checked,
@@ -154,6 +155,9 @@ export default function ExpertTopbar({ onMenuOpen }) {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+            <NotificationBell
+              buttonClassName="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border text-muted transition-colors hover:bg-surface hover:text-ink"
+            />
             <button
               type="button"
               onClick={async () => {

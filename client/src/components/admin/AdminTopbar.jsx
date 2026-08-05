@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
-  Bell,
   LogOut,
   Menu,
   Moon,
@@ -13,10 +11,10 @@ import {
   X,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { notificationApi } from '../../services/api'
 import { useShellTheme } from '../../context/ShellThemeContext'
 import QuickActionsMenu from './QuickActionsMenu'
 import AdminAvatar from './ui/AdminAvatar'
+import NotificationBell from '../shared/NotificationBell'
 
 const searchRoutes = [
   { label: 'Dashboard', path: '/admin' },
@@ -43,14 +41,6 @@ export default function AdminTopbar({
   const [search, setSearch] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-
-  const { data } = useQuery({
-    queryKey: ['notifications-count'],
-    queryFn: () => notificationApi.getAll({ unreadOnly: 'true', limit: 1 }),
-    refetchInterval: 60000,
-  })
-
-  const unread = data?.unreadCount || 0
 
   const results = search.trim()
     ? searchRoutes.filter((r) => r.label.toLowerCase().includes(search.toLowerCase()))
@@ -130,19 +120,11 @@ export default function AdminTopbar({
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate('/admin/notifications')}
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-slate-500 shadow-sm transition hover:border-indigo-200 hover:text-indigo-600"
-            aria-label="Notifications"
-          >
-            <Bell size={17} />
-            {unread > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-gradient-to-r from-[#4F46E5] to-[#3B82F6] px-1 text-[9px] font-bold text-white shadow-sm">
-                {unread > 9 ? '9+' : unread}
-              </span>
-            )}
-          </button>
+          <NotificationBell
+            buttonClassName="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-slate-500 shadow-sm transition hover:border-indigo-200 hover:text-indigo-600"
+            badgeClassName="absolute -right-1 -top-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-gradient-to-r from-[#4F46E5] to-[#3B82F6] px-1 text-[9px] font-bold text-white shadow-sm"
+            panelClassName="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-white shadow-[0_20px_50px_rgba(15,23,42,0.12)]"
+          />
 
           <div className="admin-profile-chip hidden items-center gap-2.5 rounded-2xl border border-border bg-white py-1.5 pl-1.5 pr-3 shadow-sm sm:flex">
             <AdminAvatar name={user?.name} size="sm" />

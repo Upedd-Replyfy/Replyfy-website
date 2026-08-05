@@ -195,6 +195,10 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (location.state?.reset) {
+      const preferredPlan = location.state.selectedPlan
+      const preferredExpertId = location.state.selectedExpertId
+      const preferredExpertName = location.state.selectedExpertName
+
       clearQuestionDraft()
       pendingDraftRef.current = null
       draftHydratedRef.current = true
@@ -202,13 +206,17 @@ export default function UserDashboard() {
       setQuery('')
       setFiles([])
       setLinks([])
-      setPlan('basic')
-      setSelectedExpert(null)
+      setPlan(preferredPlan && PLANS[preferredPlan] ? preferredPlan : 'mentor')
+      setSelectedExpert(
+        preferredExpertId
+          ? { userId: preferredExpertId, name: preferredExpertName || 'Mentor' }
+          : null
+      )
       setAppliedCoupon(null)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       navigate('/dashboard', { replace: true, state: {} })
     }
-  }, [location.state?.reset, navigate])
+  }, [location.state, navigate])
 
   useEffect(() => {
     setAppliedCoupon(null)
@@ -427,6 +435,15 @@ export default function UserDashboard() {
           loading={recommendedLoading}
           categoryName={selectedCategory?.name}
           expertTypeName={selectedExpertType?.name}
+          onSelectExpert={(mentor, planId) => {
+            if (planId) setPlan(planId)
+            setSelectedExpert(mentor)
+            toast.success(
+              planId === 'expert_call'
+                ? `Mentor Call selected with ${mentor.name}`
+                : `${mentor.name} selected — continue to ask`
+            )
+          }}
         />
 
         {recentQuestions.length > 0 && (

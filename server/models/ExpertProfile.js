@@ -13,6 +13,28 @@ const expertProfileSchema = new mongoose.Schema(
     bio: { type: String, default: '' },
     languages: [{ type: String }],
     skills: [{ type: String }],
+    education: [
+      {
+        school: { type: String, default: '' },
+        degree: { type: String, default: '' },
+        field: { type: String, default: '' },
+        year: { type: String, default: '' },
+      },
+    ],
+    certificates: [
+      {
+        title: { type: String, default: '' },
+        issuer: { type: String, default: '' },
+        year: { type: String, default: '' },
+      },
+    ],
+    achievements: [
+      {
+        title: { type: String, default: '' },
+        description: { type: String, default: '' },
+        year: { type: String, default: '' },
+      },
+    ],
     hourlyPrice: { type: Number, default: 0 },
     questionPrice: { type: Number, default: 99900 },
     completedAnswers: { type: Number, default: 0 },

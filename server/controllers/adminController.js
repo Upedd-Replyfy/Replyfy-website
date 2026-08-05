@@ -17,6 +17,7 @@ import { planRequiresExpertSelection } from '../constants/pricing.js'
 import ExpertType from '../models/ExpertType.js'
 import { slugify } from '../utils/slug.js'
 import { resolveIdList, mergeCategoryIdsWithTypes } from '../utils/expertMatch.js'
+import { applyProfileDetails } from '../utils/profileDetails.js'
 import {
   aggregateByDay,
   getLastNDays,
@@ -374,10 +375,23 @@ export const createExpert = asyncHandler(async (req, res) => {
     createdBy: req.user._id,
   })
 
+  applyProfileDetails(profile, req.body)
+  if (profile.isModified()) await profile.save()
+
   // Force-persist multi arrays (guards against hosts that drop array fields on insert)
   await ExpertProfile.updateOne(
     { _id: profile._id },
-    { $set: { categories: categoryIds, expertTypes: typeIds, category: primaryCategory, expertType: primaryType } }
+    {
+      $set: {
+        categories: categoryIds,
+        expertTypes: typeIds,
+        category: primaryCategory,
+        expertType: primaryType,
+        education: profile.education || [],
+        certificates: profile.certificates || [],
+        achievements: profile.achievements || [],
+      },
+    }
   )
 
   await Wallet.create({ expert: user._id })
@@ -575,6 +589,8 @@ export const updateExpert = asyncHandler(async (req, res) => {
   if (maxAssignments !== undefined) profile.maxAssignments = maxAssignments
   if (isVerified !== undefined) profile.isVerified = isVerified === true || isVerified === 'true'
   if (status !== undefined) profile.status = status
+
+  applyProfileDetails(profile, req.body)
 
   if (req.file) {
     const { uploadBufferToCloudinary } = await import('../config/cloudinary.js')
