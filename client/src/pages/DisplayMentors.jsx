@@ -540,6 +540,7 @@ export default function DisplayMentors() {
 
       <Footer onAuthOpen={setAuthMode} />
       <MentorDetailModal
+        forceLight
         open={!!selectedMentor}
         mentor={selectedMentor}
         onClose={() => setSelectedMentor(null)}

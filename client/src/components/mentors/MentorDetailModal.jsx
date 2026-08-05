@@ -62,22 +62,29 @@ const MENTOR_PLANS = [PLANS.mentor, PLANS.expert_call]
 
 function SectionCard({ children }) {
   return (
-    <div className="rounded-2xl border border-[#5B4CFF]/20 bg-[#5B4CFF]/10 p-3.5">
-      {children}
+    <div className="premium-surface-inner relative rounded-2xl p-3.5 shadow-sm">
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }
 
 function SoftChip({ children, icon: Icon }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-[#7C6CFF] shadow-sm">
+    <span className="inline-flex items-center gap-1 rounded-full border border-[#5B4CFF]/25 bg-card px-2.5 py-1 text-[11px] font-semibold text-[#5B4CFF] shadow-sm">
       {Icon ? <Icon size={11} /> : null}
       {children}
     </span>
   )
 }
 
-export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
+export default function MentorDetailModal({
+  mentor,
+  open,
+  onClose,
+  onAsk,
+  /** Force light theme tokens (public Find Mentors page sits outside dashboard-shell). */
+  forceLight = false,
+}) {
   const [tab, setTab] = useState('profile')
   const [filter, setFilter] = useState('all')
   const [knowMore, setKnowMore] = useState(false)
@@ -148,10 +155,17 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
   const PlanTagIcon = planId === 'expert_call' ? Video : MessageSquare
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-4">
+    <div
+      className={`fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-4 ${
+        forceLight ? 'dashboard-shell' : ''
+      }`}
+      data-theme={forceLight ? 'light' : undefined}
+    >
       <button
         type="button"
-        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+        className={`absolute inset-0 backdrop-blur-[2px] ${
+          forceLight ? 'bg-slate-900/35' : 'bg-black/60'
+        }`}
         aria-label="Close mentor details"
         onClick={onClose}
       />
@@ -159,7 +173,11 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
         role="dialog"
         aria-modal="true"
         aria-label={`${mentor.name} profile`}
-        className="relative z-10 flex max-h-[94vh] w-full max-w-[400px] flex-col overflow-hidden rounded-t-[28px] border border-border bg-card text-ink shadow-2xl sm:max-h-[90vh] sm:rounded-[28px]"
+        className={`relative z-10 flex max-h-[94vh] w-full max-w-[400px] flex-col overflow-hidden rounded-t-[28px] border border-border bg-card text-ink shadow-2xl sm:max-h-[90vh] sm:rounded-[28px] ${
+          forceLight
+            ? 'shadow-[0_24px_80px_rgba(15,23,42,0.18)] ring-1 ring-indigo-100/80'
+            : ''
+        }`}
       >
         <div className="relative shrink-0 bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] px-4 pb-14 pt-3">
           <div className="flex items-center gap-3 text-white">
@@ -208,7 +226,7 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 pb-4 pt-3">
+        <div className="scrollbar-none flex-1 overflow-y-auto overscroll-contain px-5 pb-4 pt-3">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-xl font-bold tracking-tight text-ink">{mentor.name}</h3>
             <span className="inline-flex items-center gap-1 text-sm font-semibold text-ink">
@@ -225,7 +243,7 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
           <button
             type="button"
             onClick={() => setKnowMore((v) => !v)}
-            className="mt-1.5 text-[13px] font-semibold text-[#a5a0ff]"
+            className="mt-1.5 text-[13px] font-semibold text-[#5B4CFF]"
           >
             {knowMore ? 'Show less' : 'Know more'}
           </button>
@@ -279,7 +297,7 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
                 type="button"
                 onClick={() => setTab(t.id)}
                 className={`relative pb-2.5 text-sm font-semibold transition ${
-                  tab === t.id ? 'text-[#a5a0ff]' : 'text-muted-light'
+                  tab === t.id ? 'text-[#5B4CFF]' : 'text-muted-light'
                 }`}
               >
                 {t.label}
@@ -292,7 +310,7 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
 
           {tab === 'profile' ? (
             <>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto pb-1">
                 {FILTERS.map((f) => (
                   <button
                     key={f.id}
@@ -300,8 +318,8 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
                     onClick={() => setFilter(f.id)}
                     className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition ${
                       filter === f.id
-                        ? 'bg-[#5B4CFF] text-white'
-                        : 'border border-border bg-surface text-muted'
+                        ? 'bg-gradient-to-r from-[#5B4CFF] to-[#7C6CFF] text-white shadow-[0_6px_16px_rgba(91,76,255,0.28)]'
+                        : 'border border-border bg-surface text-muted hover:border-[#5B4CFF]/30 hover:text-ink'
                     }`}
                   >
                     {f.label}
@@ -358,7 +376,7 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
                               </span>
                               <span className="block text-[11px] text-muted">{p.tagline}</span>
                             </span>
-                            <span className="shrink-0 text-[13px] font-bold text-[#a5a0ff]">
+                            <span className="shrink-0 text-[13px] font-bold text-[#5B4CFF]">
                               {formatRupee(p.pricePaise)}
                             </span>
                           </button>
@@ -373,7 +391,7 @@ export default function MentorDetailModal({ mentor, open, onClose, onAsk }) {
                         className="mt-3 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm font-semibold text-ink shadow-sm"
                       >
                         <span>Ask Now</span>
-                        <span className="font-bold text-[#a5a0ff]">{priceLabel}</span>
+                        <span className="font-bold text-[#5B4CFF]">{priceLabel}</span>
                       </button>
                     ) : null}
                   </SectionCard>
