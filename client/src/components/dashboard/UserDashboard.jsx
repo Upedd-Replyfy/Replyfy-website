@@ -15,6 +15,7 @@ import { userApi } from '../../services/api'
 import { PLANS, planRequiresExpertSelection } from '../../constants'
 import { useCategories, useExpertTypes, useExperts, usePlatformSettings } from '../../hooks/useCatalog'
 import { clearQuestionDraft, loadQuestionDraft, namesMatch } from '../../utils/questionDraft'
+import { payForQuestion } from '../../utils/payForQuestion'
 
 function formatRelativeTime(date) {
   const diff = Date.now() - new Date(date).getTime()
@@ -264,11 +265,22 @@ export default function UserDashboard() {
   }
 
   const handlePayment = async () => {
+    if (paying) return
     setPaying(true)
     try {
-      const title = query.split('\n')[0].slice(0, 120)
-      if (!categoryId) return toast.error('Missing category')
-      if (mentorTypesEnabled && !expertTypeId) return toast.error('Missing mentor type')
+      const title = query.split('\n')[0].slice(0, 120).trim()
+      if (!title) {
+        toast.error('Enter a question before paying')
+        return
+      }
+      if (!categoryId) {
+        toast.error('Missing category')
+        return
+      }
+      if (mentorTypesEnabled && !expertTypeId) {
+        toast.error('Missing mentor type')
+        return
+      }
 
       const formData = new FormData()
       formData.append('title', title)
@@ -285,56 +297,18 @@ export default function UserDashboard() {
       files.forEach((f) => formData.append('files', f))
 
       const { question } = await userApi.createQuestion(formData)
-      const order = await userApi.createPaymentOrder(question._id, appliedCoupon?.code)
+      const result = await payForQuestion(question, {
+        couponCode: appliedCoupon?.code,
+        planName: PLANS[plan]?.name,
+      })
 
-      if (order.devMode) {
-        await userApi.verifyPayment({
-          razorpayOrderId: order.orderId,
-          razorpayPaymentId: 'dev_payment',
-          razorpaySignature: 'dev_sig',
-          questionId: question._id,
-        })
-        toast.success('Question submitted successfully')
-        await refetchQuestions()
-        navigate(`/dashboard/questions/${question._id}`)
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.async = true
-      document.body.appendChild(script)
-
-      script.onload = () => {
-        const options = {
-          key: order.key,
-          amount: order.amount,
-          currency: order.currency,
-          name: 'Replyfy',
-          description: `${PLANS[plan].name} Plan Question`,
-          order_id: order.orderId,
-          handler: async (response) => {
-            try {
-              await userApi.verifyPayment({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-                questionId: question._id,
-              })
-              toast.success('Payment successful!')
-              await refetchQuestions()
-              navigate(`/dashboard/questions/${question._id}`)
-            } catch (err) {
-              toast.error(err.message)
-            }
-          },
-          theme: { color: '#202323' },
-        }
-        const rzp = new window.Razorpay(options)
-        rzp.open()
-      }
+      toast.success(result.mode === 'dev' ? 'Question submitted successfully' : 'Payment successful!')
+      await refetchQuestions()
+      navigate(`/dashboard/questions/${question._id}`)
     } catch (err) {
-      toast.error(err.message)
+      if (err?.message && err.message !== 'Payment cancelled') {
+        toast.error(err.message)
+      }
     } finally {
       setPaying(false)
     }

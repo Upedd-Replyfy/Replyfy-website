@@ -42,6 +42,10 @@ export async function payForQuestion(question, { couponCode, planName } = {}) {
     return { questionId, amount: order.amount, mode: 'dev' }
   }
 
+  if (!order?.key || !order?.orderId) {
+    throw new Error('Payment order was not created correctly. Please try again.')
+  }
+
   await loadRazorpayScript()
 
   const label =
@@ -50,34 +54,38 @@ export async function payForQuestion(question, { couponCode, planName } = {}) {
     'Question'
 
   return new Promise((resolve, reject) => {
-    const rzp = new window.Razorpay({
-      key: order.key,
-      amount: order.amount,
-      currency: order.currency || 'INR',
-      name: 'Replyfy',
-      description: `${label} Plan Question`,
-      order_id: order.orderId,
-      handler: async (response) => {
-        try {
-          await userApi.verifyPayment({
-            razorpayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-            questionId,
-          })
-          resolve({ questionId, amount: order.amount, mode: 'razorpay' })
-        } catch (err) {
-          reject(err)
-        }
-      },
-      modal: {
-        ondismiss: () => reject(new Error('Payment cancelled')),
-      },
-      theme: { color: '#5B4CFF' },
-    })
-    rzp.on('payment.failed', (response) => {
-      reject(new Error(response?.error?.description || 'Payment failed'))
-    })
-    rzp.open()
+    try {
+      const rzp = new window.Razorpay({
+        key: order.key,
+        amount: Number(order.amount),
+        currency: order.currency || 'INR',
+        name: 'Replyfy',
+        description: `${label} Plan Question`,
+        order_id: order.orderId,
+        handler: async (response) => {
+          try {
+            await userApi.verifyPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              questionId,
+            })
+            resolve({ questionId, amount: order.amount, mode: 'razorpay' })
+          } catch (err) {
+            reject(err)
+          }
+        },
+        modal: {
+          ondismiss: () => reject(new Error('Payment cancelled')),
+        },
+        theme: { color: '#171818' },
+      })
+      rzp.on('payment.failed', (response) => {
+        reject(new Error(response?.error?.description || 'Payment failed'))
+      })
+      rzp.open()
+    } catch (err) {
+      reject(new Error(err?.message || 'Unable to open payment checkout'))
+    }
   })
 }

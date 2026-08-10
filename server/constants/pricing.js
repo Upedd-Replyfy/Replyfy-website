@@ -1,7 +1,7 @@
 export const PLAN_IDS = ['basic', 'mentor', 'expert_call']
 
 export const PLAN_PRICING = {
-  basic: 9900,
+  basic: 100,
   mentor: 19900,
   expert_call: 99900,
 }

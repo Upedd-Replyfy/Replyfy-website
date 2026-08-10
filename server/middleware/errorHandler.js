@@ -25,6 +25,12 @@ export function errorHandler(err, req, res, next) {
     message = 'Invalid ID format'
   }
 
+  // Razorpay SDK errors often put the real reason in error.description / error.error.description
+  if (err?.error?.description || err?.description) {
+    statusCode = statusCode === 500 ? 400 : statusCode
+    message = err.error?.description || err.description
+  }
+
   if (env.nodeEnv === 'development') {
     logger.error(err.message, err)
   }

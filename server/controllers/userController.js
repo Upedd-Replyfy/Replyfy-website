@@ -169,10 +169,14 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
   }
 
   const order = await razorpay.orders.create({
-    amount: payableAmount,
+    amount: Number(payableAmount),
     currency: 'INR',
-    receipt: `q_${question._id}`.slice(0, 40),
-    notes: { questionId: question._id.toString(), userId: req.user._id.toString() },
+    receipt: `q_${String(question._id).slice(-24)}`.slice(0, 40),
+    notes: {
+      questionId: String(question._id),
+      userId: String(req.user._id),
+      plan: String(question.plan || ''),
+    },
   })
 
   const payment = await Payment.create({

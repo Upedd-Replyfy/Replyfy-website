@@ -25,11 +25,11 @@ router.post(
   '/questions',
   upload.array('files', 5),
   [
-    body('title').trim().notEmpty(),
-    body('description').trim().notEmpty(),
-    body('category').notEmpty(),
-    body('expertType').notEmpty(),
-    body('plan').isIn(PLAN_IDS),
+    body('title').trim().notEmpty().withMessage('Title is required'),
+    body('description').trim().notEmpty().withMessage('Description is required'),
+    body('category').notEmpty().withMessage('Category is required'),
+    body('expertType').optional({ values: 'falsy' }).isString().withMessage('Invalid mentor type'),
+    body('plan').isIn(PLAN_IDS).withMessage('Invalid plan'),
   ],
   validate,
   initiateQuestion
