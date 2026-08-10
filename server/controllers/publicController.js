@@ -2,6 +2,7 @@ import Category from '../models/Category.js'
 import ExpertType from '../models/ExpertType.js'
 import ExpertProfile from '../models/ExpertProfile.js'
 import Rating from '../models/Rating.js'
+import { getMentorProfileVisibilitySettings, isMentorTypesEnabled } from '../models/PlatformSettings.js'
 import { asyncHandler } from '../utils/ApiError.js'
 import { formatExpert } from '../utils/formatExpert.js'
 
@@ -26,6 +27,11 @@ export const getCategories = asyncHandler(async (req, res) => {
 })
 
 export const getExpertTypes = asyncHandler(async (req, res) => {
+  const mentorTypesEnabled = await isMentorTypesEnabled()
+  if (!mentorTypesEnabled) {
+    return res.json({ success: true, expertTypes: [], mentorTypesEnabled: false })
+  }
+
   const { category } = req.query
   const query = { isActive: true }
   if (category) query.category = category
@@ -35,7 +41,7 @@ export const getExpertTypes = asyncHandler(async (req, res) => {
     .populate('category', 'name slug')
     .sort({ sortOrder: 1, name: 1 })
 
-  res.json({ success: true, expertTypes })
+  res.json({ success: true, expertTypes, mentorTypesEnabled: true })
 })
 
 export const getExperts = asyncHandler(async (req, res) => {
@@ -117,10 +123,11 @@ export const getExperts = asyncHandler(async (req, res) => {
   const total = profiles.length
   const start = (Number(page) - 1) * Number(limit)
   const paginated = profiles.slice(start, start + Number(limit))
+  const profileVisibility = await getMentorProfileVisibilitySettings()
 
   res.json({
     success: true,
-    experts: paginated.map((p) => formatExpert(p)),
+    experts: paginated.map((p) => formatExpert({ ...p, profileVisibility })),
     pagination: {
       page: Number(page),
       limit: Number(limit),
@@ -149,19 +156,28 @@ export const getExpertById = asyncHandler(async (req, res) => {
 
   if (!profile) return res.status(404).json({ success: false, message: 'Mentor not found' })
 
-  const ratings = await Rating.find({ expert: profile.user._id })
-    .populate('user', 'name')
-    .sort({ createdAt: -1 })
-    .limit(10)
+  const profileVisibility = await getMentorProfileVisibilitySettings()
+  const ratings =
+    profileVisibility.reviews === false
+      ? []
+      : await Rating.find({ expert: profile.user._id })
+          .populate('user', 'name')
+          .sort({ createdAt: -1 })
+          .limit(10)
 
-  res.json({ success: true, expert: formatExpert(normalizeExpertDoc(profile)), ratings })
+  res.json({
+    success: true,
+    expert: formatExpert({ ...normalizeExpertDoc(profile), profileVisibility }),
+    ratings,
+  })
 })
 
 export const getPlatformStats = asyncHandler(async (req, res) => {
-  const [expertCount, answerCount, avgResponse] = await Promise.all([
+  const [expertCount, answerCount, avgResponse, mentorTypesEnabled] = await Promise.all([
     ExpertProfile.countDocuments({ status: 'active', availability: 'available' }),
     ExpertProfile.aggregate([{ $group: { _id: null, total: { $sum: '$completedAnswers' } } }]),
     ExpertProfile.aggregate([{ $group: { _id: null, avg: { $avg: '$responseTime' } } }]),
+    isMentorTypesEnabled(),
   ])
 
   res.json({
@@ -170,6 +186,12 @@ export const getPlatformStats = asyncHandler(async (req, res) => {
       experts: expertCount,
       answers: answerCount[0]?.total || 0,
       avgResponseHours: Math.round(avgResponse[0]?.avg || 24),
+      mentorTypesEnabled,
     },
   })
+})
+
+export const getPlatformSettings = asyncHandler(async (req, res) => {
+  const mentorTypesEnabled = await isMentorTypesEnabled()
+  res.json({ success: true, settings: { mentorTypesEnabled } })
 })

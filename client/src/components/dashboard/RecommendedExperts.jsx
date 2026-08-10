@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 import MentorDetailModal from '../mentors/MentorDetailModal'
 import MentorCard, { MentorCardSkeleton } from '../mentors/MentorCard'
+import SectionPager from './SectionPager'
 
 export default function RecommendedExperts({
   experts,
@@ -29,53 +29,52 @@ export default function RecommendedExperts({
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.25 }}
-      className="mt-16 md:mt-20"
+      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
-      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-[#5B4CFF]/25 bg-[#5B4CFF]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a5a0ff]">
-            <Sparkles size={12} />
-            Matched for you
-          </p>
-          <h2 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">
-            Recommended mentors
-          </h2>
-          <p className="mt-2 text-sm text-muted md:text-base">
-            Top matches for {categoryName || 'your selection'}
-            {expertTypeName ? ` · ${expertTypeName}` : ''}
-          </p>
-        </div>
+      <div className="mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+          Matched for you
+        </p>
+        <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink sm:text-xl">
+          Recommended mentors
+        </h2>
+        <p className="mt-1 text-xs text-muted sm:text-sm">
+          Top matches for {categoryName || 'your selection'}
+          {expertTypeName ? ` · ${expertTypeName}` : ''}
+        </p>
       </div>
 
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={`${categoryName}-${expertTypeName}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="grid gap-4 sm:gap-5 lg:grid-cols-2"
-        >
-          {loading
-            ? [1, 2].map((i) => <MentorCardSkeleton key={i} />)
-            : experts.slice(0, 4).map((expert, index) => (
-                <MentorCard
-                  key={expert._id}
-                  expert={expert}
-                  index={index}
-                  onOpen={setSelected}
-                  onAsk={(mentor, planId) => onSelectExpert?.(mentor, planId || 'mentor')}
-                  favorited={favorites.has(expert._id)}
-                  bookmarked={bookmarks.has(expert._id)}
-                  onToggleFavorite={toggleSet(setFavorites)}
-                  onToggleBookmark={toggleSet(setBookmarks)}
-                />
-              ))}
-        </motion.div>
-      </AnimatePresence>
+      {loading ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {[1, 2, 3, 4].map((i) => (
+            <MentorCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
+        <SectionPager
+          items={experts}
+          pageSize={4}
+          columnsClassName="grid-cols-1 sm:grid-cols-2"
+          ariaLabel="Recommended mentors pages"
+          renderItem={(expert, index) => (
+            <MentorCard
+              key={expert._id}
+              expert={expert}
+              index={index}
+              onOpen={setSelected}
+              onAsk={(mentor, planId) => onSelectExpert?.(mentor, planId || 'mentor')}
+              favorited={favorites.has(expert._id)}
+              bookmarked={bookmarks.has(expert._id)}
+              onToggleFavorite={toggleSet(setFavorites)}
+              onToggleBookmark={toggleSet(setBookmarks)}
+            />
+          )}
+        />
+      )}
 
       <MentorDetailModal
         open={!!selected}

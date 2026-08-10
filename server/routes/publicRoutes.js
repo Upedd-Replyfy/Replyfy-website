@@ -5,6 +5,7 @@ import {
   getExperts,
   getExpertById,
   getPlatformStats,
+  getPlatformSettings,
 } from '../controllers/publicController.js'
 
 const router = Router()
@@ -14,5 +15,6 @@ router.get('/expert-types', getExpertTypes)
 router.get('/experts', getExperts)
 router.get('/experts/:id', getExpertById)
 router.get('/stats', getPlatformStats)
+router.get('/settings', getPlatformSettings)
 
 export default router

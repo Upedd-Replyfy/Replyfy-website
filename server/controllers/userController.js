@@ -13,6 +13,7 @@ import {
   fetchAndAssertRazorpayPayment,
   finalizeSuccessfulPayment,
 } from '../services/paymentCompletionService.js'
+import { isMentorTypesEnabled } from '../models/PlatformSettings.js'
 
 export const initiateQuestion = asyncHandler(async (req, res) => {
   const { title, description, category, expertType, priority, plan, selectedExpert } = req.body
@@ -20,10 +21,17 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
   const cat = await Category.findById(category)
   if (!cat || !cat.isActive) throw new ApiError(400, 'Invalid category')
 
-  const ExpertType = (await import('../models/ExpertType.js')).default
-  const type = await ExpertType.findById(expertType)
-  if (!type || !type.isActive || type.category.toString() !== category.toString()) {
-    throw new ApiError(400, 'Invalid mentor type for this category')
+  const mentorTypesEnabled = await isMentorTypesEnabled()
+  let resolvedExpertType = null
+
+  if (mentorTypesEnabled) {
+    if (!expertType) throw new ApiError(400, 'Mentor type is required')
+    const ExpertType = (await import('../models/ExpertType.js')).default
+    const type = await ExpertType.findById(expertType)
+    if (!type || !type.isActive || type.category.toString() !== category.toString()) {
+      throw new ApiError(400, 'Invalid mentor type for this category')
+    }
+    resolvedExpertType = type._id
   }
 
   if (planRequiresExpertSelection(plan) && !selectedExpert) {
@@ -35,11 +43,18 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
     const { expertMatchesCategoryType } = await import('../utils/expertMatch.js')
     const profile = await ExpertProfile.findOne({
       user: selectedExpert,
-      ...expertMatchesCategoryType(category, expertType),
+      ...expertMatchesCategoryType(category, resolvedExpertType),
       availability: 'available',
       status: 'active',
     })
-    if (!profile) throw new ApiError(400, 'Selected mentor is not available for this category and type')
+    if (!profile) {
+      throw new ApiError(
+        400,
+        mentorTypesEnabled
+          ? 'Selected mentor is not available for this category and type'
+          : 'Selected mentor is not available for this category'
+      )
+    }
   }
 
   const amount = getPlanAmount(plan)
@@ -50,7 +65,7 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
     title,
     description,
     category,
-    expertType,
+    expertType: resolvedExpertType || undefined,
     priority: priority || 'standard',
     plan,
     selectedExpert: planRequiresExpertSelection(plan) ? selectedExpert : undefined,
@@ -289,9 +304,40 @@ export const getMyQuestions = asyncHandler(async (req, res) => {
     Question.countDocuments(query),
   ])
 
+  const Answer = (await import('../models/Answer.js')).default
+  const questionIds = questions.map((q) => q._id)
+  const answers = questionIds.length
+    ? await Answer.find({
+        question: { $in: questionIds },
+        status: 'approved',
+      }).select('question content status')
+    : []
+
+  const answerByQuestion = new Map(answers.map((a) => [String(a.question), a]))
+
+  const previewWords = (text, count = 5) => {
+    const words = String(text || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .split(' ')
+      .filter(Boolean)
+    if (!words.length) return ''
+    const slice = words.slice(0, count)
+    return slice.length < words.length ? `${slice.join(' ')}…` : slice.join(' ')
+  }
+
+  const hydrated = questions.map((q) => {
+    const doc = q.toObject()
+    const answer = answerByQuestion.get(String(q._id))
+    const answered = q.status === 'completed' && Boolean(answer?.content)
+    doc.answered = answered
+    doc.answerPreview = answered ? previewWords(answer.content, 5) : ''
+    return doc
+  })
+
   res.json({
     success: true,
-    questions,
+    questions: hydrated,
     pagination: { page, limit, total, pages: Math.ceil(total / limit) || 0 },
   })
 })
@@ -375,6 +421,30 @@ export const getQuestionById = asyncHandler(async (req, res) => {
       : null,
     timeline,
   })
+})
+
+export const deletePendingQuestion = asyncHandler(async (req, res) => {
+  const question = await Question.findOne({ _id: req.params.id, user: req.user._id })
+  if (!question) throw new ApiError(404, 'Question not found')
+  if (question.status !== 'pending_payment') {
+    throw new ApiError(400, 'Only unpaid questions can be deleted')
+  }
+
+  const paid = await Payment.findOne({ question: question._id, status: 'paid' })
+  if (paid) throw new ApiError(400, 'Paid questions cannot be deleted')
+
+  await Payment.updateMany(
+    { question: question._id, user: req.user._id, status: 'created' },
+    { $set: { status: 'failed' } }
+  )
+  await Question.deleteOne({ _id: question._id })
+
+  logger.info('pending_question_deleted', {
+    questionId: String(question._id),
+    userId: String(req.user._id),
+  })
+
+  res.json({ success: true, message: 'Question deleted' })
 })
 
 export const getPaymentHistory = asyncHandler(async (req, res) => {

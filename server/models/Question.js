@@ -18,7 +18,7 @@ const questionSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-    expertType: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpertType', required: true },
+    expertType: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpertType' },
     priority: { type: String, enum: ['standard', 'priority', 'urgent'], default: 'standard' },
     plan: { type: String, enum: PLAN_IDS, required: true },
     selectedExpert: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

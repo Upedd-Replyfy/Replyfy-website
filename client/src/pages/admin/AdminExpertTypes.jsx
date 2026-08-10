@@ -28,9 +28,10 @@ function Field({ label, hint, children }) {
   )
 }
 
-function ExpertTypeCard({ type, index, onEdit, onDisable, disablePending }) {
+function ExpertTypeCard({ type, index, onEdit, onToggle, togglePending }) {
   const categoryName = type.category?.name || 'Uncategorized'
   const isActive = type.isActive !== false
+  const categoryActive = Boolean(type.category && type.category.isActive !== false)
 
   return (
     <motion.article
@@ -41,7 +42,7 @@ function ExpertTypeCard({ type, index, onEdit, onDisable, disablePending }) {
       className="premium-surface group relative rounded-[14px] px-3 py-2.5 transition hover:border-[#5B4CFF]/50"
     >
       <div className="relative z-[1] flex items-center gap-2.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5B4CFF]/15 to-[#7C6CFF]/15 text-[#7C6CFF]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink text-card">
           <Tags size={18} />
         </span>
 
@@ -75,15 +76,32 @@ function ExpertTypeCard({ type, index, onEdit, onDisable, disablePending }) {
           {isActive ? (
             <button
               type="button"
-              onClick={() => onDisable(type._id)}
-              disabled={disablePending}
+              onClick={() => onToggle(type, false)}
+              disabled={togglePending}
               className="inline-flex h-8 items-center gap-1 rounded-lg border border-rose-500/25 bg-rose-500/10 px-2.5 text-[11px] font-semibold text-rose-400 transition hover:bg-rose-500/15 disabled:opacity-50"
               title="Disable"
             >
               <Power size={12} />
               <span className="hidden sm:inline">Disable</span>
             </button>
-          ) : null}
+          ) : (
+            <button
+              type="button"
+              onClick={() => onToggle(type, true)}
+              disabled={togglePending || !categoryActive}
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2.5 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:border-border disabled:bg-surface disabled:text-muted-light disabled:opacity-70"
+              title={
+                categoryActive
+                  ? 'Enable mentor type'
+                  : 'Enable the linked category before enabling this type'
+              }
+            >
+              <Power size={12} />
+              <span className="hidden sm:inline">
+                {categoryActive ? 'Enable' : 'Category disabled'}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </motion.article>
@@ -107,9 +125,14 @@ export default function AdminExpertTypes() {
     queryKey: ['admin-expert-types'],
     queryFn: () => adminApi.getExpertTypes(),
   })
+  const { data: settingData } = useQuery({
+    queryKey: ['mentor-types-setting'],
+    queryFn: adminApi.getMentorTypesSetting,
+  })
 
   const categories = categoriesData?.categories || []
   const types = data?.expertTypes || []
+  const mentorTypesEnabled = settingData?.mentorTypesEnabled !== false
 
   const { activeTypes, disabledTypes, visibleTypes } = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -188,11 +211,27 @@ export default function AdminExpertTypes() {
     onError: (err) => toast.error(err.message),
   })
 
-  const disableMutation = useMutation({
-    mutationFn: (id) => adminApi.deleteExpertType(id),
-    onSuccess: () => {
-      toast.success('Mentor type disabled')
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, enable }) =>
+      enable
+        ? adminApi.updateExpertType(id, { isActive: true })
+        : adminApi.deleteExpertType(id),
+    onSuccess: (_data, { enable }) => {
+      toast.success(enable ? 'Mentor type enabled' : 'Mentor type disabled')
       queryClient.invalidateQueries({ queryKey: ['admin-expert-types'] })
+      queryClient.invalidateQueries({ queryKey: ['expert-types'] })
+    },
+    onError: (err) => toast.error(err.message),
+  })
+
+  const featureMutation = useMutation({
+    mutationFn: (enabled) => adminApi.updateMentorTypesSetting(enabled),
+    onSuccess: (res) => {
+      toast.success(res.message || (res.mentorTypesEnabled ? 'Mentor types enabled' : 'Mentor types disabled'))
+      queryClient.invalidateQueries({ queryKey: ['mentor-types-setting'] })
+      queryClient.invalidateQueries({ queryKey: ['platform-settings'] })
+      queryClient.invalidateQueries({ queryKey: ['platform-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['expert-types'] })
     },
     onError: (err) => toast.error(err.message),
   })
@@ -204,11 +243,41 @@ export default function AdminExpertTypes() {
         title="Mentor Types"
         description="Define mentor roles within each category"
         actions={
-          <AdminButton icon={Plus} onClick={openCreate}>
+          <AdminButton icon={Plus} onClick={openCreate} disabled={!mentorTypesEnabled}>
             New Mentor Type
           </AdminButton>
         }
       />
+
+      <div className="premium-surface flex flex-col gap-3 rounded-[16px] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-ink">Mentor type feature</p>
+          <p className="mt-0.5 text-xs text-muted">
+            {mentorTypesEnabled
+              ? 'Users must pick a mentor type when asking questions and filtering mentors.'
+              : 'Disabled globally — users proceed with category only on ask flow and mentor filters.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={mentorTypesEnabled}
+          disabled={featureMutation.isPending}
+          onClick={() => featureMutation.mutate(!mentorTypesEnabled)}
+          className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition disabled:opacity-50 ${
+            mentorTypesEnabled
+              ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700'
+              : 'border-border bg-surface text-muted'
+          }`}
+        >
+          <Power size={13} />
+          {featureMutation.isPending
+            ? 'Saving...'
+            : mentorTypesEnabled
+              ? 'Feature active'
+              : 'Feature disabled'}
+        </button>
+      </div>
 
       <AdminStatStrip items={stats} />
 
@@ -310,8 +379,10 @@ export default function AdminExpertTypes() {
                 type={type}
                 index={index}
                 onEdit={openEdit}
-                onDisable={(id) => disableMutation.mutate(id)}
-                disablePending={disableMutation.isPending}
+                onToggle={(item, enable) =>
+                  toggleMutation.mutate({ id: item._id, enable })
+                }
+                togglePending={toggleMutation.isPending}
               />
             ))}
           </div>
@@ -333,8 +404,10 @@ export default function AdminExpertTypes() {
                     type={type}
                     index={index}
                     onEdit={openEdit}
-                    onDisable={(id) => disableMutation.mutate(id)}
-                    disablePending={disableMutation.isPending}
+                    onToggle={(item, enable) =>
+                      toggleMutation.mutate({ id: item._id, enable })
+                    }
+                    togglePending={toggleMutation.isPending}
                   />
                 ))}
               </div>

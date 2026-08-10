@@ -2,10 +2,16 @@ import mongoose from 'mongoose'
 import Notification from '../models/Notification.js'
 import User from '../models/User.js'
 import ExpertProfile from '../models/ExpertProfile.js'
+import PlatformSettings, {
+  DEFAULT_MENTOR_PROFILE_VISIBILITY,
+  getMentorProfileVisibilitySettings,
+  isMentorTypesEnabled,
+} from '../models/PlatformSettings.js'
 import Category from '../models/Category.js'
 import Question from '../models/Question.js'
 import Answer from '../models/Answer.js'
 import Payment from '../models/Payment.js'
+import WebhookEvent from '../models/WebhookEvent.js'
 import Wallet from '../models/Wallet.js'
 import Transaction from '../models/Transaction.js'
 import WithdrawRequest from '../models/WithdrawRequest.js'
@@ -354,6 +360,7 @@ export const createExpert = asyncHandler(async (req, res) => {
     avatar: profilePhoto || undefined,
   })
 
+  const profileVisibility = await getMentorProfileVisibilitySettings()
   const profile = await ExpertProfile.create({
     user: user._id,
     category: primaryCategory,
@@ -373,6 +380,7 @@ export const createExpert = asyncHandler(async (req, res) => {
     availability: availability || 'available',
     status: 'active',
     createdBy: req.user._id,
+    profileVisibility,
   })
 
   applyProfileDetails(profile, req.body)
@@ -414,6 +422,67 @@ export const createExpert = asyncHandler(async (req, res) => {
   res.status(201).json({
     success: true,
     expert: populated,
+  })
+})
+
+export const getMentorProfileVisibility = asyncHandler(async (req, res) => {
+  const profileVisibility = await getMentorProfileVisibilitySettings()
+  res.json({ success: true, profileVisibility })
+})
+
+export const updateMentorProfileVisibility = asyncHandler(async (req, res) => {
+  const input = req.body?.profileVisibility
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new ApiError(400, 'Invalid profile visibility settings')
+  }
+
+  const profileVisibility = {}
+  for (const field of Object.keys(DEFAULT_MENTOR_PROFILE_VISIBILITY)) {
+    if (typeof input[field] !== 'boolean') {
+      throw new ApiError(400, `Invalid visibility value for ${field}`)
+    }
+    profileVisibility[field] = input[field]
+  }
+
+  await Promise.all([
+    PlatformSettings.findOneAndUpdate(
+      { key: 'platform' },
+      { $set: { mentorProfileVisibility: profileVisibility } },
+      { upsert: true, new: true }
+    ),
+    ExpertProfile.updateMany({}, { $set: { profileVisibility } }),
+  ])
+
+  res.json({
+    success: true,
+    message: 'Profile display settings updated for all mentors',
+    profileVisibility,
+  })
+})
+
+export const getMentorTypesSetting = asyncHandler(async (req, res) => {
+  const mentorTypesEnabled = await isMentorTypesEnabled()
+  res.json({ success: true, mentorTypesEnabled })
+})
+
+export const updateMentorTypesSetting = asyncHandler(async (req, res) => {
+  const enabled = req.body?.mentorTypesEnabled
+  if (typeof enabled !== 'boolean') {
+    throw new ApiError(400, 'mentorTypesEnabled must be a boolean')
+  }
+
+  await PlatformSettings.findOneAndUpdate(
+    { key: 'platform' },
+    { $set: { mentorTypesEnabled: enabled } },
+    { upsert: true, new: true }
+  )
+
+  res.json({
+    success: true,
+    message: enabled
+      ? 'Mentor types enabled across the platform'
+      : 'Mentor types disabled — users will select by category only',
+    mentorTypesEnabled: enabled,
   })
 })
 
@@ -682,7 +751,7 @@ export const getExpertTypes = asyncHandler(async (req, res) => {
   const { category } = req.query
   const query = category ? { category } : {}
   const expertTypes = await ExpertType.find(query)
-    .populate('category', 'name slug')
+    .populate('category', 'name slug isActive')
     .sort({ sortOrder: 1, name: 1 })
   res.json({ success: true, expertTypes })
 })
@@ -711,6 +780,17 @@ export const createExpertType = asyncHandler(async (req, res) => {
 })
 
 export const updateExpertType = asyncHandler(async (req, res) => {
+  if (req.body.isActive === true || req.body.isActive === 'true') {
+    const existing = await ExpertType.findById(req.params.id)
+    if (!existing) throw new ApiError(404, 'Mentor type not found')
+
+    const category = await Category.findById(req.body.category || existing.category)
+    if (!category?.isActive) {
+      throw new ApiError(400, 'Enable the linked category before enabling this mentor type')
+    }
+    req.body.isActive = true
+  }
+
   const expertType = await ExpertType.findByIdAndUpdate(req.params.id, req.body, { new: true })
   if (!expertType) throw new ApiError(404, 'Mentor type not found')
   res.json({ success: true, expertType })
@@ -744,9 +824,18 @@ export const getPendingQuestions = asyncHandler(async (req, res) => {
   res.json({ success: true, questions })
 })
 
+/** Unpaid / abandoned drafts stay out of admin moderation views. */
+const ADMIN_HIDDEN_QUESTION_STATUSES = ['pending_payment', 'cancelled']
+
 export const getAllQuestions = asyncHandler(async (req, res) => {
   const { status, page = 1, limit = 20 } = req.query
-  const query = status ? { status } : {}
+  const query = {
+    status: { $nin: ADMIN_HIDDEN_QUESTION_STATUSES },
+  }
+  if (status && !ADMIN_HIDDEN_QUESTION_STATUSES.includes(String(status))) {
+    query.status = String(status)
+  }
+
   const [questions, total] = await Promise.all([
     Question.find(query)
       .populate('user', 'name email')
@@ -773,7 +862,7 @@ export const approveQuestion = asyncHandler(async (req, res) => {
 
   if (!expertId && question.plan === 'basic') {
     const expert = await findAvailableExpert(question.category, question.expertType)
-    if (!expert) throw new ApiError(400, 'No available mentor for this category and mentor type')
+    if (!expert) throw new ApiError(400, 'No available mentor for this category')
     expertId = expert.user._id
   } else if (!expertId) {
     throw new ApiError(400, 'No mentor selected for this plan')
@@ -940,12 +1029,63 @@ export const rejectAnswer = asyncHandler(async (req, res) => {
 })
 
 export const getPayments = asyncHandler(async (req, res) => {
+  // Close leftover checkout rows when a sibling payment already succeeded.
+  const paidQuestionIds = await Payment.distinct('question', { status: 'paid' })
+  if (paidQuestionIds.length) {
+    await Payment.updateMany(
+      { question: { $in: paidQuestionIds }, status: 'created' },
+      {
+        $set: {
+          status: 'failed',
+          metadata: { failureReason: 'superseded_by_successful_payment' },
+        },
+      }
+    )
+  }
+
   const payments = await Payment.find()
     .populate('user', 'name email')
-    .populate('question', 'title')
+    .populate('question', 'title status plan amount category')
     .sort({ createdAt: -1 })
     .limit(100)
-  res.json({ success: true, payments })
+
+  const paymentIds = payments.map((payment) => payment._id)
+  const orderIds = payments.map((payment) => payment.razorpayOrderId).filter(Boolean)
+  const webhookEvents = await WebhookEvent.find({
+    $or: [
+      { payment: { $in: paymentIds } },
+      { razorpayOrderId: { $in: orderIds } },
+    ],
+  })
+    .sort({ createdAt: -1 })
+    .lean()
+
+  const eventsByPayment = new Map()
+  const eventsByOrder = new Map()
+  for (const event of webhookEvents) {
+    if (event.payment) {
+      const key = String(event.payment)
+      eventsByPayment.set(key, [...(eventsByPayment.get(key) || []), event])
+    }
+    if (event.razorpayOrderId) {
+      eventsByOrder.set(event.razorpayOrderId, [
+        ...(eventsByOrder.get(event.razorpayOrderId) || []),
+        event,
+      ])
+    }
+  }
+
+  const paymentsWithWebhookHistory = payments.map((payment) => {
+    const linked = eventsByPayment.get(String(payment._id)) || []
+    const byOrder = eventsByOrder.get(payment.razorpayOrderId) || []
+    const webhookHistory = [...new Map([...linked, ...byOrder].map((event) => [
+      String(event._id),
+      event,
+    ])).values()]
+    return { ...payment.toObject(), webhookHistory }
+  })
+
+  res.json({ success: true, payments: paymentsWithWebhookHistory })
 })
 
 export const getWithdrawals = asyncHandler(async (req, res) => {

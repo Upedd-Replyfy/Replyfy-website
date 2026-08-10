@@ -7,13 +7,16 @@ import {
   Briefcase,
   ChevronRight,
   Clock,
+  CreditCard,
   Download,
   FileText,
   FolderTree,
   GraduationCap,
+  Loader2,
   Paperclip,
   ScrollText,
   Star,
+  Trash2,
   Trophy,
   User2,
   X,
@@ -22,6 +25,8 @@ import { catalogApi, userApi } from '../../services/api'
 import StatusBadge from '../ui/StatusBadge'
 import { QUESTION_STATUS, PLANS } from '../../constants'
 import { isQuestionSaved, toggleSavedQuestion } from '../../utils/savedAnswers'
+import { payForQuestion } from '../../utils/payForQuestion'
+import { formatRupee } from '../../utils/currency'
 
 const RATING_LABELS = {
   1: 'Poor',
@@ -142,7 +147,16 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
   })
 
   const expert = data?.expert
-  const ratingList = data?.ratings || []
+  const visibility = {
+    bio: expert?.profileVisibility?.bio !== false,
+    experience: expert?.profileVisibility?.experience !== false,
+    skills: expert?.profileVisibility?.skills !== false,
+    education: expert?.profileVisibility?.education !== false,
+    certificates: expert?.profileVisibility?.certificates !== false,
+    achievements: expert?.profileVisibility?.achievements !== false,
+    reviews: expert?.profileVisibility?.reviews !== false,
+  }
+  const ratingList = visibility.reviews ? data?.ratings || [] : []
   const rating = Number(expert?.averageRating) || 0
   const reviews = expert?.totalRatings || expert?.reviewCount || 0
   const photo = expert?.profilePhoto || expert?.avatar || fallback?.avatar
@@ -150,9 +164,9 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
   const bio =
     expert?.bio?.trim() ||
     'Experienced mentor ready to help with practical, situation-specific guidance.'
-  const education = expert?.education || []
-  const certificates = expert?.certificates || []
-  const achievements = expert?.achievements || []
+  const education = visibility.education ? expert?.education || [] : []
+  const certificates = visibility.certificates ? expert?.certificates || [] : []
+  const achievements = visibility.achievements ? expert?.achievements || [] : []
   const categories = [
     ...(expert?.categories || []).map((c) => c?.name).filter(Boolean),
     expert?.category?.name,
@@ -215,13 +229,15 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-lg font-semibold text-ink">{name}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
-                  <Star size={12} className="fill-amber-400 text-amber-400" />
-                  <span className="font-semibold text-ink">
-                    {rating ? rating.toFixed(1) : '—'}
-                  </span>
-                  <span>({reviews} reviews)</span>
-                </div>
+                {visibility.reviews ? (
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                    <Star size={12} className="fill-amber-400 text-amber-400" />
+                    <span className="font-semibold text-ink">
+                      {rating ? rating.toFixed(1) : '—'}
+                    </span>
+                    <span>({reviews} reviews)</span>
+                  </div>
+                ) : null}
                 {fallback?.email || expert?.email ? (
                   <p className="mt-1 truncate text-[11px] text-muted-light">
                     {fallback?.email || expert?.email}
@@ -230,13 +246,17 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
               </div>
             </div>
 
-            <p className="mt-4 text-sm leading-relaxed text-muted">{bio}</p>
+            {visibility.bio ? (
+              <p className="mt-4 text-sm leading-relaxed text-muted">{bio}</p>
+            ) : null}
 
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-ink">
-              <p className="inline-flex items-center gap-2">
-                <Briefcase size={14} className="text-emerald-400" />
-                {expert?.experience?.trim() || '—'}
-              </p>
+              {visibility.experience ? (
+                <p className="inline-flex items-center gap-2">
+                  <Briefcase size={14} className="text-emerald-400" />
+                  {expert?.experience?.trim() || '—'}
+                </p>
+              ) : null}
               <p className="inline-flex items-center gap-2">
                 <User2 size={14} className="text-emerald-400" />
                 {(expert?.completedAnswers || 0).toLocaleString('en-IN')} sessions
@@ -265,7 +285,7 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
               </div>
             )}
 
-            {(expert?.skills || []).length > 0 && (
+            {visibility.skills && (expert?.skills || []).length > 0 && (
               <div className="mt-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
                   Skills
@@ -283,8 +303,12 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
               </div>
             )}
 
+            {(visibility.education ||
+              visibility.certificates ||
+              visibility.achievements ||
+              visibility.reviews) && (
             <div className="mt-5 space-y-4 border-t border-border pt-4">
-              <section>
+              <section className={visibility.education ? '' : 'hidden'}>
                 <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
                   <GraduationCap size={12} className="text-emerald-400" />
                   Education
@@ -309,7 +333,7 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
                 )}
               </section>
 
-              <section>
+              <section className={visibility.certificates ? '' : 'hidden'}>
                 <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
                   <ScrollText size={12} className="text-emerald-400" />
                   Certificates
@@ -332,7 +356,7 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
                 )}
               </section>
 
-              <section>
+              <section className={visibility.achievements ? '' : 'hidden'}>
                 <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
                   <Trophy size={12} className="text-emerald-400" />
                   Achievements
@@ -357,7 +381,7 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
                 )}
               </section>
 
-              <section>
+              <section className={visibility.reviews ? '' : 'hidden'}>
                 <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
                   <Star size={12} className="text-amber-400" />
                   Reviews
@@ -403,6 +427,7 @@ function MentorSidePanel({ mentorId, fallback, onClose }) {
                 )}
               </section>
             </div>
+            )}
           </>
         )}
       </div>
@@ -416,6 +441,8 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
   const [comment, setComment] = useState('')
   const [saved, setSaved] = useState(false)
   const [showMentor, setShowMentor] = useState(false)
+  const [paying, setPaying] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['question', questionId],
@@ -429,6 +456,8 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
     setStars(5)
     setComment('')
     setShowMentor(false)
+    setPaying(false)
+    setDeleting(false)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
@@ -460,6 +489,49 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
   const answer = data?.answer
   const answerMeta = data?.answerMeta
   const timeline = data?.timeline || []
+  const needsPayment = question?.status === 'pending_payment'
+  const amountPaise =
+    question?.amount || PLANS[question?.plan]?.pricePaise || 0
+
+  const handlePay = async () => {
+    if (!question || paying || deleting) return
+    setPaying(true)
+    try {
+      await payForQuestion(question)
+      toast.success('Payment successful! Your question is moving forward.')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['question', questionId] }),
+        queryClient.invalidateQueries({ queryKey: ['my-questions'] }),
+        queryClient.invalidateQueries({ queryKey: ['sidebar-questions'] }),
+      ])
+    } catch (err) {
+      if (err?.message !== 'Payment cancelled') {
+        toast.error(err.message || 'Payment failed')
+      }
+    } finally {
+      setPaying(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!question || paying || deleting) return
+    const ok = window.confirm('Delete this unpaid question? This cannot be undone.')
+    if (!ok) return
+    setDeleting(true)
+    try {
+      await userApi.deleteQuestion(question._id)
+      toast.success('Question deleted')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['my-questions'] }),
+        queryClient.invalidateQueries({ queryKey: ['sidebar-questions'] }),
+      ])
+      onClose?.()
+    } catch (err) {
+      toast.error(err.message || 'Could not delete question')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   const allAttachments = useMemo(() => {
     const qFiles = question?.attachments || []
@@ -560,7 +632,64 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
               ) : (
                 <div className="grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
                   <div className="space-y-4">
-                    <section className="premium-surface flex max-h-[280px] flex-col overflow-hidden rounded-[18px] sm:max-h-[320px]">
+                    {needsPayment && (
+                      <section className="overflow-hidden rounded-[18px] border border-amber-500/30 bg-amber-500/10 px-4 py-4 sm:px-5">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0">
+                            <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-300">
+                              <CreditCard size={15} />
+                              Payment pending
+                            </p>
+                            <p className="mt-1 text-xs text-muted sm:text-sm">
+                              Complete payment to submit this question for mentor matching.
+                            </p>
+                            <p className="mt-2 text-lg font-bold text-ink">
+                              {formatRupee(amountPaise)}
+                              {planName ? (
+                                <span className="ml-2 text-xs font-medium text-muted">
+                                  · {planName}
+                                </span>
+                              ) : null}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleDelete}
+                              disabled={paying || deleting}
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-500 transition hover:bg-rose-500/15 disabled:opacity-60"
+                            >
+                              {deleting ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={16} />
+                              )}
+                              Delete
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handlePay}
+                              disabled={paying || deleting}
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-card transition hover:bg-ink/90 disabled:opacity-60"
+                            >
+                              {paying ? (
+                                <>
+                                  <Loader2 size={16} className="animate-spin" />
+                                  Processing…
+                                </>
+                              ) : (
+                                <>
+                                  <CreditCard size={16} />
+                                  Pay {formatRupee(amountPaise)}
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    <section className="flex max-h-[280px] flex-col overflow-hidden rounded-[18px] border border-border bg-card sm:max-h-[320px]">
                       <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
                         <div className="shrink-0 border-b border-border/60 px-4 py-3 sm:px-5">
                           <h3 className="text-base font-semibold text-ink">Your question</h3>
@@ -587,7 +716,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                     </section>
 
                     {answer ? (
-                      <section className="premium-surface flex max-h-[320px] flex-col overflow-hidden rounded-[18px] sm:max-h-[380px]">
+                      <section className="flex max-h-[320px] flex-col overflow-hidden rounded-[18px] border border-border bg-card sm:max-h-[380px]">
                         <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
                           <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border/60 px-4 py-3 sm:px-5">
                             <div>
@@ -630,13 +759,17 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                       </section>
                     ) : (
                       <section className="rounded-[18px] border border-dashed border-border bg-card px-4 py-7 text-center">
-                        <h3 className="text-sm font-semibold text-ink">Answer not ready yet</h3>
+                        <h3 className="text-sm font-semibold text-ink">
+                          {needsPayment ? 'Waiting on payment' : 'Answer not ready yet'}
+                        </h3>
                         <p className="mx-auto mt-1.5 max-w-md text-xs text-muted sm:text-sm">
-                          {answerMeta?.status === 'pending_review'
-                            ? 'Your mentor submitted an answer. Admin is reviewing it before delivery.'
-                            : answerMeta?.status === 'rejected'
-                              ? 'The answer needs revision from your mentor.'
-                              : 'You’ll see the full mentor answer here once it’s approved and delivered.'}
+                          {needsPayment
+                            ? 'Pay now to send this question for admin review and mentor matching.'
+                            : answerMeta?.status === 'pending_review'
+                              ? 'Your mentor submitted an answer. Admin is reviewing it before delivery.'
+                              : answerMeta?.status === 'rejected'
+                                ? 'The answer needs revision from your mentor.'
+                                : 'You’ll see the full mentor answer here once it’s approved and delivered.'}
                         </p>
                       </section>
                     )}
@@ -683,7 +816,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                             type="button"
                             onClick={() => ratingMutation.mutate()}
                             disabled={ratingMutation.isPending}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-ink px-5 py-2 text-sm font-semibold text-card transition hover:bg-ink/90 disabled:opacity-50"
                           >
                             {ratingMutation.isPending ? 'Submitting...' : 'Submit rating'}
                           </button>
@@ -693,7 +826,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                   </div>
 
                   <aside className="space-y-4">
-                    <section className="premium-surface flex max-h-[260px] flex-col overflow-hidden rounded-[18px] sm:max-h-[320px]">
+                    <section className="flex max-h-[260px] flex-col overflow-hidden rounded-[18px] border border-border bg-card sm:max-h-[320px]">
                       <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
                         <div className="shrink-0 border-b border-border/60 px-4 py-3 sm:px-5">
                           <h3 className="text-base font-semibold text-ink">Timeline</h3>
@@ -705,7 +838,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                       </div>
                     </section>
 
-                    <section className="premium-surface flex max-h-[220px] flex-col overflow-hidden rounded-[18px]">
+                    <section className="flex max-h-[220px] flex-col overflow-hidden rounded-[18px] border border-border bg-card">
                       <div className="relative z-[1] flex min-h-0 flex-1 flex-col">
                         <div className="shrink-0 border-b border-border/60 px-4 py-3 sm:px-5">
                           <h3 className="text-base font-semibold text-ink">All attachments</h3>
@@ -752,6 +885,44 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                 </div>
               )}
             </div>
+
+            {needsPayment ? (
+              <div className="shrink-0 border-t border-border bg-card px-4 py-3 sm:px-5">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={paying || deleting}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-500 transition hover:bg-rose-500/15 disabled:opacity-60 sm:w-auto"
+                  >
+                    {deleting ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                    Delete question
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePay}
+                    disabled={paying || deleting}
+                    className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-bold text-card transition hover:bg-ink/90 disabled:opacity-60"
+                  >
+                    {paying ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Processing payment…
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard size={16} />
+                        Pay {formatRupee(amountPaise)} to continue
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : null}
             </motion.div>
 
             <AnimatePresence>

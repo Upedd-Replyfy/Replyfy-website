@@ -410,10 +410,18 @@ export default function AdminQuestions() {
   }, [source])
 
   const plans = useMemo(() => [...new Set(source.map((q) => q.plan).filter(Boolean))], [source])
-  const statuses = useMemo(() => [...new Set(source.map((q) => q.status).filter(Boolean))], [source])
+  const statuses = useMemo(
+    () =>
+      [...new Set(source.map((q) => q.status).filter(Boolean))].filter(
+        (s) => !['pending_payment', 'cancelled'].includes(s)
+      ),
+    [source]
+  )
 
   const questions = useMemo(() => {
-    let list = [...source]
+    let list = [...source].filter(
+      (item) => !['pending_payment', 'cancelled'].includes(item.status)
+    )
     const q = query.trim().toLowerCase()
     if (q) {
       list = list.filter((item) =>

@@ -131,26 +131,44 @@ export default function MentorDetailModal({
 
   const handleAsk = () => onAsk?.(mentor, planId)
 
+  const visibility = {
+    bio: mentor.profileVisibility?.bio !== false,
+    experience: mentor.profileVisibility?.experience !== false,
+    skills: mentor.profileVisibility?.skills !== false,
+    education: mentor.profileVisibility?.education !== false,
+    certificates: mentor.profileVisibility?.certificates !== false,
+    achievements: mentor.profileVisibility?.achievements !== false,
+    reviews: mentor.profileVisibility?.reviews !== false,
+  }
   const categories = labelsFrom(mentor.categories, mentor.category)
   const types = labelsFrom(mentor.expertTypes, mentor.expertType)
-  const education = mentor.education || []
-  const certificates = mentor.certificates || []
-  const achievements = mentor.achievements || []
-  const skills = mentor.skills || []
-  const languages = mentor.languages || []
+  const education = visibility.education ? mentor.education || [] : []
+  const certificates = visibility.certificates ? mentor.certificates || [] : []
+  const achievements = visibility.achievements ? mentor.achievements || [] : []
+  const skills = visibility.skills ? mentor.skills || [] : []
+  const languages = visibility.skills ? mentor.languages || [] : []
   const rating = Number(mentor.averageRating) || 0
   const reviews = mentor.totalRatings || mentor.reviewCount || 0
   const answered = mentor.completedAnswers || 0
   const responseHrs = mentor.responseTime || 48
   const available = mentor.availability === 'available' || mentor.isAvailable
   const isTop = mentor.isVerified || rating >= 4.5
-  const credentials = credentialLine(mentor, types, education, achievements, skills)
+  const credentials = credentialLine(
+    { ...mentor, experience: visibility.experience ? mentor.experience : '' },
+    types,
+    education,
+    achievements,
+    skills
+  )
   const bio =
     mentor.bio?.trim() ||
     'Experienced mentor ready to help with practical, situation-specific guidance.'
   const categoryBadge = categories[0] || types[0] || 'Mentor'
   const categoryInitial = categoryBadge.slice(0, 1).toUpperCase()
   const show = (id) => filter === 'all' || filter === id
+  const visibleFilters = FILTERS.filter(
+    (item) => item.id === 'all' || visibility[item.id]
+  )
   const planTag = planId === 'expert_call' ? '1:1 Call' : 'Query'
   const PlanTagIcon = planId === 'expert_call' ? Video : MessageSquare
 
@@ -229,10 +247,12 @@ export default function MentorDetailModal({
         <div className="scrollbar-none flex-1 overflow-y-auto overscroll-contain px-5 pb-4 pt-3">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-xl font-bold tracking-tight text-ink">{mentor.name}</h3>
-            <span className="inline-flex items-center gap-1 text-sm font-semibold text-ink">
-              <Star size={14} className="fill-amber-400 text-amber-400" />
-              {rating ? rating.toFixed(1) : '—'}
-            </span>
+            {visibility.reviews ? (
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-ink">
+                <Star size={14} className="fill-amber-400 text-amber-400" />
+                {rating ? rating.toFixed(1) : '—'}
+              </span>
+            ) : null}
             {mentor.isVerified && <BadgeCheck size={16} className="text-[#7C6CFF]" />}
           </div>
 
@@ -240,20 +260,26 @@ export default function MentorDetailModal({
             <p className="mt-1.5 text-[13px] leading-snug text-muted">{credentials}</p>
           ) : null}
 
-          <button
-            type="button"
-            onClick={() => setKnowMore((v) => !v)}
-            className="mt-1.5 text-[13px] font-semibold text-[#5B4CFF]"
-          >
-            {knowMore ? 'Show less' : 'Know more'}
-          </button>
-          {knowMore && <p className="mt-2 text-[13px] leading-relaxed text-muted">{bio}</p>}
+          {visibility.bio ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setKnowMore((v) => !v)}
+                className="mt-1.5 text-[13px] font-semibold text-[#5B4CFF]"
+              >
+                {knowMore ? 'Show less' : 'Know more'}
+              </button>
+              {knowMore && <p className="mt-2 text-[13px] leading-relaxed text-muted">{bio}</p>}
+            </>
+          ) : null}
 
           <ul className="mt-4 space-y-2.5">
-            <li className="flex items-center gap-2.5 text-[13px] text-ink">
-              <Briefcase size={16} className="shrink-0 text-muted-light" />
-              <span>{mentor.experience?.trim() || 'Experience on request'}</span>
-            </li>
+            {visibility.experience ? (
+              <li className="flex items-center gap-2.5 text-[13px] text-ink">
+                <Briefcase size={16} className="shrink-0 text-muted-light" />
+                <span>{mentor.experience?.trim() || 'Experience on request'}</span>
+              </li>
+            ) : null}
             <li className="flex items-center gap-2.5 text-[13px] text-ink">
               <Users size={16} className="shrink-0 text-muted-light" />
               <span>{answered} mentee engagements</span>
@@ -290,7 +316,7 @@ export default function MentorDetailModal({
           <div className="mt-5 flex gap-6 border-b border-border">
             {[
               { id: 'profile', label: 'Profile' },
-              { id: 'reviews', label: 'Reviews' },
+              ...(visibility.reviews ? [{ id: 'reviews', label: 'Reviews' }] : []),
             ].map((t) => (
               <button
                 key={t.id}
@@ -311,7 +337,7 @@ export default function MentorDetailModal({
           {tab === 'profile' ? (
             <>
               <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto pb-1">
-                {FILTERS.map((f) => (
+                {visibleFilters.map((f) => (
                   <button
                     key={f.id}
                     type="button"

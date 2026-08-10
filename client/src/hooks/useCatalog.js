@@ -20,6 +20,17 @@ export function useExpertTypes(categoryId, enabled = true) {
   })
 }
 
+export function usePlatformSettings() {
+  return useQuery({
+    queryKey: ['platform-settings'],
+    queryFn: catalogApi.getSettings,
+    staleTime: 60 * 1000,
+    select: (data) => ({
+      mentorTypesEnabled: data?.settings?.mentorTypesEnabled !== false,
+    }),
+  })
+}
+
 export function useExperts(params, enabled = true) {
   return useQuery({
     queryKey: ['experts', params],

@@ -11,6 +11,7 @@ export default function PaymentStep({
   plan,
   category,
   expertType,
+  mentorTypesEnabled = true,
   selectedExpert,
   paying,
   appliedCoupon,
@@ -71,10 +72,12 @@ export default function PaymentStep({
             <span className="text-muted">Category</span>
             <span className="font-medium text-ink">{category?.name}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted">Mentor type</span>
-            <span className="font-medium text-ink">{expertType?.name}</span>
-          </div>
+          {mentorTypesEnabled ? (
+            <div className="flex justify-between">
+              <span className="text-muted">Mentor type</span>
+              <span className="font-medium text-ink">{expertType?.name}</span>
+            </div>
+          ) : null}
           {planRequiresExpertSelection(plan) && selectedExpert && (
             <div className="flex justify-between">
               <span className="text-muted">Mentor</span>

@@ -185,7 +185,7 @@ export function PhonePreview({
           <div className="absolute inset-0 rounded-[2.6rem] bg-[#1a1a1b] p-[3px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.85),0_0_40px_-8px_rgba(56,189,248,0.2)]">
             <div className="relative h-full w-full overflow-hidden rounded-[2.45rem] bg-black ring-1 ring-white/10">
               <div
-                className="dashboard-shell absolute inset-0 flex flex-col overflow-hidden rounded-[2.45rem] bg-canvas"
+                className="hero-preview-shell absolute inset-0 flex flex-col overflow-hidden rounded-[2.45rem] bg-canvas"
                 data-theme={theme}
               >
                 <div className="relative z-30 flex h-14 shrink-0 items-center justify-between px-5 pt-2">

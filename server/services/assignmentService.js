@@ -3,9 +3,9 @@ import QuestionAssignment from '../models/QuestionAssignment.js'
 import { ApiError } from '../utils/ApiError.js'
 import { expertMatchesCategoryType } from '../utils/expertMatch.js'
 
-export async function findAvailableExpert(categoryId, expertTypeId, excludeExpertId = null) {
+export async function findAvailableExpert(categoryId, expertTypeId = null, excludeExpertId = null) {
   const query = {
-    ...expertMatchesCategoryType(categoryId, expertTypeId),
+    ...expertMatchesCategoryType(categoryId, expertTypeId || null),
     availability: 'available',
     status: 'active',
     $expr: { $lt: ['$activeAssignments', '$maxAssignments'] },

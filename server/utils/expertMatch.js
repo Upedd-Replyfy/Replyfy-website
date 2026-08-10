@@ -1,18 +1,19 @@
 /**
- * Mongo query fragment: mentor matches a question category + type
+ * Mongo query fragment: mentor matches a question category (+ optional type)
  * via primary fields or multi-select arrays.
  */
 export function expertMatchesCategoryType(categoryId, expertTypeId) {
-  return {
-    $and: [
-      {
-        $or: [{ category: categoryId }, { categories: categoryId }],
-      },
-      {
-        $or: [{ expertType: expertTypeId }, { expertTypes: expertTypeId }],
-      },
-    ],
+  const clauses = [
+    {
+      $or: [{ category: categoryId }, { categories: categoryId }],
+    },
+  ]
+  if (expertTypeId) {
+    clauses.push({
+      $or: [{ expertType: expertTypeId }, { expertTypes: expertTypeId }],
+    })
   }
+  return { $and: clauses }
 }
 
 /** Parse id list from JSON string, comma string, array, or single id. */
@@ -88,10 +89,12 @@ export function profileCoversCategoryType(profile, categoryId, expertTypeId) {
       .map((c) => String(c?._id || c || ''))
       .filter(Boolean)
   )
+  if (!catIds.has(String(categoryId))) return false
+  if (!expertTypeId) return true
   const typeIds = new Set(
     [profile.expertType, ...(profile.expertTypes || [])]
       .map((t) => String(t?._id || t || ''))
       .filter(Boolean)
   )
-  return catIds.has(String(categoryId)) && typeIds.has(String(expertTypeId))
+  return typeIds.has(String(expertTypeId))
 }

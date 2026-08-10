@@ -13,6 +13,7 @@ import {
   Users,
   Bell,
   FolderTree,
+  SlidersHorizontal,
 } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminModal from '../../components/admin/AdminModal'
@@ -82,6 +83,7 @@ function toMentorProfile(expert) {
     education: expert.education || [],
     certificates: expert.certificates || [],
     achievements: expert.achievements || [],
+    profileVisibility: expert.profileVisibility,
     completedAnswers: expert.completedAnswers,
     averageRating: expert.averageRating,
     totalRatings: expert.totalRatings,
@@ -96,6 +98,130 @@ function toMentorProfile(expert) {
     categories: expert.categories || [],
     expertTypes: expert.expertTypes || [],
   }
+}
+
+const PROFILE_VISIBILITY_FIELDS = [
+  { id: 'bio', label: 'Bio', description: 'Mentor introduction and “Know more” text' },
+  { id: 'experience', label: 'Experience', description: 'Experience summary and background' },
+  { id: 'skills', label: 'Skills & languages', description: 'Skills and spoken languages' },
+  { id: 'education', label: 'Education', description: 'Degrees, schools, and study history' },
+  { id: 'certificates', label: 'Certificates', description: 'Certificates, issuers, and dates' },
+  { id: 'achievements', label: 'Achievements', description: 'Awards and major accomplishments' },
+  { id: 'reviews', label: 'Reviews', description: 'Rating summary and student reviews' },
+]
+
+function visibilityState(settings) {
+  return Object.fromEntries(
+    PROFILE_VISIBILITY_FIELDS.map(({ id }) => [id, settings?.[id] !== false])
+  )
+}
+
+function ProfileVisibilityModal({ initialVisibility, open, onClose }) {
+  const queryClient = useQueryClient()
+  const [visibility, setVisibility] = useState(() => visibilityState(initialVisibility))
+
+  const mutation = useMutation({
+    mutationFn: () => adminApi.updateMentorProfileVisibility(visibility),
+    onSuccess: () => {
+      toast.success('Profile display settings updated for all mentors')
+      queryClient.invalidateQueries({ queryKey: ['mentor-profile-visibility'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-experts'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-experts'] })
+      onClose()
+    },
+    onError: (err) => toast.error(err.message),
+  })
+
+  const enabledCount = Object.values(visibility).filter(Boolean).length
+
+  return (
+    <AdminModal
+      open={open}
+      onClose={onClose}
+      title="All mentor profiles"
+      description="Choose what appears on every mentor card and public profile"
+      size="md"
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between rounded-xl border border-border bg-surface px-3.5 py-3">
+          <div>
+            <p className="text-sm font-semibold text-ink">Visible profile sections</p>
+            <p className="mt-0.5 text-xs text-muted">{enabledCount} of {PROFILE_VISIBILITY_FIELDS.length} enabled</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const enableAll = enabledCount !== PROFILE_VISIBILITY_FIELDS.length
+              setVisibility(
+                Object.fromEntries(PROFILE_VISIBILITY_FIELDS.map(({ id }) => [id, enableAll]))
+              )
+            }}
+            className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-ink transition hover:bg-surface"
+          >
+            {enabledCount === PROFILE_VISIBILITY_FIELDS.length ? 'Disable all' : 'Enable all'}
+          </button>
+        </div>
+
+        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+          {PROFILE_VISIBILITY_FIELDS.map((field) => {
+            const enabled = visibility[field.id]
+            return (
+              <label
+                key={field.id}
+                className="flex cursor-pointer items-center gap-3 px-3.5 py-3 transition hover:bg-surface"
+              >
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  onChange={(e) =>
+                    setVisibility((prev) => ({ ...prev, [field.id]: e.target.checked }))
+                  }
+                  className="sr-only"
+                />
+                <span
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                    enabled ? 'bg-ink' : 'bg-slate-200'
+                  }`}
+                  aria-hidden
+                >
+                  <span
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition ${
+                      enabled ? 'left-6' : 'left-1'
+                    }`}
+                  />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-ink">{field.label}</span>
+                  <span className="mt-0.5 block text-xs text-muted">{field.description}</span>
+                </span>
+                <span className="text-[11px] font-semibold text-muted">
+                  {enabled ? 'Visible' : 'Hidden'}
+                </span>
+              </label>
+            )
+          })}
+        </div>
+
+        <p className="text-xs leading-relaxed text-muted">
+          These settings apply to all current and future mentors. Hidden information remains saved
+          and can be enabled again at any time.
+        </p>
+
+        <div className="flex justify-end gap-2 max-sm:flex-col-reverse">
+          <AdminButton variant="secondary" onClick={onClose} className="max-sm:w-full">
+            Cancel
+          </AdminButton>
+          <AdminButton
+            onClick={() => mutation.mutate()}
+            loading={mutation.isPending}
+            className="max-sm:w-full"
+          >
+            Save display settings
+          </AdminButton>
+        </div>
+      </div>
+    </AdminModal>
+  )
 }
 
 function MentorAdminCard({ expert, index, onOpen, onEdit, onDelete, onNotify }) {
@@ -147,7 +273,7 @@ function MentorAdminCard({ expert, index, onOpen, onEdit, onDelete, onNotify }) 
               <span className="inline-flex min-w-0 items-center gap-1 truncate text-[11px] text-muted">
                 <FolderTree size={10} className="shrink-0 text-[#7C6CFF]" />
                 <span className="truncate">{meta}</span>
-              </span>
+    </span>
             ) : null}
           </div>
         </div>
@@ -199,12 +325,17 @@ export default function AdminExperts() {
   const [editExpert, setEditExpert] = useState(null)
   const [deleteExpert, setDeleteExpert] = useState(null)
   const [profileExpert, setProfileExpert] = useState(null)
+  const [visibilityOpen, setVisibilityOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [typeId, setTypeId] = useState('')
   const [notifyRecipient, setNotifyRecipient] = useState(null)
 
   const { data, isLoading } = useQuery({ queryKey: ['admin-experts'], queryFn: adminApi.getExperts })
+  const { data: visibilityData, isLoading: isVisibilityLoading } = useQuery({
+    queryKey: ['mentor-profile-visibility'],
+    queryFn: adminApi.getMentorProfileVisibility,
+  })
   const { data: categoriesData } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: adminApi.getCategories,
@@ -213,10 +344,15 @@ export default function AdminExperts() {
     queryKey: ['admin-expert-types'],
     queryFn: () => adminApi.getExpertTypes(),
   })
+  const { data: mentorTypesSetting } = useQuery({
+    queryKey: ['mentor-types-setting'],
+    queryFn: adminApi.getMentorTypesSetting,
+  })
 
   const experts = data?.experts || []
   const categories = categoriesData?.categories || []
   const expertTypes = typesData?.expertTypes || []
+  const mentorTypesEnabled = mentorTypesSetting?.mentorTypesEnabled !== false
 
   const typesForFilter = useMemo(() => {
     if (!categoryId) return expertTypes
@@ -233,7 +369,7 @@ export default function AdminExperts() {
           .map(String)
         if (!catIds.includes(String(categoryId))) return false
       }
-      if (typeId) {
+      if (mentorTypesEnabled && typeId) {
         const typeIds = [e.expertType?._id || e.expertType]
           .concat((e.expertTypes || []).map((t) => t?._id || t))
           .filter(Boolean)
@@ -249,7 +385,7 @@ export default function AdminExperts() {
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [experts, query, categoryId, typeId])
+  }, [experts, query, categoryId, typeId, mentorTypesEnabled])
 
   const stats = useMemo(() => {
     const verified = experts.filter((e) => e.isVerified).length
@@ -302,6 +438,14 @@ export default function AdminExperts() {
           <div className="flex flex-wrap items-center gap-2">
             <AdminButton
               variant="secondary"
+              icon={SlidersHorizontal}
+              disabled={isVisibilityLoading}
+              onClick={() => setVisibilityOpen(true)}
+            >
+              Profile display
+            </AdminButton>
+            <AdminButton
+              variant="secondary"
               onClick={async () => {
                 try {
                   const res = await adminApi.syncExpertCatalog()
@@ -330,10 +474,10 @@ export default function AdminExperts() {
 
       <div className="premium-filter flex flex-col gap-2.5 rounded-[16px] px-3.5 py-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+                        <div>
             <p className="text-sm font-semibold text-ink">Mentor directory</p>
             <p className="text-xs text-muted">{filtered.length} shown</p>
-          </div>
+                        </div>
           <label className="relative block w-full sm:max-w-xs">
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
@@ -343,8 +487,8 @@ export default function AdminExperts() {
               className="h-9 w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-3 text-sm text-ink outline-none placeholder:text-muted-light focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10"
             />
           </label>
-        </div>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]">
+                      </div>
+        <div className={`grid gap-2 ${mentorTypesEnabled ? 'sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto]' : 'sm:grid-cols-2 lg:grid-cols-[1fr_auto]'}`}>
           <select
             value={categoryId}
             onChange={(e) => {
@@ -361,23 +505,25 @@ export default function AdminExperts() {
               </option>
             ))}
           </select>
-          <select
-            value={typeId}
-            onChange={(e) => setTypeId(e.target.value)}
-            className="h-9 rounded-xl border border-border bg-surface px-3 text-sm text-ink outline-none focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10"
-            aria-label="Filter by mentor type"
-          >
-            <option value="">All types</option>
-            {typesForFilter.map((t) => (
-              <option key={t._id} value={t._id}>
-                {t.name}
-                {t.category?.name ? ` · ${t.category.name}` : ''}
-              </option>
-            ))}
-          </select>
+          {mentorTypesEnabled ? (
+            <select
+              value={typeId}
+              onChange={(e) => setTypeId(e.target.value)}
+              className="h-9 rounded-xl border border-border bg-surface px-3 text-sm text-ink outline-none focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10"
+              aria-label="Filter by mentor type"
+            >
+              <option value="">All types</option>
+              {typesForFilter.map((t) => (
+                <option key={t._id} value={t._id}>
+                  {t.name}
+                  {t.category?.name ? ` · ${t.category.name}` : ''}
+                </option>
+              ))}
+            </select>
+          ) : null}
           {(categoryId || typeId || query) && (
-            <button
-              type="button"
+                        <button
+                          type="button"
               onClick={() => {
                 setQuery('')
                 setCategoryId('')
@@ -386,8 +532,8 @@ export default function AdminExperts() {
               className="h-9 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-muted transition hover:border-[#5B4CFF]/30 hover:text-[#7C6CFF]"
             >
               Reset
-            </button>
-          )}
+                        </button>
+              )}
         </div>
       </div>
 
@@ -420,7 +566,7 @@ export default function AdminExperts() {
               onNotify={handleNotify}
             />
           ))}
-        </div>
+          </div>
       )}
 
       <MentorDetailModal
@@ -428,6 +574,15 @@ export default function AdminExperts() {
         mentor={toMentorProfile(profileExpert)}
         onClose={() => setProfileExpert(null)}
       />
+
+      {visibilityOpen ? (
+        <ProfileVisibilityModal
+          key={JSON.stringify(visibilityData?.profileVisibility || {})}
+          open
+          initialVisibility={visibilityData?.profileVisibility}
+          onClose={() => setVisibilityOpen(false)}
+        />
+      ) : null}
 
       <EditExpertModal
         open={!!editExpert}

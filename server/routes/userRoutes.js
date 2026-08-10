@@ -12,6 +12,7 @@ import {
   validateCouponCode,
   getMyQuestions,
   getQuestionById,
+  deletePendingQuestion,
   getPaymentHistory,
 } from '../controllers/userController.js'
 import { submitRating, getQuestionRating } from '../controllers/ratingController.js'
@@ -62,6 +63,7 @@ router.post(
 )
 router.get('/questions', getMyQuestions)
 router.get('/questions/:id', getQuestionById)
+router.delete('/questions/:id', deletePendingQuestion)
 router.get('/payments', getPaymentHistory)
 router.post('/ratings', body('questionId').notEmpty(), body('stars').isInt({ min: 1, max: 5 }), validate, submitRating)
 router.get('/ratings/:questionId', getQuestionRating)

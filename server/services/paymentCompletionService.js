@@ -11,6 +11,7 @@ import { withPaymentTransaction } from '../utils/paymentTxn.js'
 
 /**
  * Fetch payment from Razorpay and assert it matches our DB order.
+ * Auto-captures authorized payments so verify does not leave status as "created".
  * @returns {Promise<object|null>} Razorpay payment entity, or null in allowed skip cases
  */
 export async function fetchAndAssertRazorpayPayment({
@@ -22,9 +23,26 @@ export async function fetchAndAssertRazorpayPayment({
   const razorpay = getRazorpay()
   if (!razorpay) return null
 
-  const rpPayment = await razorpay.payments.fetch(razorpayPaymentId)
+  let rpPayment = await razorpay.payments.fetch(razorpayPaymentId)
   if (!rpPayment) {
     throw new ApiError(400, 'Unable to fetch payment from Razorpay')
+  }
+
+  // Some methods land as authorized first; capture so our app can mark paid.
+  if (rpPayment.status === 'authorized') {
+    try {
+      rpPayment = await razorpay.payments.capture(
+        razorpayPaymentId,
+        Number(expectedAmountPaise),
+        expectedCurrency
+      )
+    } catch (err) {
+      // Already captured concurrently (webhook/client race) — re-fetch.
+      rpPayment = await razorpay.payments.fetch(razorpayPaymentId)
+      if (rpPayment.status !== 'captured') {
+        throw new ApiError(400, err?.message || 'Unable to capture payment')
+      }
+    }
   }
 
   if (rpPayment.status !== 'captured') {
@@ -137,6 +155,24 @@ export async function finalizeSuccessfulPayment({
       question.payment = claimed._id
       await question.save(opts)
     }
+
+    // Drop leftover checkout attempts for the same question so admin history
+    // does not show a newer "Created" row next to the successful Paid one.
+    await Payment.updateMany(
+      {
+        question: claimed.question,
+        _id: { $ne: claimed._id },
+        status: 'created',
+      },
+      {
+        $set: {
+          status: 'failed',
+          verifiedVia: source,
+          metadata: { failureReason: 'superseded_by_successful_payment' },
+        },
+      },
+      opts
+    )
 
     if (claimed.couponCode && !claimed.couponUsageCounted) {
       await incrementCouponUsage(claimed.couponCode, session)

@@ -137,7 +137,7 @@ export default function UserExperts() {
           available={stats.available}
         />
 
-        <div className="mt-8">
+        <div className="mt-6">
           <MentorFilterBar
             search={search}
             onSearchChange={setSearch}
@@ -157,56 +157,66 @@ export default function UserExperts() {
           />
         </div>
 
-        <div className="mt-8">
+        <div className="mt-6">
           {isLoading ? (
-            <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
-              {[1, 2, 3, 4].map((i) => (
-                <MentorCardSkeleton key={i} />
-              ))}
+            <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
+              <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <MentorCardSkeleton key={i} />
+                ))}
+              </div>
             </div>
           ) : filtered.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center rounded-[24px] border border-dashed border-border bg-card px-6 py-20 text-center"
+              className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5B4CFF]/15 text-[#7C6CFF]">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-surface text-ink">
                 {search || categoryId || experience || minRating || availability ? (
-                  <SearchX size={24} />
+                  <SearchX size={22} />
                 ) : (
-                  <Users size={24} />
+                  <Users size={22} />
                 )}
               </span>
-              <h2 className="mt-5 text-xl font-semibold text-ink">No mentors match</h2>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+              <h2 className="mt-4 text-lg font-semibold text-ink">No mentors match</h2>
+              <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted">
                 Try another search, clear a filter, or reset to browse the full mentor directory.
               </p>
               <button
                 type="button"
                 onClick={resetFilters}
-                className="mt-6 rounded-xl bg-[#5B4CFF] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(91,76,255,0.28)] transition hover:brightness-110"
+                className="mt-5 rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-card transition hover:bg-ink/90"
               >
                 Reset filters
               </button>
             </motion.div>
           ) : (
-            <AnimatePresence mode="popLayout">
-              <motion.div layout className="grid gap-4 sm:gap-5 lg:grid-cols-2">
-                {filtered.map((expert, index) => (
-                  <MentorCard
-                    key={expert._id}
-                    expert={expert}
-                    index={index}
-                    onOpen={setSelected}
-                    onAsk={(m, planId) => goAsk(m, planId || 'mentor')}
-                    favorited={favorites.has(expert._id)}
-                    bookmarked={bookmarks.has(expert._id)}
-                    onToggleFavorite={toggleSet(setFavorites)}
-                    onToggleBookmark={toggleSet(setBookmarks)}
-                  />
-                ))}
-              </motion.div>
-            </AnimatePresence>
+            <section className="rounded-2xl border border-border bg-card p-3 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-2 border-b border-border pb-3">
+                <div>
+                  <p className="text-sm font-semibold text-ink">Mentor directory</p>
+                  <p className="text-[11px] text-muted">{filtered.length} mentors shown</p>
+                </div>
+              </div>
+              <AnimatePresence mode="popLayout">
+                <motion.div layout className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+                  {filtered.map((expert, index) => (
+                    <MentorCard
+                      key={expert._id}
+                      expert={expert}
+                      index={index}
+                      onOpen={setSelected}
+                      onAsk={(m, planId) => goAsk(m, planId || 'mentor')}
+                      favorited={favorites.has(expert._id)}
+                      bookmarked={bookmarks.has(expert._id)}
+                      onToggleFavorite={toggleSet(setFavorites)}
+                      onToggleBookmark={toggleSet(setBookmarks)}
+                    />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </section>
           )}
         </div>
       </motion.div>

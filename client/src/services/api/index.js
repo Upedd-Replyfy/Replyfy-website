@@ -16,6 +16,7 @@ export const catalogApi = {
   getExperts: (params) => api.get('/experts', { params }),
   getExpert: (id) => api.get(`/public/experts/${id}`),
   getStats: () => api.get('/stats'),
+  getSettings: () => api.get('/settings'),
 }
 
 export const userApi = {
@@ -26,6 +27,7 @@ export const userApi = {
   verifyPayment: (data) => api.post('/users/payments/verify', data),
   getQuestions: (params) => api.get('/users/questions', { params }),
   getQuestion: (id) => api.get(`/users/questions/${id}`),
+  deleteQuestion: (id) => api.delete(`/users/questions/${id}`),
   getPayments: () => api.get('/users/payments'),
   submitRating: (data) => api.post('/users/ratings', data),
 }
@@ -51,6 +53,9 @@ export const adminApi = {
   toggleUser: (id) => api.patch(`/admin/users/${id}/toggle`),
   createExpert: (data) => api.post('/admin/experts', data),
   getExperts: () => api.get('/admin/experts'),
+  getMentorProfileVisibility: () => api.get('/admin/experts/profile-visibility'),
+  updateMentorProfileVisibility: (profileVisibility) =>
+    api.put('/admin/experts/profile-visibility', { profileVisibility }),
   updateExpert: (id, data) => api.put(`/admin/experts/${id}`, data),
   // Prefer path without :id segment so older proxies never treat "sync-catalog" as an id
   syncExpertCatalog: () => api.post('/admin/sync-expert-catalog'),
@@ -63,6 +68,9 @@ export const adminApi = {
   createExpertType: (data) => api.post('/admin/expert-types', data),
   updateExpertType: (id, data) => api.put(`/admin/expert-types/${id}`, data),
   deleteExpertType: (id) => api.delete(`/admin/expert-types/${id}`),
+  getMentorTypesSetting: () => api.get('/admin/expert-types/setting'),
+  updateMentorTypesSetting: (mentorTypesEnabled) =>
+    api.put('/admin/expert-types/setting', { mentorTypesEnabled }),
   getPendingQuestions: () => api.get('/admin/questions/pending'),
   getQuestions: (params) => api.get('/admin/questions', { params }),
   approveQuestion: (id, expertId) =>

@@ -33,6 +33,7 @@ export default function QuestionComposer({
   onExpertTypeChange,
   selectedCategory,
   selectedExpertType,
+  mentorTypesEnabled = true,
   query,
   onQueryChange,
   files,
@@ -91,7 +92,7 @@ export default function QuestionComposer({
 
   const removeLink = (index) => onLinksChange?.(links.filter((_, i) => i !== index))
 
-  const canSubmit = query.trim() && categoryId && expertTypeId
+  const canSubmit = query.trim() && categoryId && (!mentorTypesEnabled || expertTypeId)
   const firstName = user?.name?.split(' ')[0] || 'there'
 
   return (
@@ -138,12 +139,14 @@ export default function QuestionComposer({
 
         <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
         <div className="p-3 md:p-4">
-          <ExpertTypeTabs
-            expertTypes={expertTypes}
-            selectedId={expertTypeId}
-            onSelect={onExpertTypeChange}
-            loading={expertTypesLoading}
-          />
+          {mentorTypesEnabled ? (
+            <ExpertTypeTabs
+              expertTypes={expertTypes}
+              selectedId={expertTypeId}
+              onSelect={onExpertTypeChange}
+              loading={expertTypesLoading}
+            />
+          ) : null}
 
           <div
             className="relative"

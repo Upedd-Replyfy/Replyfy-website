@@ -27,7 +27,7 @@ export default function AdminStatStrip({ items = [] }) {
             className="premium-surface flex items-center gap-3.5 rounded-[18px] px-4 py-3.5"
           >
             {Icon ? (
-              <span className="relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] text-white shadow-[0_8px_16px_rgba(91,76,255,0.3)]">
+              <span className="relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink text-card">
                 <Icon size={18} />
               </span>
             ) : null}

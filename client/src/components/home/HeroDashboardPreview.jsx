@@ -115,10 +115,10 @@ function DesktopDashboardBody(props) {
 
   return (
     <div
-      className="dashboard-shell flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-12 pb-7 pt-12"
+      className="hero-preview-shell flex min-h-0 flex-1 flex-col overflow-hidden bg-canvas px-10 pb-5 pt-8"
       data-theme={theme}
     >
-      <div className="mb-4 flex justify-end" onClick={stopPropagation}>
+      <div className="mb-3 flex justify-end" onClick={stopPropagation}>
         <button
           type="button"
           onClick={(e) => {
@@ -134,21 +134,21 @@ function DesktopDashboardBody(props) {
       </div>
 
       <div className="text-center">
-        <h3 className="text-4xl font-semibold leading-[1.12] tracking-tight text-ink">
+        <h3 className="text-[2rem] font-semibold leading-[1.15] tracking-tight text-ink sm:text-4xl">
           Your question,
           <br />
           <span className="font-light text-muted">answered </span>
-          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text font-semibold text-transparent">
+          <span className="text-gradient-accent font-semibold">
             by a human.
           </span>
         </h3>
-        <p className="mx-auto mt-3 max-w-[640px] text-sm leading-relaxed text-muted">
+        <p className="mx-auto mt-2.5 max-w-[640px] text-sm leading-relaxed text-muted">
           Real mentors — founders, CAs, advisors — read your question and reply personally. Within
           12 hrs.
         </p>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-2" onClick={stopPropagation}>
+      <div className="mt-5 flex flex-wrap gap-2" onClick={stopPropagation}>
         {categories.map((cat) => (
           <button
             key={cat}
@@ -159,8 +159,8 @@ function DesktopDashboardBody(props) {
             }}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               category === cat
-                ? 'bg-gradient-to-r from-sky-500 to-violet-500 text-white shadow-sm'
-                : 'border border-border bg-card text-ink'
+                ? 'bg-accent-gradient text-white shadow-sm'
+                : 'border border-border bg-surface text-ink'
             }`}
           >
             {cat}
@@ -169,12 +169,12 @@ function DesktopDashboardBody(props) {
       </div>
 
       <div
-        className="mt-6 shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]"
+        className="mt-5 shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]"
         onClick={stopPropagation}
       >
         <div className="flex flex-col p-3">
           <div className="mb-2 flex flex-wrap items-center gap-1 border-b border-border pb-2">
-            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-light">
+            <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
               Mentor
             </span>
             {expertTypes.map((type) => (
@@ -184,7 +184,7 @@ function DesktopDashboardBody(props) {
                 onClick={() => setExpertType(type)}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                   expertType === type
-                    ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/15 text-ink underline decoration-2 underline-offset-4 decoration-violet-500'
+                    ? 'bg-accent-gradient-soft text-ink underline decoration-2 underline-offset-4 decoration-accent'
                     : 'text-muted hover:text-ink'
                 }`}
               >
@@ -199,7 +199,7 @@ function DesktopDashboardBody(props) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             rows={3}
-            className="h-[72px] w-full resize-none bg-transparent text-sm leading-relaxed text-ink placeholder:text-muted-light focus:outline-none"
+            className="h-[72px] w-full resize-none bg-transparent text-sm leading-relaxed text-ink placeholder:text-muted focus:outline-none"
           />
 
           <div className="mt-2 flex shrink-0 items-center justify-between gap-3 border-t border-border pt-2">
@@ -221,8 +221,10 @@ function DesktopDashboardBody(props) {
                 stopPropagation(e)
                 onAuthOpen('login')
               }}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-fg transition ${
-                isLight ? 'hover:bg-black/85' : 'hover:bg-white/90'
+              className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition hover:opacity-90 ${
+                isLight
+                  ? 'bg-accent-gradient text-white'
+                  : 'bg-white text-[#171818]'
               }`}
             >
               <Sparkles size={14} />
@@ -233,7 +235,7 @@ function DesktopDashboardBody(props) {
         </div>
       </div>
 
-      <p className="mt-3 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-light">
+      <p className="mt-3 shrink-0 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
         Suggested for {category} · {expertType}
       </p>
     </div>
@@ -258,7 +260,7 @@ function MobileAppScreen({
 
   return (
     <div
-      className="dashboard-shell flex h-full min-h-0 w-full flex-col overflow-hidden bg-canvas touch-pan-y"
+      className="hero-preview-shell flex h-full min-h-0 w-full flex-col overflow-hidden bg-canvas touch-pan-y"
       data-theme={theme}
       onClick={stopPropagation}
     >
@@ -281,7 +283,7 @@ function MobileAppScreen({
           Your question,
           <br />
           <span className="font-light text-muted">answered </span>
-          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text font-semibold text-transparent">
+          <span className="text-gradient-accent font-semibold">
             by a human.
           </span>
         </h3>
@@ -293,7 +295,7 @@ function MobileAppScreen({
       <div className="shrink-0 px-3.5 pb-2">
         <p className="text-sm font-semibold tracking-tight text-ink">
           Hey!{' '}
-          <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
+          <span className="text-gradient-accent">
             there
           </span>
         </p>
@@ -311,8 +313,8 @@ function MobileAppScreen({
             }}
             className={`inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-[11px] font-medium transition ${
               category === cat
-                ? 'bg-gradient-to-r from-sky-500 to-violet-500 text-white shadow-sm'
-                : 'border border-border bg-card text-ink'
+                ? 'bg-accent-gradient text-white shadow-sm'
+                : 'border border-border bg-surface text-ink'
             }`}
           >
             {cat}
@@ -322,7 +324,7 @@ function MobileAppScreen({
 
       <div className="mx-3 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-luxury-sm)]">
         <div className="flex shrink-0 items-center gap-0.5 overflow-x-auto touch-pan-x border-b border-border px-2 py-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <span className="mr-1 shrink-0 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-light">
+          <span className="mr-1 shrink-0 text-[9px] font-semibold uppercase tracking-[0.1em] text-muted">
             Mentor
           </span>
           {expertTypes.map((type) => (
@@ -332,7 +334,7 @@ function MobileAppScreen({
               onClick={() => setExpertType(type)}
               className={`inline-flex h-7 shrink-0 items-center rounded-md px-2 text-[11px] font-medium transition ${
                 expertType === type
-                  ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/15 text-ink underline decoration-violet-500 decoration-2 underline-offset-2'
+                  ? 'bg-accent-gradient-soft text-ink underline decoration-accent decoration-2 underline-offset-2'
                   : 'text-muted'
               }`}
             >
@@ -346,7 +348,7 @@ function MobileAppScreen({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="min-h-[56px] w-full flex-1 resize-none touch-pan-y bg-transparent px-2.5 py-2 text-xs leading-relaxed text-ink placeholder:text-muted-light focus:outline-none"
+          className="min-h-[56px] w-full flex-1 resize-none touch-pan-y bg-transparent px-2.5 py-2 text-xs leading-relaxed text-ink placeholder:text-muted focus:outline-none"
         />
 
         <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border px-2 py-2">
@@ -364,7 +366,11 @@ function MobileAppScreen({
               stopPropagation(e)
               onAuthOpen('login')
             }}
-            className="inline-flex h-8 items-center gap-1 rounded-lg bg-primary px-2.5 text-[11px] font-semibold text-primary-fg"
+            className={`inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-[11px] font-semibold ${
+              isLight
+                ? 'bg-accent-gradient text-white'
+                : 'bg-white text-[#171818]'
+            }`}
           >
             <Sparkles size={12} />
             Ask mentor
@@ -373,7 +379,7 @@ function MobileAppScreen({
         </div>
       </div>
 
-      <p className="shrink-0 px-3 pb-1 pt-0.5 text-center text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-light">
+      <p className="shrink-0 px-3 pb-1.5 pt-0.5 text-center text-[10px] font-semibold uppercase tracking-[0.1em] text-muted">
         Suggested for {category} · {expertType}
       </p>
     </div>

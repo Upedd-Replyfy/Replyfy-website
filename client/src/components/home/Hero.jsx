@@ -25,7 +25,7 @@ export default function Hero({ onAuthOpen }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 70% 55% at 82% 45%, rgba(12, 16, 234, 0.1) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 90%, rgba(56,189,248,0.06) 0%, transparent 55%)',
+            'radial-gradient(ellipse 70% 55% at 82% 45%, rgba(67, 166, 246, 0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 90%, rgba(143, 99, 244, 0.08) 0%, transparent 55%)',
         }}
       />
 
@@ -39,7 +39,7 @@ export default function Hero({ onAuthOpen }) {
             <br />
             Humans Give
             <br />
-            <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent">
+            <span className="text-gradient-accent">
               Experience.
             </span>
           </motion.h1>
@@ -78,11 +78,11 @@ export default function Hero({ onAuthOpen }) {
                 to="/mentors"
                 className="group inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-base font-semibold sm:min-h-12 sm:w-auto sm:py-3.5 sm:text-lg"
               >
-                <span className="bg-gradient-to-r from-sky-400 to-violet-400 bg-clip-text text-transparent transition group-hover:from-sky-300 group-hover:to-violet-300">
+                <span className="text-gradient-accent transition group-hover:opacity-90">
                   Find mentor
                 </span>
                 <motion.span
-                  className="inline-flex text-violet-400"
+                  className="inline-flex text-[#8f63f4]"
                   animate={{ x: [0, 4, 0] }}
                   transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
                 >

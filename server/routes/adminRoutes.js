@@ -10,6 +10,10 @@ import {
   createExpert,
   getExperts,
   syncExpertCatalog,
+  getMentorProfileVisibility,
+  updateMentorProfileVisibility,
+  getMentorTypesSetting,
+  updateMentorTypesSetting,
   updateExpert,
   deleteExpert,
   createCategory,
@@ -56,6 +60,10 @@ router.patch('/users/:id/toggle', toggleUserStatus)
 // Sync registered early (before /experts/:id) so deploys never miss it
 router.post('/sync-expert-catalog', syncExpertCatalog)
 router.post('/experts/sync-catalog', syncExpertCatalog)
+router.get('/experts/profile-visibility', getMentorProfileVisibility)
+router.put('/experts/profile-visibility', updateMentorProfileVisibility)
+router.get('/expert-types/setting', getMentorTypesSetting)
+router.put('/expert-types/setting', updateMentorTypesSetting)
 
 router.post(
   '/experts',

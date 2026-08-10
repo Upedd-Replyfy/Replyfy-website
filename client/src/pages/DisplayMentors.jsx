@@ -18,7 +18,8 @@ import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 import AuthPreviewModal from '../components/auth/AuthPreviewModal'
 import MentorDetailModal from '../components/mentors/MentorDetailModal'
-import { useCategories, useExpertTypes, useExperts } from '../hooks/useCatalog'
+import MentorCard, { MentorCardSkeleton } from '../components/mentors/MentorCard'
+import { useCategories, useExpertTypes, useExperts, usePlatformSettings } from '../hooks/useCatalog'
 
 function avatarUrl(mentor) {
   return (
@@ -68,20 +69,31 @@ function mentorTypeLabels(mentor) {
 }
 
 function MentorProfileCard({ mentor, onAsk, onOpen, index = 0 }) {
-  const skills = mentor.skills || []
+  const visibility = {
+    bio: mentor.profileVisibility?.bio !== false,
+    experience: mentor.profileVisibility?.experience !== false,
+    skills: mentor.profileVisibility?.skills !== false,
+    education: mentor.profileVisibility?.education !== false,
+    certificates: mentor.profileVisibility?.certificates !== false,
+    achievements: mentor.profileVisibility?.achievements !== false,
+    reviews: mentor.profileVisibility?.reviews !== false,
+  }
+  const skills = visibility.skills ? mentor.skills || [] : []
   const languages = mentor.languages || []
-  const experience = mentor.experience?.trim() || 'Background on request'
+  const experience = visibility.experience
+    ? mentor.experience?.trim() || 'Background on request'
+    : 'Not displayed'
   const reviewed = mentor.completedAnswers ?? 0
-  const rating = mentor.averageRating ?? 0
-  const reviews = mentor.totalRatings || mentor.reviewCount || 0
+  const rating = visibility.reviews ? mentor.averageRating ?? 0 : 0
+  const reviews = visibility.reviews ? mentor.totalRatings || mentor.reviewCount || 0 : 0
   const responseHrs = mentor.responseTime || 12
   const categoryLabels = mentorCategoryLabels(mentor)
   const typeLabels = mentorTypeLabels(mentor)
   const primaryType = typeLabels[0] || 'Mentor'
   const primaryCategory = categoryLabels[0] || ''
-  const educationCount = mentor.education?.length || 0
-  const certCount = mentor.certificates?.length || 0
-  const achievementCount = mentor.achievements?.length || 0
+  const educationCount = visibility.education ? mentor.education?.length || 0 : 0
+  const certCount = visibility.certificates ? mentor.certificates?.length || 0 : 0
+  const achievementCount = visibility.achievements ? mentor.achievements?.length || 0 : 0
 
   return (
     <motion.article
@@ -127,21 +139,25 @@ function MentorProfileCard({ mentor, onAsk, onOpen, index = 0 }) {
               {categoryLabels.length > 1 ? ` +${categoryLabels.length - 1}` : ''}
             </p>
           </div>
-          <div className="shrink-0 rounded-full bg-white px-3 py-1.5 shadow-sm">
-            <div className="flex items-center gap-1.5">
-              <Stars value={rating} size={11} />
-              <span className="text-xs font-bold text-[#111827]">{rating || '—'}</span>
+          {visibility.reviews ? (
+            <div className="shrink-0 rounded-full bg-white px-3 py-1.5 shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <Stars value={rating} size={11} />
+                <span className="text-xs font-bold text-[#111827]">{rating || '—'}</span>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </button>
 
       <div className="flex flex-1 flex-col p-6">
         <button type="button" onClick={() => onOpen?.(mentor)} className="flex flex-1 flex-col text-left">
-        <p className="line-clamp-3 text-[15px] leading-relaxed text-[#6B7280]">
-          {mentor.bio?.trim() ||
-            'Experienced mentor ready to help with practical, situation-specific guidance.'}
-        </p>
+        {visibility.bio ? (
+          <p className="line-clamp-3 text-[15px] leading-relaxed text-[#6B7280]">
+            {mentor.bio?.trim() ||
+              'Experienced mentor ready to help with practical, situation-specific guidance.'}
+          </p>
+        ) : null}
 
         {(categoryLabels.length > 0 || typeLabels.length > 0) && (
           <div className="mt-4 space-y-2">
@@ -178,17 +194,19 @@ function MentorProfileCard({ mentor, onAsk, onOpen, index = 0 }) {
         )}
 
         <div className="mt-5 grid grid-cols-2 gap-2.5">
-          <StatCell label="Background">{experience}</StatCell>
+          {visibility.experience ? <StatCell label="Background">{experience}</StatCell> : null}
           <StatCell label="Reviewed">
             <span className="flex items-center gap-1.5">
               <MessageSquare size={13} className="text-violet-500" />
               {reviewed} questions
             </span>
           </StatCell>
-          <StatCell label="Rating">
-            {rating}
-            <span className="font-medium text-[#9CA3AF]"> / 5 · {reviews} reviews</span>
-          </StatCell>
+          {visibility.reviews ? (
+            <StatCell label="Rating">
+              {rating}
+              <span className="font-medium text-[#9CA3AF]"> / 5 · {reviews} reviews</span>
+            </StatCell>
+          ) : null}
           <StatCell label="Response">
             <span className="flex items-center gap-1.5">
               <Clock size={13} className="text-sky-500" />~{responseHrs}h
@@ -262,16 +280,16 @@ function MentorProfileCard({ mentor, onAsk, onOpen, index = 0 }) {
 function CategoryPills({ categories, selectedId, onSelect, loading }) {
   if (loading) {
     return (
-      <div className="mb-5 flex flex-wrap gap-2.5">
+      <div className="mb-3 flex flex-wrap gap-2">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-10 w-24 animate-pulse rounded-full bg-[#F3F4F6]" />
+          <div key={i} className="h-8 w-20 animate-pulse rounded-full bg-[#F3F4F6]" />
         ))}
       </div>
     )
   }
 
   return (
-    <div className="mb-5 flex flex-wrap gap-2.5">
+    <div className="mb-3 flex flex-wrap gap-2">
       {categories.map((cat) => {
         const active = selectedId === cat._id
         return (
@@ -279,7 +297,7 @@ function CategoryPills({ categories, selectedId, onSelect, loading }) {
             key={cat._id}
             type="button"
             onClick={() => onSelect(cat)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition duration-200 hover:scale-[1.03] active:scale-[0.98] ${
+            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition duration-200 hover:scale-[1.03] active:scale-[0.98] ${
               active
                 ? 'bg-gradient-to-r from-sky-500 to-violet-600 text-white shadow-[0_8px_20px_rgba(99,102,241,0.28)]'
                 : 'border border-[#E5E7EB] bg-white text-[#4B5563] hover:border-violet-200 hover:text-violet-700'
@@ -296,24 +314,24 @@ function CategoryPills({ categories, selectedId, onSelect, loading }) {
 function MentorTypeSegment({ expertTypes, selectedId, onSelect, loading }) {
   if (loading) {
     return (
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap gap-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-10 w-24 animate-pulse rounded-xl bg-[#F3F4F6]" />
+          <div key={i} className="h-8 w-20 animate-pulse rounded-lg bg-[#F3F4F6]" />
         ))}
       </div>
     )
   }
 
   if (!expertTypes.length) {
-    return <p className="mb-5 text-sm text-[#9CA3AF]">No mentor types for this category</p>
+    return <p className="mb-3 text-xs text-[#9CA3AF]">No mentor types for this category</p>
   }
 
   return (
-    <div className="mb-5">
-      <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600/80">
+    <div className="mb-3">
+      <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-violet-600/80">
         Mentor type
       </p>
-      <div className="inline-flex max-w-full flex-wrap gap-1 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-1.5">
+      <div className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-1">
         {expertTypes.map((type) => {
           const active = selectedId === type._id
           return (
@@ -321,7 +339,7 @@ function MentorTypeSegment({ expertTypes, selectedId, onSelect, loading }) {
               key={type._id}
               type="button"
               onClick={() => onSelect(type)}
-              className={`rounded-xl px-3.5 py-2 text-sm font-medium transition duration-200 ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition duration-200 ${
                 active
                   ? 'bg-violet-100 text-violet-800 shadow-sm'
                   : 'text-[#6B7280] hover:bg-white hover:text-[#111827]'
@@ -345,21 +363,26 @@ export default function DisplayMentors() {
   const [selectedMentor, setSelectedMentor] = useState(null)
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
-  const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(categoryId)
+  const { data: platformSettings } = usePlatformSettings()
+  const mentorTypesEnabled = platformSettings?.mentorTypesEnabled !== false
+  const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(
+    categoryId,
+    mentorTypesEnabled
+  )
 
   const expertParams = useMemo(
     () =>
       categoryId
         ? {
             category: categoryId,
-            expertType: expertTypeId || undefined,
+            expertType: mentorTypesEnabled ? expertTypeId || undefined : undefined,
             availability: 'available',
             search: search.trim() || undefined,
             limit: 48,
             sort,
           }
         : null,
-    [categoryId, expertTypeId, search, sort]
+    [categoryId, expertTypeId, search, sort, mentorTypesEnabled]
   )
 
   const { data, isLoading } = useExperts(expertParams, !!expertParams)
@@ -372,19 +395,30 @@ export default function DisplayMentors() {
   }, [categories, categoryId])
 
   useEffect(() => {
+    if (!mentorTypesEnabled) {
+      setExpertTypeId(null)
+      return
+    }
     if (!expertTypes.length) {
       setExpertTypeId(null)
       return
     }
     setExpertTypeId((prev) => (expertTypes.some((t) => t._id === prev) ? prev : expertTypes[0]._id))
-  }, [expertTypes])
+  }, [expertTypes, mentorTypesEnabled])
 
   const handleCategoryChange = (cat) => {
     setCategoryId(cat._id)
     setExpertTypeId(null)
   }
 
-  const handleAsk = () => setAuthMode('signup')
+  const handleAsk = (_mentor, planId) => {
+    try {
+      if (planId) sessionStorage.setItem('replyfy_preferred_plan', planId)
+    } catch {
+      /* ignore */
+    }
+    setAuthMode('signup')
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
@@ -395,12 +429,12 @@ export default function DisplayMentors() {
         />
         <Navbar onAuthOpen={setAuthMode} />
 
-        <div className="relative mx-auto max-w-[1280px] px-4 pb-16 pt-20 sm:px-8 sm:pb-20 md:pb-24 md:pt-28">
+        <div className="relative mx-auto max-w-[1120px] px-4 pb-12 pt-20 sm:px-8 sm:pb-14 md:pb-16 md:pt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            className="mb-6 flex flex-wrap items-center justify-between gap-3"
+            className="mb-4 flex flex-wrap items-center justify-between gap-3"
           >
             <Link
               to="/"
@@ -421,13 +455,13 @@ export default function DisplayMentors() {
             transition={{ duration: 0.55, delay: 0.05 }}
             className="max-w-2xl"
           >
-            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-[2.75rem] md:leading-[1.1]">
+            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl md:text-4xl md:leading-[1.1]">
               Find the{' '}
               <span className="bg-gradient-to-r from-sky-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent">
                 right mentor
               </span>
             </h1>
-            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/60 sm:text-base">
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/60">
               Browse verified mentors by category and specialty. Compare ratings, backgrounds, and
               questions reviewed — then ask with confidence.
             </p>
@@ -435,12 +469,12 @@ export default function DisplayMentors() {
         </div>
       </div>
 
-      <main className="relative z-10 mx-auto max-w-[1280px] px-4 pb-16 sm:px-8 sm:pb-20">
+      <main className="relative z-10 mx-auto max-w-[1120px] px-4 pb-16 sm:px-8 sm:pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="-mt-12 rounded-[24px] border border-[#E5E7EB] bg-white/90 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl sm:-mt-16 sm:p-8"
+          className="-mt-8 max-w-4xl rounded-2xl border border-[#E5E7EB] bg-white/95 p-4 shadow-[0_16px_44px_rgba(0,0,0,0.07)] backdrop-blur-xl sm:-mt-10 sm:p-5"
         >
           <CategoryPills
             categories={categories}
@@ -449,29 +483,31 @@ export default function DisplayMentors() {
             loading={categoriesLoading}
           />
 
-          <MentorTypeSegment
-            expertTypes={expertTypes}
-            selectedId={expertTypeId}
-            onSelect={(type) => setExpertTypeId(type._id)}
-            loading={expertTypesLoading}
-          />
+          {mentorTypesEnabled ? (
+            <MentorTypeSegment
+              expertTypes={expertTypes}
+              selectedId={expertTypeId}
+              onSelect={(type) => setExpertTypeId(type._id)}
+              loading={expertTypesLoading}
+            />
+          ) : null}
 
-          <div className="relative max-w-2xl">
+            <div className="relative max-w-xl">
             <Search
               size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9CA3AF]"
             />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, skill, or background…"
-              className="h-14 w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] py-3.5 pl-12 pr-4 text-[15px] text-[#111827] placeholder:text-[#9CA3AF] transition focus:border-violet-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-200/70"
+              className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-[#F3F4F6] py-2.5 pl-10 pr-4 text-sm text-[#111827] placeholder:text-[#9CA3AF] transition focus:border-violet-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-200/70"
             />
           </div>
         </motion.div>
 
-        <div className="mt-8 flex flex-wrap items-end justify-between gap-4 sm:mt-10">
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4 sm:mt-8">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-[#111827] sm:text-xl">
               {isLoading
@@ -501,14 +537,11 @@ export default function DisplayMentors() {
           </label>
         </div>
 
-        <div className="mt-6 sm:mt-8">
+        <div className="mt-5 sm:mt-6">
           {isLoading || categoriesLoading ? (
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="dashboard-shell grid gap-3 sm:grid-cols-2 xl:grid-cols-3" data-theme="light">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="h-[540px] animate-pulse rounded-[24px] border border-[#E5E7EB] bg-white"
-                />
+                <MentorCardSkeleton key={i} />
               ))}
             </div>
           ) : mentors.length === 0 ? (
@@ -523,11 +556,11 @@ export default function DisplayMentors() {
               </p>
             </motion.div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="dashboard-shell grid gap-3 sm:grid-cols-2 xl:grid-cols-3" data-theme="light">
               {mentors.map((mentor, index) => (
-                <MentorProfileCard
+                <MentorCard
                   key={mentor._id || mentor.userId || index}
-                  mentor={mentor}
+                  expert={mentor}
                   index={index}
                   onAsk={handleAsk}
                   onOpen={setSelectedMentor}

@@ -54,7 +54,7 @@ function CategoryCard({ cat, index, isNew, onEdit, onToggle, togglePending }) {
       }`}
     >
       <div className="relative z-[1] flex items-center gap-2.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5B4CFF]/15 to-[#7C6CFF]/15 text-[#7C6CFF]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink text-card">
           <FolderTree size={18} />
         </span>
 

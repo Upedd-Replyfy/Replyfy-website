@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { RotateCcw, Search, SlidersHorizontal } from 'lucide-react'
 
 const selectClass =
-  'h-11 rounded-xl border border-border bg-card px-3 text-sm text-ink outline-none transition focus:border-[#5B4CFF]/40 focus:ring-4 focus:ring-[#5B4CFF]/10'
+  'h-11 rounded-xl border border-border bg-card px-3 text-sm text-ink outline-none transition focus:border-ink/30 focus:ring-2 focus:ring-ink/10'
 
 export default function MentorFilterBar({
   search,
@@ -26,10 +26,10 @@ export default function MentorFilterBar({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="premium-filter rounded-[24px] p-4 sm:p-5"
+      className="rounded-2xl border border-border bg-card p-3 sm:p-4"
       aria-label="Mentor filters"
     >
-      <div className="mb-4 flex items-center gap-2 text-muted">
+      <div className="mb-3 flex items-center gap-2 text-muted">
         <SlidersHorizontal size={15} />
         <p className="text-xs font-semibold uppercase tracking-[0.12em]">Filters</p>
       </div>
@@ -45,7 +45,7 @@ export default function MentorFilterBar({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search by name, skill, or expertise..."
-            className="h-11 w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-ink shadow-sm outline-none transition placeholder:text-muted-light focus:border-[#5B4CFF]/40 focus:bg-card focus:ring-4 focus:ring-[#5B4CFF]/10"
+            className="h-11 w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-ink outline-none transition placeholder:text-muted-light focus:border-ink/30 focus:bg-card focus:ring-2 focus:ring-ink/10"
           />
         </label>
 
@@ -114,7 +114,7 @@ export default function MentorFilterBar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-muted transition hover:border-[#5B4CFF]/30 hover:text-[#7C6CFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B4CFF]/40"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-3.5 text-sm font-semibold text-muted transition hover:border-ink/25 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
             aria-label="Reset filters"
           >
             <RotateCcw size={14} />

@@ -66,8 +66,8 @@ export default function AdminSidebar({ collapsed, onToggle, floating = false }) 
                     className={({ isActive }) =>
                       `group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] font-medium transition-all duration-200 ${
                         isActive
-                          ? 'admin-nav-active text-indigo-700'
-                          : 'text-slate-500 hover:text-slate-900'
+                          ? 'admin-nav-active text-ink'
+                          : 'text-muted hover:text-ink'
                       } ${collapsed ? 'justify-center px-2' : ''}`
                     }
                   >
@@ -76,15 +76,15 @@ export default function AdminSidebar({ collapsed, onToggle, floating = false }) 
                         {isActive && (
                           <motion.span
                             layoutId="admin-nav-glow"
-                            className="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/15 via-indigo-400/10 to-blue-400/5 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.18)]"
+                            className="absolute inset-0 rounded-xl bg-surface ring-1 ring-border"
                             transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                           />
                         )}
                         <span
                           className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all ${
                             isActive
-                              ? 'bg-gradient-to-br from-[#4F46E5] to-[#6366F1] text-white shadow-[0_8px_16px_rgba(79,70,229,0.28)]'
-                              : 'bg-slate-50 text-slate-500 group-hover:bg-white group-hover:text-indigo-600 group-hover:shadow-sm'
+                              ? 'bg-ink text-card'
+                              : 'bg-surface text-muted ring-1 ring-border group-hover:bg-card group-hover:text-ink'
                           }`}
                         >
                           <Icon size={16} strokeWidth={isActive ? 2.25 : 1.85} />
@@ -104,10 +104,9 @@ export default function AdminSidebar({ collapsed, onToggle, floating = false }) 
 
       {!collapsed && (
         <div className="shrink-0 p-3">
-          <div className="relative overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-3.5">
-            <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-indigo-400/20 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-3.5">
             <div className="relative flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F46E5] to-[#3B82F6] text-white shadow-sm">
+              <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-card">
                 <Sparkles size={14} />
               </span>
               <div>

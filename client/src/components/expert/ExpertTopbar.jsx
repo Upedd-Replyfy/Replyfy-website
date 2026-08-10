@@ -21,14 +21,14 @@ function PremiumAvailabilitySwitch({
       on: 'border-emerald-400/40 bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 shadow-[0_0_24px_-6px_rgba(16,185,129,0.45)]',
       iconOn: 'bg-emerald-500 text-white shadow-[0_4px_14px_rgba(16,185,129,0.45)]',
       trackOn: 'bg-emerald-500',
-      labelOn: 'text-emerald-400',
+      labelOn: 'text-emerald-500',
       ring: 'focus-visible:ring-emerald-400/40',
     },
     sky: {
       on: 'border-sky-400/40 bg-gradient-to-br from-sky-500/20 to-violet-500/5 shadow-[0_0_24px_-6px_rgba(56,189,248,0.4)]',
       iconOn: 'bg-sky-500 text-white shadow-[0_4px_14px_rgba(56,189,248,0.45)]',
       trackOn: 'bg-sky-500',
-      labelOn: 'text-sky-400',
+      labelOn: 'text-sky-500',
       ring: 'focus-visible:ring-sky-400/40',
     },
   }
@@ -45,7 +45,7 @@ function PremiumAvailabilitySwitch({
       className={`group flex min-h-[52px] min-w-0 flex-1 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-all duration-200 disabled:opacity-55 sm:min-w-[168px] sm:flex-none sm:px-3.5 ${
         checked
           ? t.on
-          : 'border-border bg-surface/80 text-muted hover:border-white/15 hover:bg-card'
+          : 'border-border bg-surface/80 text-muted hover:border-sky-400/25 hover:bg-card'
       } ${t.ring} outline-none focus-visible:ring-2`}
     >
       <span

@@ -10,6 +10,7 @@ import {
   getExpertTypes,
   getExperts,
   getPlatformStats,
+  getPlatformSettings,
 } from '../controllers/publicController.js'
 
 const router = Router()
@@ -18,6 +19,7 @@ router.get('/categories', getCategories)
 router.get('/expert-types', getExpertTypes)
 router.get('/experts', getExperts)
 router.get('/stats', getPlatformStats)
+router.get('/settings', getPlatformSettings)
 
 router.use('/auth', authRoutes)
 router.use('/public', publicRoutes)

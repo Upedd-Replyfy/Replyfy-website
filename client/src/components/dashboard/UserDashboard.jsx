@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ShieldCheck, Clock, MessageSquare } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 import QuestionComposer from './QuestionComposer'
 import PlanSelector from './PlanSelector'
@@ -13,11 +13,8 @@ import RecommendedExperts from './RecommendedExperts'
 import RecentQuestions from './RecentQuestions'
 import { userApi } from '../../services/api'
 import { PLANS, planRequiresExpertSelection } from '../../constants'
-import { useCategories, useExpertTypes, useExperts, usePlatformStats } from '../../hooks/useCatalog'
-import { fadeUp } from '../../utils/animations'
+import { useCategories, useExpertTypes, useExperts, usePlatformSettings } from '../../hooks/useCatalog'
 import { clearQuestionDraft, loadQuestionDraft, namesMatch } from '../../utils/questionDraft'
-
-const trustIcons = [ShieldCheck, Clock, MessageSquare]
 
 function formatRelativeTime(date) {
   const diff = Date.now() - new Date(date).getTime()
@@ -52,6 +49,7 @@ function mapApiQuestion(q) {
     categoryLabel: q.category?.name,
     expertTypeLabel: q.expertType?.name,
     status: mapQuestionStatus(q.status),
+    answered: Boolean(q.answered || q.status === 'completed'),
     time: formatRelativeTime(q.createdAt),
   }
 }
@@ -91,8 +89,12 @@ export default function UserDashboard() {
   }
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
-  const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(categoryId)
-  const { data: stats } = usePlatformStats()
+  const { data: platformSettings } = usePlatformSettings()
+  const mentorTypesEnabled = platformSettings?.mentorTypesEnabled !== false
+  const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(
+    categoryId,
+    mentorTypesEnabled
+  )
 
   const selectedCategory = useMemo(
     () => categories.find((c) => c._id === categoryId),
@@ -105,15 +107,21 @@ export default function UserDashboard() {
 
   const { data: questionsData, refetch: refetchQuestions } = useQuery({
     queryKey: ['my-questions'],
-    queryFn: () => userApi.getQuestions({ limit: 6 }),
+    queryFn: () => userApi.getQuestions({ limit: 24 }),
   })
 
   const premiumExpertParams = useMemo(
     () =>
-      categoryId && expertTypeId
-        ? { category: categoryId, expertType: expertTypeId, availability: 'available', limit: 20, sort: 'rating' }
+      categoryId
+        ? {
+            category: categoryId,
+            expertType: mentorTypesEnabled ? expertTypeId || undefined : undefined,
+            availability: 'available',
+            limit: 20,
+            sort: 'rating',
+          }
         : null,
-    [categoryId, expertTypeId]
+    [categoryId, expertTypeId, mentorTypesEnabled]
   )
 
   const {
@@ -125,10 +133,16 @@ export default function UserDashboard() {
 
   const recommendedParams = useMemo(
     () =>
-      categoryId && expertTypeId
-        ? { category: categoryId, expertType: expertTypeId, availability: 'available', limit: 4, sort: 'rating' }
+      categoryId
+        ? {
+            category: categoryId,
+            expertType: mentorTypesEnabled ? expertTypeId || undefined : undefined,
+            availability: 'available',
+            limit: 12,
+            sort: 'rating',
+          }
         : null,
-    [categoryId, expertTypeId]
+    [categoryId, expertTypeId, mentorTypesEnabled]
   )
 
   const { data: recommendedData, isLoading: recommendedLoading } = useExperts(
@@ -140,15 +154,6 @@ export default function UserDashboard() {
     () => (questionsData?.questions || []).map(mapApiQuestion),
     [questionsData]
   )
-
-  const trustIndicators = useMemo(() => {
-    if (!stats) return null
-    return [
-      { value: `${stats.experts}+`, label: 'Verified mentors' },
-      { value: `${stats.avgResponseHours}h`, label: 'Avg response' },
-      { value: `${stats.answers.toLocaleString()}+`, label: 'Questions answered' },
-    ]
-  }, [stats])
 
   useEffect(() => {
     if (!categories.length) return
@@ -166,6 +171,10 @@ export default function UserDashboard() {
   }, [categories, categoryId])
 
   useEffect(() => {
+    if (!mentorTypesEnabled) {
+      setExpertTypeId(null)
+      return
+    }
     if (!categoryId || expertTypesLoading) return
 
     if (!expertTypes.length) {
@@ -191,7 +200,7 @@ export default function UserDashboard() {
     }
 
     setExpertTypeId((prev) => (expertTypes.some((t) => t._id === prev) ? prev : expertTypes[0]._id))
-  }, [categoryId, expertTypes, expertTypesLoading])
+  }, [categoryId, expertTypes, expertTypesLoading, mentorTypesEnabled])
 
   useEffect(() => {
     if (location.state?.reset) {
@@ -231,7 +240,7 @@ export default function UserDashboard() {
   const handleComposeSubmit = () => {
     if (!query.trim()) return toast.error('Please describe your question')
     if (!categoryId) return toast.error('Please select a category')
-    if (!expertTypeId) return toast.error('Please select a mentor type')
+    if (mentorTypesEnabled && !expertTypeId) return toast.error('Please select a mentor type')
     setStep('plan')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -258,13 +267,16 @@ export default function UserDashboard() {
     setPaying(true)
     try {
       const title = query.split('\n')[0].slice(0, 120)
-      if (!categoryId || !expertTypeId) return toast.error('Missing category or mentor type')
+      if (!categoryId) return toast.error('Missing category')
+      if (mentorTypesEnabled && !expertTypeId) return toast.error('Missing mentor type')
 
       const formData = new FormData()
       formData.append('title', title)
       formData.append('description', query)
       formData.append('category', categoryId)
-      formData.append('expertType', expertTypeId)
+      if (mentorTypesEnabled && expertTypeId) {
+        formData.append('expertType', expertTypeId)
+      }
       formData.append('priority', 'standard')
       formData.append('plan', plan)
       if (planRequiresExpertSelection(plan) && selectedExpert) {
@@ -333,7 +345,7 @@ export default function UserDashboard() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex w-full flex-1 flex-col px-6 py-8 lg:px-10 xl:px-12"
+        className="dashboard-original-style flex w-full flex-1 flex-col px-6 py-8 lg:px-10 xl:px-12"
       >
         <div className="w-full">
           <button
@@ -365,6 +377,7 @@ export default function UserDashboard() {
               plan={plan}
               category={selectedCategory}
               expertType={selectedExpertType}
+              mentorTypesEnabled={mentorTypesEnabled}
               selectedExpert={selectedExpert}
               paying={paying}
               appliedCoupon={appliedCoupon}
@@ -384,57 +397,36 @@ export default function UserDashboard() {
       transition={{ duration: 0.4 }}
       className="flex w-full flex-1 flex-col items-center px-6 pb-4 pt-2 lg:px-10 xl:px-12"
     >
-      <QuestionComposer
-        categories={categories}
-        categoriesLoading={categoriesLoading}
-        categoryId={categoryId}
-        onCategoryChange={handleCategoryChange}
-        expertTypes={expertTypes}
-        expertTypesLoading={expertTypesLoading}
-        expertTypeId={expertTypeId}
-        onExpertTypeChange={(type) => setExpertTypeId(type._id)}
-        selectedCategory={selectedCategory}
-        selectedExpertType={selectedExpertType}
-        query={query}
-        onQueryChange={setQuery}
-        files={files}
-        onFilesChange={setFiles}
-        links={links}
-        onLinksChange={setLinks}
-        onSubmit={handleComposeSubmit}
-        loading={false}
-      />
+      <div className="dashboard-original-style w-full">
+        <QuestionComposer
+          categories={categories}
+          categoriesLoading={categoriesLoading}
+          categoryId={categoryId}
+          onCategoryChange={handleCategoryChange}
+          expertTypes={expertTypes}
+          expertTypesLoading={expertTypesLoading}
+          expertTypeId={expertTypeId}
+          onExpertTypeChange={(type) => setExpertTypeId(type._id)}
+          mentorTypesEnabled={mentorTypesEnabled}
+          selectedCategory={selectedCategory}
+          selectedExpertType={selectedExpertType}
+          query={query}
+          onQueryChange={setQuery}
+          files={files}
+          onFilesChange={setFiles}
+          links={links}
+          onLinksChange={setLinks}
+          onSubmit={handleComposeSubmit}
+          loading={false}
+        />
+      </div>
 
-      {trustIndicators && (
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeUp}
-          className="mt-12 flex w-full flex-wrap items-center justify-center gap-3 border-t border-border pt-10"
-        >
-          {trustIndicators.map((item, i) => {
-            const Icon = trustIcons[i]
-            return (
-              <div key={item.label} className="luxury-card flex items-center gap-3 px-5 py-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface text-ink">
-                  <Icon size={16} />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-ink">{item.value}</p>
-                  <p className="text-[11px] text-muted-light">{item.label}</p>
-                </div>
-              </div>
-            )
-          })}
-        </motion.div>
-      )}
-
-      <div className="w-full">
+      <div className="mt-8 w-full space-y-5 pb-8">
         <RecommendedExperts
           experts={recommendedData?.experts || []}
           loading={recommendedLoading}
           categoryName={selectedCategory?.name}
-          expertTypeName={selectedExpertType?.name}
+          expertTypeName={mentorTypesEnabled ? selectedExpertType?.name : undefined}
           onSelectExpert={(mentor, planId) => {
             if (planId) setPlan(planId)
             setSelectedExpert(mentor)
