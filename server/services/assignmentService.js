@@ -8,7 +8,6 @@ export async function findAvailableExpert(categoryId, expertTypeId = null, exclu
     ...expertMatchesCategoryType(categoryId, expertTypeId || null),
     availability: 'available',
     status: 'active',
-    $expr: { $lt: ['$activeAssignments', '$maxAssignments'] },
   }
 
   const profiles = await ExpertProfile.find(query)
@@ -19,7 +18,12 @@ export async function findAvailableExpert(categoryId, expertTypeId = null, exclu
     (p) => p.user?.isActive && (!excludeExpertId || p.user._id.toString() !== excludeExpertId.toString())
   )
 
-  return available[0] || null
+  // Prefer mentors under their soft capacity, but still assign if everyone is busy.
+  const underCapacity = available.filter(
+    (p) => (p.activeAssignments || 0) < (p.maxAssignments || 50)
+  )
+
+  return underCapacity[0] || available[0] || null
 }
 
 export async function assignExpertToQuestion({
@@ -30,7 +34,9 @@ export async function assignExpertToQuestion({
   session,
   relaxAvailability = false,
 }) {
-  const profile = await ExpertProfile.findOne({ user: expertUserId }).session(session || null)
+  const profileQuery = ExpertProfile.findOne({ user: expertUserId })
+  if (session) profileQuery.session(session)
+  const profile = await profileQuery
   if (!profile || profile.status !== 'active') {
     throw new ApiError(400, 'Mentor profile is not active')
   }
@@ -39,7 +45,9 @@ export async function assignExpertToQuestion({
   }
 
   const User = (await import('../models/User.js')).default
-  const user = await User.findById(expertUserId).session(session || null)
+  const userQuery = User.findById(expertUserId)
+  if (session) userQuery.session(session)
+  const user = await userQuery
   if (!user || !user.isActive || user.role !== 'expert') {
     throw new ApiError(400, 'Mentor account is not active')
   }
@@ -48,24 +56,26 @@ export async function assignExpertToQuestion({
   question.status = 'assigned'
   question.assignedAt = new Date()
   question.assignedBy = assignedBy
-  question.deadline = new Date(Date.now() + profile.responseTime * 60 * 60 * 1000)
+  question.deadline = new Date(Date.now() + (profile.responseTime || 48) * 60 * 60 * 1000)
 
-  await question.save({ session })
+  const saveOpts = session ? { session } : undefined
+  await question.save(saveOpts)
 
-  profile.activeAssignments += 1
-  await profile.save({ session })
+  profile.activeAssignments = (profile.activeAssignments || 0) + 1
+  await profile.save(saveOpts)
 
-  await QuestionAssignment.create(
-    [
-      {
-        question: question._id,
-        expert: expertUserId,
-        assignedBy,
-        assignmentType,
-      },
-    ],
-    { session }
-  )
+  const assignmentPayload = {
+    question: question._id,
+    expert: expertUserId,
+    assignedBy,
+    assignmentType,
+  }
+
+  if (session) {
+    await QuestionAssignment.create([assignmentPayload], { session })
+  } else {
+    await QuestionAssignment.create(assignmentPayload)
+  }
 
   return question
 }

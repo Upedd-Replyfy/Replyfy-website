@@ -60,7 +60,8 @@ const expertProfileSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
     activeAssignments: { type: Number, default: 0 },
-    maxAssignments: { type: Number, default: 5 },
+    /** Soft capacity for auto-match preference; admins can still assign above this. */
+    maxAssignments: { type: Number, default: 50 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }

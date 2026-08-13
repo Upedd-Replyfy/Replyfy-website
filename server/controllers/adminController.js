@@ -374,7 +374,7 @@ export const createExpert = asyncHandler(async (req, res) => {
     responseTime: responseTime || 48,
     hourlyPrice: hourlyPrice || 0,
     questionPrice: questionPrice || 99900,
-    maxAssignments: maxAssignments || 5,
+    maxAssignments: maxAssignments || 50,
     profilePhoto,
     isVerified: isVerified === true || isVerified === 'true',
     availability: availability || 'available',
@@ -987,6 +987,7 @@ export const approveAnswer = asyncHandler(async (req, res) => {
     link: `/dashboard/questions/${question._id}`,
     email: question.user.email,
     cta: 'Read your answer',
+    sendMail: true,
   })
 
   await createNotification({
@@ -995,8 +996,6 @@ export const approveAnswer = asyncHandler(async (req, res) => {
     title: 'Rate Your Mentor',
     message: 'Please rate your experience with the mentor.',
     link: `/dashboard/questions/${question._id}`,
-    email: question.user.email,
-    sendMail: false,
   })
 
   res.json({ success: true, answer, question })
@@ -1192,8 +1191,8 @@ export const sendNotification = asyncHandler(async (req, res) => {
 
   if (!recipients.length) throw new ApiError(404, 'No recipients found')
 
-  // Email only for single personal sends to avoid bulk SMTP load
-  const sendMail = audience === 'one'
+  // Email only when admin approves a mentor answer (see approveAnswer). In-app only here.
+  const sendMail = false
 
   const notifications = await Promise.all(
     recipients.map((u) =>
@@ -1203,7 +1202,6 @@ export const sendNotification = asyncHandler(async (req, res) => {
         title: title.trim(),
         message: message.trim(),
         link: link || '',
-        email: u.email,
         sendMail,
         metadata: { audience, broadcast: audience !== 'one' },
       })

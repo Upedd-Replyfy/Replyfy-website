@@ -27,7 +27,7 @@ function buildInitialState(expert) {
       status: expert.status || 'active',
       isActive: expert.user?.isActive !== false,
       responseTime: expert.responseTime ?? 48,
-      maxAssignments: expert.maxAssignments ?? 5,
+      maxAssignments: expert.maxAssignments ?? 50,
     },
     selectedCategories: idListFromRefs(expert.categories, expert.category),
     selectedTypes: idListFromRefs(expert.expertTypes, expert.expertType),
@@ -270,7 +270,7 @@ function EditExpertForm({ expert, onClose }) {
       <input
         type="number"
         min={1}
-        value={form.maxAssignments ?? 5}
+        value={form.maxAssignments ?? 50}
         onChange={(e) => setForm((p) => ({ ...p, maxAssignments: e.target.value }))}
         placeholder="Max assignments"
         className={inputClass}

@@ -121,14 +121,12 @@ export const submitAnswer = asyncHandler(async (req, res) => {
   question.status = 'waiting_admin_review'
   await question.save()
 
-  const user = await User.findById(question.user)
   await createNotification({
     userId: question.user,
     type: 'answer_submitted',
     title: 'Answer Submitted for Review',
     message: 'A mentor has submitted an answer. It will be delivered after admin approval.',
     link: `/dashboard/questions/${question._id}`,
-    email: user?.email,
   })
 
   const admins = await User.find({ role: 'admin', isActive: true })
