@@ -57,7 +57,7 @@ function NavItem({ item, onNavigate, onReset }) {
           }
           onNavigate?.()
         }}
-        className="mb-5 flex items-center justify-center gap-2.5 rounded-xl bg-ink px-4 py-3.5 text-sm font-semibold text-card transition hover:opacity-85 active:scale-[0.99]"
+        className="mb-5 flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 active:scale-[0.99]"
       >
         <Icon size={18} strokeWidth={2.25} />
         <span>{item.label}</span>
@@ -143,7 +143,7 @@ export default function DashboardSidebar({ open, onClose }) {
   const sidebar = (
     <aside className="relative flex h-screen w-full shrink-0 flex-col overflow-hidden border-r border-border bg-card px-4 py-5 md:px-5">
       <div className="relative z-10 mb-5 flex items-center justify-between">
-        <Logo dashboard surface="adaptive" size="md" />
+        <Logo dashboard surface="adaptive" size="sidebar" className="ml-1" />
         <button
           type="button"
           onClick={onClose}

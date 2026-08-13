@@ -983,9 +983,10 @@ export const approveAnswer = asyncHandler(async (req, res) => {
     userId: question.user._id,
     type: 'answer_delivered',
     title: 'Your Answer is Ready',
-    message: `Your question "${question.title}" has been answered.`,
+    message: `Hi ${question.user.name || 'there'}, your question "${question.title}" has been answered by a mentor and approved. Open Replyfy to read the full answer.`,
     link: `/dashboard/questions/${question._id}`,
     email: question.user.email,
+    cta: 'Read your answer',
   })
 
   await createNotification({
@@ -993,8 +994,9 @@ export const approveAnswer = asyncHandler(async (req, res) => {
     type: 'rating_reminder',
     title: 'Rate Your Mentor',
     message: 'Please rate your experience with the mentor.',
-    link: `/dashboard/questions/${question._id}/rate`,
+    link: `/dashboard/questions/${question._id}`,
     email: question.user.email,
+    sendMail: false,
   })
 
   res.json({ success: true, answer, question })

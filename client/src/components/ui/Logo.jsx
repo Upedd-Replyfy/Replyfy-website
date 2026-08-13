@@ -4,6 +4,7 @@ const imageSizes = {
   xs: 'h-8 w-auto max-w-[148px]',
   sm: 'h-10 w-auto max-w-[176px]',
   md: 'h-11 w-auto max-w-[196px]',
+  sidebar: 'h-[3.25rem] w-auto max-w-[230px]',
   nav: 'h-12 w-auto max-w-[220px] md:h-[3.25rem] md:max-w-[248px]',
   lg: 'h-14 w-auto max-w-[280px] sm:h-16 sm:max-w-[320px] md:h-[4.5rem] md:max-w-[360px]',
 }

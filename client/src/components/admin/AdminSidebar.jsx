@@ -22,7 +22,7 @@ export default function AdminSidebar({ collapsed, onToggle, floating = false }) 
           collapsed ? 'justify-center px-2' : 'justify-between px-4'
         }`}
       >
-        {!collapsed && <Logo admin className="scale-[0.88]" surface="adaptive" />}
+        {!collapsed && <Logo admin className="ml-1" size="sidebar" surface="adaptive" />}
         {collapsed && (
           <Link to="/admin" className="flex h-10 w-10 items-center justify-center" aria-label="Replyfy Admin">
             <LogoMark className="h-9 w-9 object-contain" />

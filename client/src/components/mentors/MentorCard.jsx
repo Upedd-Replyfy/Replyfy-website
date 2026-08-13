@@ -23,17 +23,17 @@ function avatarUrl(expert) {
   )
 }
 
-function roleLine(expert) {
-  const type = expert.expertType?.name || expert.expertTypes?.[0]?.name || 'Mentor'
-  const cat = expert.category?.name || expert.categories?.[0]?.name
-  const bio = expert.bio?.trim()
-  if (bio) return bio
-  return [type, cat, expert.experience].filter(Boolean).join(' · ')
-}
-
-function categoryInitial(expert) {
-  const name = expert.category?.name || expert.categories?.[0]?.name || 'R'
-  return name.slice(0, 1).toUpperCase()
+function formatExperienceLabel(exp) {
+  if (!exp || exp === '—' || exp === 'Private') return exp || '—'
+  const str = String(exp).trim()
+  if (/^\d+(\.\d+)?$/.test(str)) {
+    const num = Number(str)
+    return `${num} ${num === 1 ? 'Year' : 'Years'} Exp.`
+  }
+  if (!/year|yr/i.test(str) && /\d/.test(str)) {
+    return `${str} Yrs Exp.`
+  }
+  return str
 }
 
 export default function MentorCard({
@@ -51,12 +51,16 @@ export default function MentorCard({
   const rating = showReviews ? Number(expert.averageRating) || 0 : 0
   const reviews = showReviews ? expert.totalRatings || expert.reviewCount || 0 : 0
   const answers = expert.completedAnswers || 0
-  const experience =
+  const rawExperience =
     expert.profileVisibility?.experience === false
       ? 'Private'
       : expert.experience?.trim() || '—'
+  const experienceLabel = formatExperienceLabel(rawExperience)
   const available = expert.availability === 'available' || expert.isAvailable
   const isTop = expert.isVerified || rating >= 4.5
+
+  const expertType = expert.expertType?.name || expert.expertTypes?.[0]?.name || 'Mentor'
+  const category = expert.category?.name || expert.categories?.[0]?.name || ''
 
   const queryPlan = PLANS.mentor
   const callPlan = PLANS.expert_call
@@ -70,68 +74,72 @@ export default function MentorCard({
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       whileHover={{ y: -2 }}
-      className="group relative flex h-full flex-col rounded-xl border border-border bg-card p-3 transition hover:border-ink/25"
+      className="group relative flex h-full flex-col rounded-2xl border border-border bg-card p-3.5 sm:p-4 transition-all duration-200 hover:border-ink/30 hover:shadow-luxury-md"
     >
-      <div className="relative z-[1] flex flex-1 flex-col">
-        <div className="flex gap-2.5">
+      <div className="relative z-[1] flex flex-1 flex-col justify-between">
+        {/* Top Header Section: Proportioned Photo on Left, All Data Shifted to Right */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-3.5 items-start">
+          {/* Proportioned Mentor Image */}
           <button
             type="button"
             onClick={() => onOpen?.(expert)}
-            className="relative shrink-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="group/avatar relative shrink-0 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
             aria-label={`View ${expert.name} profile`}
           >
             <img
               src={avatarUrl(expert)}
-              alt=""
-              className="h-11 w-11 rounded-lg object-cover ring-1 ring-border"
+              alt={expert.name || 'Mentor'}
+              className="h-20 w-20 sm:h-24 sm:w-24 rounded-xl object-cover ring-1 ring-border/80 shadow-sm transition-transform duration-200 group-hover/avatar:scale-[1.02]"
             />
-            {isTop && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded bg-ink text-card ring-2 ring-card">
-                <Trophy size={8} />
-              </span>
-            )}
+
             {available && (
-              <span className="absolute -bottom-0.5 -left-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-card" />
+              <span
+                className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border-2 border-card bg-emerald-500/90 px-1.5 py-0.5 text-[8px] font-bold text-white shadow-sm backdrop-blur-sm"
+                title="Available Now"
+              >
+                <span className="h-1 w-1 rounded-full bg-white animate-pulse" />
+                Online
+              </span>
             )}
           </button>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
+          {/* Right Column with All Data */}
+          <div className="min-w-0 flex-1 space-y-1.5">
+            {/* Top row: Name & Favorite/Bookmark buttons */}
+            <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0">
                 <button
                   type="button"
                   onClick={() => onOpen?.(expert)}
                   className="text-left outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
                 >
-                  <h3 className="truncate text-[14px] font-semibold tracking-tight text-ink">
+                  <h3 className="truncate text-[15px] font-bold tracking-tight text-ink group-hover:text-primary transition-colors">
                     {expert.name}
                   </h3>
                 </button>
-                {showReviews ? (
-                  <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[10px]">
-                    <Star size={10} className="fill-amber-400 text-amber-400" />
-                    <span className="font-semibold text-ink">
-                      {rating ? rating.toFixed(1) : '—'}
+
+                {/* Mentor Type & Category Badges */}
+                <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                  {expertType && (
+                    <span className="inline-flex items-center rounded-md border border-border bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-ink">
+                      {expertType}
                     </span>
-                    <span className="text-muted-light">
-                      ({reviews} Review{reviews === 1 ? '' : 's'})
+                  )}
+                  {category && (
+                    <span className="inline-flex items-center rounded-md border border-border/80 bg-surface/70 px-1.5 py-0.5 text-[10px] font-semibold text-muted">
+                      {category}
                     </span>
-                  </div>
-                ) : null}
+                  )}
+                </div>
               </div>
 
+              {/* Favorites & Bookmarks */}
               <div className="flex shrink-0 items-center gap-1">
-                <span
-                  className="hidden h-6 w-6 items-center justify-center rounded-md border border-border bg-surface text-[10px] font-bold text-ink sm:flex"
-                  title={expert.category?.name || 'Category'}
-                >
-                  {categoryInitial(expert)}
-                </span>
-                {onToggleFavorite ? (
+                {onToggleFavorite && (
                   <button
                     type="button"
                     onClick={() => onToggleFavorite(expert)}
-                    className={`flex h-6 w-6 items-center justify-center rounded-md border transition ${
+                    className={`flex h-6.5 w-6.5 items-center justify-center rounded-md border transition ${
                       favorited
                         ? 'border-ink bg-ink text-card'
                         : 'border-border bg-surface text-muted-light hover:text-ink'
@@ -140,12 +148,12 @@ export default function MentorCard({
                   >
                     <Heart size={11} fill={favorited ? 'currentColor' : 'none'} />
                   </button>
-                ) : null}
-                {onToggleBookmark ? (
+                )}
+                {onToggleBookmark && (
                   <button
                     type="button"
                     onClick={() => onToggleBookmark(expert)}
-                    className={`flex h-6 w-6 items-center justify-center rounded-md border transition ${
+                    className={`flex h-6.5 w-6.5 items-center justify-center rounded-md border transition ${
                       bookmarked
                         ? 'border-ink bg-ink text-card'
                         : 'border-border bg-surface text-muted-light hover:text-ink'
@@ -154,47 +162,67 @@ export default function MentorCard({
                   >
                     <Bookmark size={11} fill={bookmarked ? 'currentColor' : 'none'} />
                   </button>
-                ) : null}
+                )}
               </div>
             </div>
 
-            <p className="mt-1 line-clamp-1 text-[11px] leading-snug text-muted">
-              {roleLine(expert)}
-            </p>
+            {/* Rating & Reviews */}
+            {showReviews && (
+              <div className="flex items-center gap-1 text-[11px]">
+                <div className="inline-flex items-center gap-0.5 rounded-md border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 font-bold text-amber-500">
+                  <Star size={10} className="fill-amber-400 text-amber-400" />
+                  <span>{rating ? rating.toFixed(1) : '—'}</span>
+                </div>
+                <span className="text-[10px] font-medium text-muted">
+                  ({reviews} {reviews === 1 ? 'Review' : 'Reviews'})
+                </span>
+              </div>
+            )}
+
+            {/* Experience, Sessions & Avg Response */}
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] text-muted">
+              {expert.profileVisibility?.experience !== false && (
+                <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                  <Briefcase size={11} className="text-muted-light shrink-0" />
+                  {experienceLabel}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 font-medium text-muted">
+                <MonitorPlay size={11} className="text-muted-light shrink-0" />
+                {answers.toLocaleString('en-IN')} Sessions
+              </span>
+              <span className="inline-flex items-center gap-1 font-medium text-muted">
+                <CalendarCheck size={11} className="text-muted-light shrink-0" />
+                {available ? '99%' : '—'} Avg.
+              </span>
+            </div>
+
+            {/* Bio excerpt */}
+            {expert.bio && (
+              <p className="line-clamp-1 text-[11px] leading-relaxed text-muted pt-0.5">
+                {expert.bio}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted">
-          {expert.profileVisibility?.experience !== false ? (
-            <span className="inline-flex items-center gap-1">
-              <Briefcase size={10} className="text-muted-light" />
-              {experience}
-            </span>
-          ) : null}
-          <span className="inline-flex items-center gap-1">
-            <MonitorPlay size={10} className="text-muted-light" />
-            {answers.toLocaleString('en-IN')} Sessions
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <CalendarCheck size={10} className="text-muted-light" />
-            {available ? '99%' : '—'} Avg.
-          </span>
-        </div>
-
-        <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+        {/* Action Cards (Query & 1:1 Call) */}
+        <div className="mt-3 grid grid-cols-2 gap-1.5">
           <button
             type="button"
             onClick={() => onAsk?.(expert, queryPlan.id)}
-            className="flex flex-col rounded-lg border border-border bg-surface/70 p-2 text-left transition hover:border-ink/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="flex flex-col justify-between rounded-xl border border-border bg-surface/70 p-2 text-left transition hover:border-ink/25 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
           >
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted">
-              <MessageSquare size={10} />
-              Query
-            </span>
-            <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-ink">
-              Ask {expert.name?.split(' ')[0] || 'mentor'}
-            </p>
-            <span className="mt-1 inline-flex w-fit items-center rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-bold text-ink">
+            <div>
+              <span className="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-muted">
+                <MessageSquare size={9} />
+                Query
+              </span>
+              <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-ink">
+                Ask {expert.name?.split(' ')[0] || 'mentor'}
+              </p>
+            </div>
+            <span className="mt-1.5 inline-flex w-fit items-center rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-bold text-ink">
               {formatRupee(queryPlan.pricePaise)}
             </span>
           </button>
@@ -202,21 +230,24 @@ export default function MentorCard({
           <button
             type="button"
             onClick={() => onAsk?.(expert, callPlan.id)}
-            className="flex flex-col rounded-lg border border-border bg-surface/70 p-2 text-left transition hover:border-ink/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
+            className="flex flex-col justify-between rounded-xl border border-border bg-surface/70 p-2 text-left transition hover:border-ink/25 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
           >
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted">
-              <Video size={10} />
-              1:1 Call
-            </span>
-            <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-ink">
-              Live mentor session
-            </p>
-            <span className="mt-1 inline-flex w-fit items-center rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-bold text-ink">
+            <div>
+              <span className="inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-muted">
+                <Video size={9} />
+                1:1 Call
+              </span>
+              <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-ink">
+                Live mentor session
+              </p>
+            </div>
+            <span className="mt-1.5 inline-flex w-fit items-center rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-bold text-ink">
               {formatRupee(callPlan.pricePaise)}
             </span>
           </button>
         </div>
 
+        {/* View Profile Button */}
         <motion.button
           type="button"
           onClick={() => onOpen?.(expert)}
@@ -225,7 +256,7 @@ export default function MentorCard({
           animate={{
             boxShadow: hovered ? '0 4px 12px rgba(0,0,0,0.12)' : '0 1px 3px rgba(0,0,0,0.06)',
           }}
-          className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-[12px] font-semibold text-card transition hover:bg-ink/90"
+          className="mt-2.5 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-ink px-3 py-2 text-xs font-semibold text-card transition hover:bg-ink/90"
         >
           View profile
           <ArrowRight size={12} />
@@ -237,18 +268,22 @@ export default function MentorCard({
 
 export function MentorCardSkeleton() {
   return (
-    <div className="h-[210px] animate-pulse rounded-xl border border-border bg-card p-3">
-      <div className="flex gap-2.5">
-        <div className="h-11 w-11 rounded-lg bg-surface" />
+    <div className="h-[230px] animate-pulse rounded-2xl border border-border bg-card p-3.5 sm:p-4">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-xl bg-surface" />
         <div className="flex-1 space-y-2 pt-1">
-          <div className="h-3.5 w-28 rounded bg-surface" />
-          <div className="h-3 w-20 rounded bg-surface" />
+          <div className="h-3.5 w-32 rounded bg-surface" />
+          <div className="flex gap-1.5">
+            <div className="h-4 w-20 rounded bg-surface" />
+            <div className="h-4 w-16 rounded bg-surface" />
+          </div>
+          <div className="h-3 w-24 rounded bg-surface" />
+          <div className="h-3 w-36 rounded bg-surface" />
         </div>
       </div>
-      <div className="mt-3 h-3 w-2/3 rounded bg-surface" />
       <div className="mt-3 grid grid-cols-2 gap-1.5">
-        <div className="h-14 rounded-lg border border-border bg-surface" />
-        <div className="h-14 rounded-lg border border-border bg-surface" />
+        <div className="h-14 rounded-xl border border-border bg-surface" />
+        <div className="h-14 rounded-xl border border-border bg-surface" />
       </div>
     </div>
   )

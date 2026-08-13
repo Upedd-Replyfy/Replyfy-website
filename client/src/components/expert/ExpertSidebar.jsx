@@ -15,7 +15,7 @@ export default function ExpertSidebar({ onNavigate }) {
   return (
     <aside className="expert-sidebar flex h-full w-[248px] flex-col border-r border-border bg-card/98 backdrop-blur-xl">
       <div className="flex h-16 shrink-0 items-center border-b border-border px-6 pt-[env(safe-area-inset-top)]">
-        <Logo expert surface="adaptive" />
+        <Logo expert surface="adaptive" size="sidebar" className="ml-1" />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-4 py-5">

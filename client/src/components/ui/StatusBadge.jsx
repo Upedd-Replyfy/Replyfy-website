@@ -1,12 +1,12 @@
 const STATUS_STYLES = {
-  pending_payment: 'bg-surface text-muted',
-  pending_admin_review: 'bg-surface text-ink',
+  pending_payment: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+  pending_admin_review: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
   assigned: 'bg-white/10 text-ink',
   in_progress: 'bg-white/10 text-ink',
-  waiting_admin_review: 'bg-surface text-muted',
+  waiting_admin_review: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
   completed: 'bg-primary text-primary-fg',
   rejected: 'bg-charcoal/10 text-charcoal',
-  pending_review: 'bg-surface text-muted',
+  pending_review: 'bg-amber-500/15 text-amber-500 border border-amber-500/30',
   approved: 'bg-primary text-primary-fg',
 }
 

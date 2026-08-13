@@ -93,7 +93,7 @@ export default function DashboardTopbar({ onMenuOpen }) {
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setQuickOpen(!quickOpen)}
-            className="btn-primary hidden items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold sm:flex"
+            className="hidden items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg sm:flex"
           >
             <Plus size={16} />
             Quick action

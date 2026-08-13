@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion'
-import { Check, Clock, HelpCircle, Loader2, Users, ArrowUpRight, MessageSquare } from 'lucide-react'
+import { Check, Clock, Users, ArrowUpRight, MessageSquare, FileText } from 'lucide-react'
 import { fadeUp, staggerContainer } from '../../utils/animations'
 import SectionPager from './SectionPager'
 
 const statusConfig = {
   answered: { icon: Check, label: 'Answered', color: 'text-emerald-600' },
-  in_review: { icon: Loader2, label: 'In review', color: 'text-sky-600' },
+  in_review: { icon: FileText, label: 'In review', color: 'text-amber-500' },
   matched: { icon: Users, label: 'Matched', color: 'text-violet-600' },
   draft: { icon: MessageSquare, label: 'Draft', color: 'text-amber-600' },
 }
@@ -36,7 +36,7 @@ function QuestionCard({ q, index, onSelect }) {
           {isAnswered ? (
             <Check size={13} strokeWidth={2.5} />
           ) : (
-            <HelpCircle size={13} />
+            <span className="text-xs font-bold leading-none">Q</span>
           )}
         </span>
         <ArrowUpRight
@@ -67,7 +67,7 @@ function QuestionCard({ q, index, onSelect }) {
 
       <div className="mt-auto flex items-center justify-between pt-2">
         <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${status.color}`}>
-          <StatusIcon size={11} className={q.status === 'in_review' ? 'animate-spin' : ''} />
+          <StatusIcon size={11} />
           {status.label}
         </span>
         <span className="flex items-center gap-1 text-[11px] text-muted-light">
