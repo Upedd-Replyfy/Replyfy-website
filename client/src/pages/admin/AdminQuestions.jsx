@@ -13,6 +13,7 @@ import {
   Clock,
   ArrowUpDown,
   Paperclip,
+  Link2,
   Star,
   CircleHelp,
   BadgeCheck,
@@ -290,6 +291,23 @@ function QuestionDetailModal({
                 >
                   <Paperclip size={13} />
                   <span className="truncate">{file.name || 'Attachment'}</span>
+                </a>
+              ))}
+            </div>
+          )}
+          {(question.links || []).length > 0 && (
+            <div className="mt-3 space-y-2">
+              <p className="text-xs font-semibold text-slate-500">Links</p>
+              {question.links.map((url) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
+                >
+                  <Link2 size={13} />
+                  <span className="truncate">{url}</span>
                 </a>
               ))}
             </div>

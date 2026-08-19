@@ -14,6 +14,10 @@ const fileFilter = (req, file, cb) => {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/csv',
   ]
   if (allowed.includes(file.mimetype)) cb(null, true)
   else cb(new ApiError(400, `File type ${file.mimetype} not allowed`), false)

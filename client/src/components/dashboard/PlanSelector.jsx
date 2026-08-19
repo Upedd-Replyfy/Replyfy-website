@@ -1,10 +1,13 @@
 import { motion } from 'framer-motion'
-import { PLANS } from '../../constants'
+import { planListFrom } from '../../constants'
 import PlanCard from '../pricing/PlanCard'
 import { useDashboardTheme } from '../../context/DashboardThemeContext'
 
-export default function PlanSelector({ plan, onSelect, onContinue }) {
+export default function PlanSelector({ plan, plans, onSelect, onContinue }) {
   const { isDark } = useDashboardTheme()
+  const list = planListFrom(plans)
+  const hasAuto = list.some((p) => !p.requiresExpertSelection)
+  const hasPick = list.some((p) => p.requiresExpertSelection)
 
   return (
     <motion.div
@@ -14,11 +17,13 @@ export default function PlanSelector({ plan, onSelect, onContinue }) {
     >
       <h2 className="text-2xl font-semibold text-ink">Choose your plan</h2>
       <p className="mt-2 text-sm text-muted">
-        Basic auto-assigns a mentor. Choose Mentor or Mentor Call to pick your mentor.
+        {hasAuto && hasPick
+          ? 'Some plans auto-assign a mentor. Others let you pick who answers.'
+          : 'Choose the plan that fits your question.'}
       </p>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-3">
-        {Object.values(PLANS).map((p) => (
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((p) => (
           <PlanCard
             key={p.id}
             plan={p}

@@ -7,8 +7,8 @@ const STEPS = [
   { id: 'payment', label: 'Payment' },
 ]
 
-export default function StepProgress({ current, plan }) {
-  const visible = planRequiresExpertSelection(plan)
+export default function StepProgress({ current, plan, plans }) {
+  const visible = planRequiresExpertSelection(plan, plans)
     ? STEPS
     : STEPS.filter((s) => s.id !== 'expert')
 

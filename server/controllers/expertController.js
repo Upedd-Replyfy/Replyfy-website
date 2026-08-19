@@ -44,17 +44,47 @@ export const getAssignedQuestions = asyncHandler(async (req, res) => {
   if (status) query.status = status
   else query.status = { $in: ['assigned', 'in_progress', 'waiting_admin_review'] }
 
+  const pageNum = Number(page)
+  const limitNum = Number(limit)
+
   const [questions, total] = await Promise.all([
     Question.find(query)
       .populate('category', 'name')
-      .populate('user', 'name email')
-      .sort({ deadline: 1, createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit)),
+      .populate('user', 'name email avatar')
+      .sort(status === 'completed' ? { updatedAt: -1 } : { deadline: 1, createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum),
     Question.countDocuments(query),
   ])
 
-  res.json({ success: true, questions, pagination: { page: Number(page), limit: Number(limit), total } })
+  let hydrated = questions
+  if (status === 'completed' && questions.length) {
+    const answers = await Answer.find({
+      question: { $in: questions.map((q) => q._id) },
+      expert: req.user._id,
+    }).select('question content status')
+
+    const answerByQuestion = new Map(answers.map((a) => [String(a.question), a]))
+    hydrated = questions.map((q) => {
+      const doc = q.toObject()
+      const answer = answerByQuestion.get(String(q._id))
+      const words = String(answer?.content || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .filter(Boolean)
+      doc.answerPreview = words.length
+        ? words.slice(0, 24).join(' ') + (words.length > 24 ? '…' : '')
+        : ''
+      return doc
+    })
+  }
+
+  res.json({
+    success: true,
+    questions: hydrated,
+    pagination: { page: pageNum, limit: limitNum, total },
+  })
 })
 
 export const getQuestionDetail = asyncHandler(async (req, res) => {
@@ -63,7 +93,7 @@ export const getQuestionDetail = asyncHandler(async (req, res) => {
     assignedExpert: req.user._id,
   })
     .populate('category')
-    .populate('user', 'name email')
+      .populate('user', 'name email avatar')
 
   if (!question) throw new ApiError(404, 'Question not found')
 

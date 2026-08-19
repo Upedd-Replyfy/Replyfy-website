@@ -12,8 +12,8 @@ import StepProgress from './StepProgress'
 import RecommendedExperts from './RecommendedExperts'
 import RecentQuestions from './RecentQuestions'
 import { userApi } from '../../services/api'
-import { PLANS, planRequiresExpertSelection } from '../../constants'
-import { useCategories, useExpertTypes, useExperts, usePlatformSettings } from '../../hooks/useCatalog'
+import { PLANS, planRequiresExpertSelection, resolvePlan } from '../../constants'
+import { useCategories, useExpertTypes, useExperts, usePlatformSettings, usePlans } from '../../hooks/useCatalog'
 import { clearQuestionDraft, loadQuestionDraft, namesMatch } from '../../utils/questionDraft'
 import { payForQuestion } from '../../utils/payForQuestion'
 
@@ -90,6 +90,8 @@ export default function UserDashboard() {
   }
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
+  const { data: plans = Object.values(PLANS), isSuccess: plansLoaded } = usePlans()
+  const needsMentor = planRequiresExpertSelection(plan, plans)
   const { data: platformSettings } = usePlatformSettings()
   const mentorTypesEnabled = platformSettings?.mentorTypesEnabled !== false
   const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(
@@ -130,7 +132,7 @@ export default function UserDashboard() {
     isLoading: premiumExpertsLoading,
     error: premiumExpertsError,
     refetch: refetchPremiumExperts,
-  } = useExperts(premiumExpertParams, step === 'expert' && planRequiresExpertSelection(plan) && !!premiumExpertParams)
+  } = useExperts(premiumExpertParams, step === 'expert' && needsMentor && !!premiumExpertParams)
 
   const recommendedParams = useMemo(
     () =>
@@ -193,14 +195,14 @@ export default function UserDashboard() {
       const match = pending.expertTypeName
         ? expertTypes.find((t) => namesMatch(t.name, pending.expertTypeName))
         : null
-      setExpertTypeId(match?._id || expertTypes[0]._id)
+      setExpertTypeId(match?._id || null)
       clearQuestionDraft()
       pendingDraftRef.current = null
       draftHydratedRef.current = true
       return
     }
 
-    setExpertTypeId((prev) => (expertTypes.some((t) => t._id === prev) ? prev : expertTypes[0]._id))
+    setExpertTypeId((prev) => (prev && expertTypes.some((t) => t._id === prev) ? prev : null))
   }, [categoryId, expertTypes, expertTypesLoading, mentorTypesEnabled])
 
   useEffect(() => {
@@ -216,7 +218,7 @@ export default function UserDashboard() {
       setQuery('')
       setFiles([])
       setLinks([])
-      setPlan(preferredPlan && PLANS[preferredPlan] ? preferredPlan : 'mentor')
+      setPlan(preferredPlan || 'mentor')
       setSelectedExpert(
         preferredExpertId
           ? { userId: preferredExpertId, name: preferredExpertName || 'Mentor' }
@@ -227,6 +229,12 @@ export default function UserDashboard() {
       navigate('/dashboard', { replace: true, state: {} })
     }
   }, [location.state, navigate])
+
+  useEffect(() => {
+    if (!plansLoaded || !plans.length) return
+    if (resolvePlan(plan, plans)) return
+    setPlan(plans.find((p) => p.popular)?.id || plans[0].id)
+  }, [plansLoaded, plans, plan])
 
   useEffect(() => {
     setAppliedCoupon(null)
@@ -241,13 +249,12 @@ export default function UserDashboard() {
   const handleComposeSubmit = () => {
     if (!query.trim()) return toast.error('Please describe your question')
     if (!categoryId) return toast.error('Please select a category')
-    if (mentorTypesEnabled && !expertTypeId) return toast.error('Please select a mentor type')
     setStep('plan')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handlePlanContinue = () => {
-    setStep(planRequiresExpertSelection(plan) ? 'expert' : 'payment')
+    setStep(needsMentor ? 'expert' : 'payment')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -260,7 +267,7 @@ export default function UserDashboard() {
   const handleBack = () => {
     if (step === 'plan') setStep('compose')
     else if (step === 'expert') setStep('plan')
-    else if (step === 'payment') setStep(planRequiresExpertSelection(plan) ? 'expert' : 'plan')
+    else if (step === 'payment') setStep(needsMentor ? 'expert' : 'plan')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -277,21 +284,20 @@ export default function UserDashboard() {
         toast.error('Missing category')
         return
       }
-      if (mentorTypesEnabled && !expertTypeId) {
-        toast.error('Missing mentor type')
-        return
-      }
 
       const formData = new FormData()
       formData.append('title', title)
       formData.append('description', query)
+      if (links.length) {
+        formData.append('links', JSON.stringify(links))
+      }
       formData.append('category', categoryId)
       if (mentorTypesEnabled && expertTypeId) {
         formData.append('expertType', expertTypeId)
       }
       formData.append('priority', 'standard')
       formData.append('plan', plan)
-      if (planRequiresExpertSelection(plan) && selectedExpert) {
+      if (needsMentor && selectedExpert) {
         formData.append('selectedExpert', selectedExpert.userId)
       }
       files.forEach((f) => formData.append('files', f))
@@ -299,7 +305,7 @@ export default function UserDashboard() {
       const { question } = await userApi.createQuestion(formData)
       const result = await payForQuestion(question, {
         couponCode: appliedCoupon?.code,
-        planName: PLANS[plan]?.name,
+        planName: resolvePlan(plan, plans)?.name,
       })
 
       toast.success(result.mode === 'dev' ? 'Question submitted successfully' : 'Payment successful!')
@@ -330,10 +336,10 @@ export default function UserDashboard() {
             <ArrowLeft size={16} /> Back
           </button>
 
-          <StepProgress current={step} plan={plan} />
+          <StepProgress current={step} plan={plan} plans={plans} />
 
           {step === 'plan' && (
-            <PlanSelector plan={plan} onSelect={setPlan} onContinue={handlePlanContinue} />
+            <PlanSelector plan={plan} plans={plans} onSelect={setPlan} onContinue={handlePlanContinue} />
           )}
           {step === 'expert' && (
             <ExpertPicker
@@ -349,6 +355,7 @@ export default function UserDashboard() {
           {step === 'payment' && (
             <PaymentStep
               plan={plan}
+              plans={plans}
               category={selectedCategory}
               expertType={selectedExpertType}
               mentorTypesEnabled={mentorTypesEnabled}
@@ -380,7 +387,7 @@ export default function UserDashboard() {
           expertTypes={expertTypes}
           expertTypesLoading={expertTypesLoading}
           expertTypeId={expertTypeId}
-          onExpertTypeChange={(type) => setExpertTypeId(type._id)}
+          onExpertTypeChange={(type) => setExpertTypeId(type?._id || null)}
           mentorTypesEnabled={mentorTypesEnabled}
           selectedCategory={selectedCategory}
           selectedExpertType={selectedExpertType}

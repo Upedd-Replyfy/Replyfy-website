@@ -9,7 +9,7 @@ import MentorCard, { MentorCardSkeleton } from '../../components/mentors/MentorC
 import MentorFilterBar from '../../components/mentors/MentorFilterBar'
 import MentorPageHeader from '../../components/mentors/MentorPageHeader'
 import { catalogApi } from '../../services/api'
-import { useCategories } from '../../hooks/useCatalog'
+import { useCategories, usePlatformSettings } from '../../hooks/useCatalog'
 
 function parseExperienceYears(text = '') {
   const nums = String(text).match(/\d+(\.\d+)?/g)
@@ -43,6 +43,8 @@ export default function UserExperts() {
   const [bookmarks, setBookmarks] = useState(() => new Set())
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
+  const { data: platformSettings } = usePlatformSettings()
+  const mentorTypesEnabled = Boolean(platformSettings?.mentorTypesEnabled)
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard-experts', categoryId, search],
@@ -212,6 +214,7 @@ export default function UserExperts() {
                       bookmarked={bookmarks.has(expert._id)}
                       onToggleFavorite={toggleSet(setFavorites)}
                       onToggleBookmark={toggleSet(setBookmarks)}
+                      showMentorType={mentorTypesEnabled}
                     />
                   ))}
                 </motion.div>
@@ -224,6 +227,7 @@ export default function UserExperts() {
       <MentorDetailModal
         open={!!selected}
         mentor={selected}
+        showMentorType={mentorTypesEnabled}
         onClose={() => setSelected(null)}
         onAsk={(mentor, planId) => {
           setSelected(null)

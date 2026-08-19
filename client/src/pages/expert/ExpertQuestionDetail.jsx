@@ -7,6 +7,7 @@ import {
   Calendar,
   FolderOpen,
   Paperclip,
+  Link2,
   User2,
   X,
   FileText,
@@ -15,21 +16,11 @@ import {
   Play,
 } from 'lucide-react'
 import StatusBadge from '../../components/ui/StatusBadge'
+import UserAvatar from '../../components/ui/UserAvatar'
 import { expertApi } from '../../services/api'
 
 function formatMoney(amount) {
   return `₹${(amount || 0) / 100}`
-}
-
-function initials(name = '?') {
-  return (
-    String(name)
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || '?'
-  )
 }
 
 export default function ExpertQuestionDetail() {
@@ -86,6 +77,7 @@ export default function ExpertQuestionDetail() {
   const canSubmit = ['assigned', 'in_progress'].includes(question?.status)
   const answerPending = answer?.status === 'pending_review'
   const answerRejected = answer?.status === 'rejected'
+  const answerApproved = answer?.status === 'approved' || question?.status === 'completed'
   const attachments = question?.attachments || []
   const user = question?.user || {}
   const showStart = question?.status === 'assigned'
@@ -99,11 +91,11 @@ export default function ExpertQuestionDetail() {
       {/* Top bar */}
       <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <Link
-          to="/expert/questions"
+          to={question?.status === 'completed' ? '/expert/history' : '/expert/questions'}
           className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-ink"
         >
           <ArrowLeft size={16} />
-          Back to questions
+          {question?.status === 'completed' ? 'Back to history' : 'Back to questions'}
         </Link>
 
         {showStart && (
@@ -138,17 +130,7 @@ export default function ExpertQuestionDetail() {
             </div>
 
             <div className="mt-3 flex items-center gap-3">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt=""
-                  className="h-10 w-10 shrink-0 rounded-2xl object-cover ring-2 ring-white shadow-sm"
-                />
-              ) : (
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-violet-500 text-xs font-bold text-white shadow-sm ring-2 ring-white">
-                  {initials(user.name)}
-                </span>
-              )}
+              <UserAvatar src={user.avatar} name={user.name} size="md" rounded="xl" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-ink">{user.name || 'User'}</p>
                 <p className="truncate text-xs text-muted">{user.email || '—'}</p>
@@ -223,6 +205,31 @@ export default function ExpertQuestionDetail() {
                 </p>
               )}
             </div>
+
+            {(question?.links || []).length > 0 && (
+              <div>
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                  Links
+                </h2>
+                <ul className="mt-2 space-y-2">
+                  {question.links.map((url) => (
+                    <li key={url}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-3 text-sm font-medium text-ink transition hover:border-sky-500/30 hover:bg-sky-500/5"
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
+                          <Link2 size={15} />
+                        </span>
+                        <span className="min-w-0 truncate">{url}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </section>
 
@@ -234,10 +241,12 @@ export default function ExpertQuestionDetail() {
               Your answer
             </p>
             <h2 className="mt-1.5 text-base font-bold tracking-tight text-ink sm:text-lg">
-              Submit your answer
+              {answerApproved ? 'Submitted answer' : 'Submit your answer'}
             </h2>
             <p className="mt-1 text-sm text-muted">
-              Provide a detailed, professional response for the user.
+              {answerApproved
+                ? 'This answer was approved and delivered to the user.'
+                : 'Provide a detailed, professional response for the user.'}
             </p>
           </div>
 
@@ -261,6 +270,15 @@ export default function ExpertQuestionDetail() {
                 className="min-h-[200px] w-full flex-1 resize-y rounded-xl border border-border bg-surface/40 px-4 py-3.5 text-[15px] leading-relaxed text-ink placeholder:text-muted-light shadow-[var(--shadow-luxury-sm)] transition focus:border-sky-500/40 focus:bg-card focus:outline-none focus:ring-2 focus:ring-sky-500/15 lg:min-h-[180px] lg:resize-none"
                 placeholder="Write your professional answer here…"
               />
+            ) : answer?.content && (answerPending || answerApproved) ? (
+              <div className="mt-0 rounded-xl border border-border bg-surface/50 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                  {answerApproved ? 'Delivered answer' : 'Submitted answer'}
+                </p>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink/80">
+                  {answer.content}
+                </p>
+              </div>
             ) : !answerPending && !answerRejected ? (
               <div className="flex min-h-[160px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface/40 px-6 py-12 text-center">
                 <PenLine className="text-muted" size={28} />
@@ -272,17 +290,6 @@ export default function ExpertQuestionDetail() {
                 </p>
               </div>
             ) : null}
-
-            {answer?.content && answerPending && (
-              <div className="mt-4 rounded-xl border border-border bg-surface/50 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                  Submitted answer
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink/80">
-                  {answer.content}
-                </p>
-              </div>
-            )}
           </div>
 
           {canSubmit && !answerPending && (

@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import HomePricingCard from './HomePricingCard'
-import { PLANS } from '../../constants'
+import { usePlans } from '../../hooks/useCatalog'
 import { fadeUp, staggerContainer } from '../../utils/animations'
 
 export default function Pricing() {
-  const [selectedPlan, setSelectedPlan] = useState('mentor')
-  const selected = PLANS[selectedPlan]
+  const { data: plans = [] } = usePlans()
+  const [selectedPlan, setSelectedPlan] = useState(null)
+  const selected = plans.find((p) => p.id === selectedPlan) || plans.find((p) => p.popular) || plans[0]
+
+  const activeId = selected?.id || selectedPlan
 
   return (
     <section
@@ -26,13 +29,13 @@ export default function Pricing() {
             Pricing
           </span>
           <h2 className="mt-4 text-2xl font-semibold tracking-tight text-black leading-[1.12] md:text-3xl lg:text-[2.125rem]">
-            Three tiers.{' '}
+            Plans that fit.{' '}
             <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
               One for every need.
             </span>
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-black/50 md:text-base">
-            Basic auto-assigns a mentor. Choose Mentor or Mentor Call to pick your mentor.
+            Choose a plan that fits your question. Some let you pick a mentor; others we assign for you.
           </p>
         </motion.div>
 
@@ -41,9 +44,9 @@ export default function Pricing() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={staggerContainer}
-          className="mx-auto flex max-w-[980px] flex-col items-center gap-4 md:flex-row md:items-stretch md:justify-center md:gap-5"
+          className="mx-auto flex max-w-[1100px] flex-col items-center gap-4 md:flex-row md:flex-wrap md:items-stretch md:justify-center md:gap-5"
         >
-          {Object.values(PLANS).map((plan, index) => (
+          {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
               variants={fadeUp}
@@ -52,7 +55,7 @@ export default function Pricing() {
             >
               <HomePricingCard
                 plan={plan}
-                selected={selectedPlan === plan.id}
+                selected={activeId === plan.id}
                 onSelect={() => setSelectedPlan(plan.id)}
               />
             </motion.div>
@@ -61,7 +64,7 @@ export default function Pricing() {
 
         <AnimatePresence mode="wait">
           <motion.div
-            key={selectedPlan}
+            key={activeId}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -71,14 +74,14 @@ export default function Pricing() {
             <p className="text-center text-sm text-black/50 sm:text-left">
               Selected:{' '}
               <span className="font-semibold text-black">
-                {selected.name} — ₹{selected.price}
+                {selected ? `${selected.name} — ₹${selected.price}` : 'Choose a plan'}
               </span>
             </p>
             <Link
-              to={`/signup?plan=${selectedPlan}`}
+              to={selected ? `/signup?plan=${selected.id}` : '/signup'}
               className="inline-flex min-h-12 w-full max-w-[300px] items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-violet-500 px-8 py-3 text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-[0_8px_24px_rgba(139,92,246,0.35)] sm:w-auto"
             >
-              Continue with {selected.name}
+              Continue with {selected?.name || 'a plan'}
             </Link>
           </motion.div>
         </AnimatePresence>

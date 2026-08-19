@@ -13,7 +13,7 @@ export default function QuestionDetail() {
       <QuestionDetailModal
         open={!!id}
         questionId={id}
-        onClose={() => navigate('/dashboard/questions', { replace: true })}
+        onClose={() => navigate(-1)}
       />
     </DashboardLayout>
   )

@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Loader2,
   Paperclip,
+  Link2,
   ScrollText,
   Star,
   Trash2,
@@ -23,7 +24,8 @@ import {
 } from 'lucide-react'
 import { catalogApi, userApi } from '../../services/api'
 import StatusBadge from '../ui/StatusBadge'
-import { QUESTION_STATUS, PLANS } from '../../constants'
+import { QUESTION_STATUS, planDisplayName, resolvePlan } from '../../constants'
+import { usePlans } from '../../hooks/useCatalog'
 import { isQuestionSaved, toggleSavedQuestion } from '../../utils/savedAnswers'
 import { payForQuestion } from '../../utils/payForQuestion'
 import { formatRupee } from '../../utils/currency'
@@ -443,6 +445,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
   const [showMentor, setShowMentor] = useState(false)
   const [paying, setPaying] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const { data: plans } = usePlans()
 
   const { data, isLoading } = useQuery({
     queryKey: ['question', questionId],
@@ -491,7 +494,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
   const timeline = data?.timeline || []
   const needsPayment = question?.status === 'pending_payment'
   const amountPaise =
-    question?.amount || PLANS[question?.plan]?.pricePaise || 0
+    question?.amount || resolvePlan(question?.plan, plans)?.pricePaise || 0
 
   const handlePay = async () => {
     if (!question || paying || deleting) return
@@ -542,7 +545,7 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
     ]
   }, [question, answer])
 
-  const planName = question ? PLANS[question.plan]?.name || question.plan : ''
+  const planName = question ? planDisplayName(question.plan, plans) : ''
   const statusLabel = question ? QUESTION_STATUS[question.status] || question.status : ''
   const mentorUser = question?.assignedExpert || question?.selectedExpert
   const mentorId = mentorUser?._id || mentorUser
@@ -709,6 +712,27 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                                 Question attachments
                               </p>
                               <AttachmentList files={question.attachments} />
+                            </div>
+                          )}
+                          {(question.links || []).length > 0 && (
+                            <div className="mt-4">
+                              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+                                Links
+                              </p>
+                              <div className="flex flex-col gap-1.5">
+                                {question.links.map((url) => (
+                                  <a
+                                    key={url}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-600 hover:underline"
+                                  >
+                                    <Link2 size={13} />
+                                    <span className="truncate">{url}</span>
+                                  </a>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>

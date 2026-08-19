@@ -17,6 +17,7 @@ export const catalogApi = {
   getExpert: (id) => api.get(`/public/experts/${id}`),
   getStats: () => api.get('/stats'),
   getSettings: () => api.get('/settings'),
+  getPlans: () => api.get('/plans'),
 }
 
 export const userApi = {
@@ -86,6 +87,10 @@ export const adminApi = {
   rejectWithdrawal: (id, reason) => api.post(`/admin/withdrawals/${id}/reject`, { reason }),
   sendNotification: (data) => api.post('/admin/notifications', data),
   getNotifications: (params) => api.get('/admin/notifications', { params }),
+  getPlans: () => api.get('/admin/plans'),
+  createPlan: (data) => api.post('/admin/plans', data),
+  updatePlan: (id, data) => api.put(`/admin/plans/${id}`, data),
+  deletePlan: (id) => api.delete(`/admin/plans/${id}`),
 }
 
 export const notificationApi = {

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import { PLAN_IDS } from '../constants/pricing.js'
 
 const couponSchema = new mongoose.Schema(
   {
@@ -9,7 +8,7 @@ const couponSchema = new mongoose.Schema(
     discountValue: { type: Number, required: true },
     minAmount: { type: Number, default: 0 },
     maxDiscount: { type: Number },
-    applicablePlans: [{ type: String, enum: PLAN_IDS }],
+    applicablePlans: [{ type: String, trim: true, lowercase: true }],
     usageLimit: { type: Number },
     usedCount: { type: Number, default: 0 },
     expiresAt: { type: Date },

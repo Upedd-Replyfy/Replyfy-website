@@ -19,7 +19,8 @@ import {
 import DashboardLayout from '../../layouts/DashboardLayout'
 import QuestionDetailModal from '../../components/questions/QuestionDetailModal'
 import { userApi } from '../../services/api'
-import { PLANS, QUESTION_STATUS } from '../../constants'
+import { QUESTION_STATUS, planDisplayName, resolvePlan } from '../../constants'
+import { usePlans } from '../../hooks/useCatalog'
 import { formatDistanceToNow } from '../../utils/date'
 import { formatRupee } from '../../utils/currency'
 import { payForQuestion } from '../../utils/payForQuestion'
@@ -58,12 +59,13 @@ function previewText(text, words = 12) {
 }
 
 function QuestionCard({ question, index, onOpen, onPay, onDelete, payingId, deletingId }) {
+  const { data: plans } = usePlans()
   const statusLabel = QUESTION_STATUS[question.status] || question.status
   const tone = STATUS_TONE[question.status] || STATUS_TONE.cancelled
   const dotColor = STATUS_DOT[question.status] || 'bg-muted'
-  const planName = PLANS[question.plan]?.name
+  const planName = planDisplayName(question.plan, plans)
   const needsPayment = question.status === 'pending_payment'
-  const amountPaise = question.amount || PLANS[question.plan]?.pricePaise || 0
+  const amountPaise = question.amount || resolvePlan(question.plan, plans)?.pricePaise || 0
   const isPaying = payingId === question._id
   const isDeleting = deletingId === question._id
   const isAnswered = question.answered || question.status === 'completed'

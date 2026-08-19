@@ -6,8 +6,9 @@ import AdminStatStrip from '../../components/admin/AdminStatStrip'
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge'
 import AdminModal from '../../components/admin/AdminModal'
 import { adminApi } from '../../services/api'
-import { PLANS } from '../../constants'
+import { planDisplayName } from '../../constants'
 import { formatRupee } from '../../utils/currency'
+import { usePlans } from '../../hooks/useCatalog'
 
 function statusTone(status) {
   if (status === 'captured' || status === 'paid' || status === 'success') return 'success'
@@ -51,8 +52,8 @@ function formatDateTime(date) {
   })
 }
 
-function planName(plan) {
-  return PLANS[plan]?.name || String(plan || '—').replace(/_/g, ' ')
+function planName(plan, plans) {
+  return planDisplayName(plan, plans)
 }
 
 function DetailRow({ label, value, mono = false }) {
@@ -71,6 +72,7 @@ function DetailRow({ label, value, mono = false }) {
 }
 
 function PaymentDetailModal({ payment, open, onClose }) {
+  const { data: plans } = usePlans()
   if (!payment) return null
 
   const failureReason = payment.metadata?.failureReason
@@ -101,7 +103,7 @@ function PaymentDetailModal({ payment, open, onClose }) {
             {statusLabel(payment.status)}
           </AdminStatusBadge>
           <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-semibold capitalize text-muted">
-            {planName(payment.plan)}
+            {planName(payment.plan, plans)}
           </span>
           <span className="text-lg font-bold text-ink">{formatRupee(payment.amount)}</span>
         </div>
@@ -126,7 +128,7 @@ function PaymentDetailModal({ payment, open, onClose }) {
         </section>
 
         <section className="rounded-2xl border border-border bg-surface/50 px-4 py-1">
-          <DetailRow label="Plan" value={planName(payment.plan)} />
+          <DetailRow label="Plan" value={planName(payment.plan, plans)} />
           <DetailRow label="Currency" value={payment.currency || 'INR'} />
           <DetailRow label="Amount charged" value={formatRupee(payment.amount)} />
           <DetailRow label="Original amount" value={formatRupee(original)} />
@@ -225,6 +227,7 @@ function PaymentDetailModal({ payment, open, onClose }) {
 export default function AdminPayments() {
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
+  const { data: plans } = usePlans()
   const { data, isLoading } = useQuery({
     queryKey: ['admin-payments'],
     queryFn: adminApi.getPayments,
@@ -328,7 +331,7 @@ export default function AdminPayments() {
                     </AdminStatusBadge>
                   </div>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                    <span className="capitalize">{p.plan?.replace('_', ' ') || '—'}</span>
+                    <span className="capitalize">{planName(p.plan, plans)}</span>
                     <span className="font-semibold text-ink">
                       ₹{(p.amount / 100).toLocaleString('en-IN')}
                     </span>
@@ -390,7 +393,7 @@ export default function AdminPayments() {
                       <p className="truncate text-xs text-muted">{p.user?.email}</p>
                     </td>
                     <td className="px-5 py-4 capitalize text-muted">
-                      {p.plan?.replace('_', ' ') || '—'}
+                      {planName(p.plan, plans)}
                     </td>
                     <td className="px-5 py-4 font-semibold text-ink">
                       ₹{(p.amount / 100).toLocaleString('en-IN')}

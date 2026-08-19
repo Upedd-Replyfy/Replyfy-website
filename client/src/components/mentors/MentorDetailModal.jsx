@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
   BadgeCheck,
@@ -17,7 +17,8 @@ import {
   Video,
   Zap,
 } from 'lucide-react'
-import { PLANS, planRequiresExpertSelection } from '../../constants'
+import { planListFrom, planRequiresExpertSelection, resolvePlan } from '../../constants'
+import { usePlans } from '../../hooks/useCatalog'
 import { formatRupee } from '../../utils/currency'
 
 function avatarUrl(mentor) {
@@ -58,7 +59,6 @@ const FILTERS = [
 ]
 
 /** Plans that let the user keep this mentor selected. */
-const MENTOR_PLANS = [PLANS.mentor, PLANS.expert_call]
 
 function SectionCard({ children }) {
   return (
@@ -84,10 +84,16 @@ export default function MentorDetailModal({
   onAsk,
   /** Force light theme tokens (public Find Mentors page sits outside dashboard-shell). */
   forceLight = false,
+  showMentorType = true,
 }) {
+  const { data: catalogPlans } = usePlans()
+  const mentorPlans = useMemo(() => {
+    const list = planListFrom(catalogPlans)
+    const requiring = list.filter((p) => p.requiresExpertSelection)
+    return requiring.length ? requiring : list
+  }, [catalogPlans])
   const [tab, setTab] = useState('profile')
   const [filter, setFilter] = useState('all')
-  const [knowMore, setKnowMore] = useState(false)
   const [saved, setSaved] = useState(false)
   const [planId, setPlanId] = useState('mentor')
 
@@ -95,8 +101,11 @@ export default function MentorDetailModal({
     if (!open) return undefined
     setTab('profile')
     setFilter('all')
-    setKnowMore(false)
-    setPlanId(mentor?.videoCallAvailable ? 'expert_call' : 'mentor')
+    const callPlan = mentorPlans.find((p) => p.id === 'expert_call')
+    const queryPlan = mentorPlans.find((p) => p.id === 'mentor') || mentorPlans[0]
+    setPlanId(
+      mentor?.videoCallAvailable && callPlan ? callPlan.id : queryPlan?.id || 'mentor'
+    )
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const onKey = (e) => {
@@ -107,7 +116,7 @@ export default function MentorDetailModal({
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
     }
-  }, [open, onClose, mentor])
+  }, [open, onClose, mentor, mentorPlans])
 
   const shareProfile = async () => {
     if (!mentor) return
@@ -126,8 +135,8 @@ export default function MentorDetailModal({
 
   if (!open || !mentor) return null
 
-  const selectedPlan = PLANS[planId] || PLANS.mentor
-  const priceLabel = formatRupee(selectedPlan.pricePaise)
+  const selectedPlan = resolvePlan(planId, catalogPlans) || mentorPlans[0]
+  const priceLabel = formatRupee(selectedPlan?.pricePaise)
 
   const handleAsk = () => onAsk?.(mentor, planId)
 
@@ -141,7 +150,7 @@ export default function MentorDetailModal({
     reviews: mentor.profileVisibility?.reviews !== false,
   }
   const categories = labelsFrom(mentor.categories, mentor.category)
-  const types = labelsFrom(mentor.expertTypes, mentor.expertType)
+  const types = showMentorType ? labelsFrom(mentor.expertTypes, mentor.expertType) : []
   const education = visibility.education ? mentor.education || [] : []
   const certificates = visibility.certificates ? mentor.certificates || [] : []
   const achievements = visibility.achievements ? mentor.achievements || [] : []
@@ -163,14 +172,13 @@ export default function MentorDetailModal({
   const bio =
     mentor.bio?.trim() ||
     'Experienced mentor ready to help with practical, situation-specific guidance.'
-  const categoryBadge = categories[0] || types[0] || 'Mentor'
-  const categoryInitial = categoryBadge.slice(0, 1).toUpperCase()
   const show = (id) => filter === 'all' || filter === id
   const visibleFilters = FILTERS.filter(
     (item) => item.id === 'all' || visibility[item.id]
   )
-  const planTag = planId === 'expert_call' ? '1:1 Call' : 'Query'
-  const PlanTagIcon = planId === 'expert_call' ? Video : MessageSquare
+  const callish = selectedPlan?.id === 'expert_call' || /call|live/i.test(selectedPlan?.name || '')
+  const planTag = callish ? '1:1 Call' : 'Query'
+  const PlanTagIcon = callish ? Video : MessageSquare
 
   return (
     <div
@@ -197,7 +205,7 @@ export default function MentorDetailModal({
             : ''
         }`}
       >
-        <div className="relative shrink-0 bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] px-4 pb-14 pt-3">
+        <div className="relative shrink-0 bg-gradient-to-br from-[#5B4CFF] to-[#7C6CFF] px-4 pb-20 pt-3">
           <div className="flex items-center gap-3 text-white">
             <button
               type="button"
@@ -222,29 +230,23 @@ export default function MentorDetailModal({
           )}
         </div>
 
-        <div className="relative z-10 -mt-12 px-5">
+        <div className="relative z-10 -mt-16 px-5">
           <div className="relative inline-block">
             <img
               src={avatarUrl(mentor)}
-              alt=""
-              className="h-[88px] w-[88px] rounded-full object-cover shadow-md ring-[3px] ring-card"
+              alt={mentor.name || 'Mentor'}
+              className="h-[132px] w-[132px] rounded-full object-cover shadow-md ring-[4px] ring-card"
             />
             {available && (
-              <span className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-0.5 whitespace-nowrap rounded-full bg-sky-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-                <Zap size={10} fill="currentColor" />
+              <span className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-0.5 whitespace-nowrap rounded-full bg-sky-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow">
+                <Zap size={11} fill="currentColor" />
                 Available
               </span>
             )}
-            <span
-              className="absolute -bottom-0.5 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-[11px] font-bold text-[#7C6CFF] shadow ring-2 ring-card"
-              title={categoryBadge}
-            >
-              {categoryInitial}
-            </span>
           </div>
         </div>
 
-        <div className="scrollbar-none flex-1 overflow-y-auto overscroll-contain px-5 pb-4 pt-3">
+        <div className="scrollbar-none flex-1 overflow-y-auto overscroll-contain px-5 pb-4 pt-5">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-xl font-bold tracking-tight text-ink">{mentor.name}</h3>
             {visibility.reviews ? (
@@ -261,16 +263,7 @@ export default function MentorDetailModal({
           ) : null}
 
           {visibility.bio ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setKnowMore((v) => !v)}
-                className="mt-1.5 text-[13px] font-semibold text-[#5B4CFF]"
-              >
-                {knowMore ? 'Show less' : 'Know more'}
-              </button>
-              {knowMore && <p className="mt-2 text-[13px] leading-relaxed text-muted">{bio}</p>}
-            </>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted">{bio}</p>
           ) : null}
 
           <ul className="mt-4 space-y-2.5">
@@ -362,7 +355,7 @@ export default function MentorDetailModal({
                     </p>
                     <p className="mt-1 flex items-center gap-1 text-[12px] text-muted">
                       <Clock size={12} />
-                      {planId === 'expert_call' ? '20 Min live call' : `~${responseHrs}h response`}
+                      {callish ? '20 Min live call' : `~${responseHrs}h response`}
                     </p>
                     {(categories.length > 0 || types.length > 0) && (
                       <p className="mt-2 line-clamp-2 text-[11px] text-muted">
@@ -374,7 +367,7 @@ export default function MentorDetailModal({
                       Choose plan
                     </p>
                     <div className="mt-2 space-y-2">
-                      {MENTOR_PLANS.map((p) => {
+                      {mentorPlans.map((p) => {
                         const active = planId === p.id
                         return (
                           <button
@@ -506,11 +499,11 @@ export default function MentorDetailModal({
                 onClick={handleAsk}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#5B4CFF] to-[#7C6CFF] px-4 py-3.5 text-sm font-bold text-white shadow-[0_10px_28px_rgba(91,76,255,0.35)]"
               >
-                Ask with {selectedPlan.name} · {priceLabel}
+                Ask with {selectedPlan?.name} · {priceLabel}
               </button>
-              {planRequiresExpertSelection(planId) ? (
+              {planRequiresExpertSelection(planId, catalogPlans) ? (
                 <p className="mt-2 text-center text-[11px] text-muted-light">
-                  {selectedPlan.tagline}
+                  {selectedPlan?.tagline}
                 </p>
               ) : null}
             </>

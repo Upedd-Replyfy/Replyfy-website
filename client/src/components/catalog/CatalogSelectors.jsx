@@ -56,8 +56,19 @@ export function ExpertTypeTabs({ expertTypes, selectedId, onSelect, loading }) {
       <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-light">
         Mentor
       </span>
+      <button
+        type="button"
+        onClick={() => onSelect(null)}
+        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+          !selectedId
+            ? 'bg-surface text-ink underline decoration-charcoal/50 decoration-2 underline-offset-4 dark:decoration-white/70'
+            : 'text-muted hover:text-ink'
+        }`}
+      >
+        All
+      </button>
       {expertTypes.length === 0 ? (
-        <span className="text-sm text-muted">No mentor types for this category</span>
+        <span className="text-sm text-muted">Optional — pick a type or leave All</span>
       ) : (
         expertTypes.map((type) => {
           const active = selectedId === type._id

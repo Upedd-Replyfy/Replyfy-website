@@ -2,7 +2,11 @@ import Question from '../models/Question.js'
 import Payment from '../models/Payment.js'
 import Category from '../models/Category.js'
 import { ApiError, asyncHandler } from '../utils/ApiError.js'
-import { getPlanAmount, planRequiresExpertSelection } from '../constants/pricing.js'
+import {
+  getPlanAmount,
+  getPlanBySlug,
+  planRequiresExpertSelection,
+} from '../services/planService.js'
 import { env } from '../config/env.js'
 import { getRazorpay, verifyPaymentSignature, allowDevPayments } from '../config/razorpay.js'
 import { uploadFiles } from '../utils/uploadFiles.js'
@@ -15,8 +19,41 @@ import {
 } from '../services/paymentCompletionService.js'
 import { isMentorTypesEnabled } from '../models/PlatformSettings.js'
 
+function parseQuestionLinks(raw) {
+  let list = []
+  if (Array.isArray(raw)) list = raw
+  else if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw)
+      list = Array.isArray(parsed) ? parsed : [parsed]
+    } catch {
+      list = raw.split(/[\n,]/)
+    }
+  }
+
+  const unique = []
+  const seen = new Set()
+  for (const item of list) {
+    const value = String(item || '').trim()
+    if (!value) continue
+    const url = /^https?:\/\//i.test(value) ? value : `https://${value}`
+    try {
+      new URL(url)
+    } catch {
+      continue
+    }
+    const key = url.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    unique.push(url)
+    if (unique.length >= 10) break
+  }
+  return unique
+}
+
 export const initiateQuestion = asyncHandler(async (req, res) => {
-  const { title, description, category, expertType, priority, plan, selectedExpert } = req.body
+  const { title, description, category, expertType, priority, plan, selectedExpert, links } = req.body
+  const questionLinks = parseQuestionLinks(links)
 
   const cat = await Category.findById(category)
   if (!cat || !cat.isActive) throw new ApiError(400, 'Invalid category')
@@ -24,8 +61,7 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
   const mentorTypesEnabled = await isMentorTypesEnabled()
   let resolvedExpertType = null
 
-  if (mentorTypesEnabled) {
-    if (!expertType) throw new ApiError(400, 'Mentor type is required')
+  if (mentorTypesEnabled && expertType) {
     const ExpertType = (await import('../models/ExpertType.js')).default
     const type = await ExpertType.findById(expertType)
     if (!type || !type.isActive || type.category.toString() !== category.toString()) {
@@ -34,11 +70,16 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
     resolvedExpertType = type._id
   }
 
-  if (planRequiresExpertSelection(plan) && !selectedExpert) {
+  const planDoc = await getPlanBySlug(plan, { activeOnly: true })
+  if (!planDoc) throw new ApiError(400, 'Invalid or inactive plan')
+
+  const requiresExpert = await planRequiresExpertSelection(plan)
+
+  if (requiresExpert && !selectedExpert) {
     throw new ApiError(400, 'This plan requires mentor selection')
   }
 
-  if (planRequiresExpertSelection(plan) && selectedExpert) {
+  if (requiresExpert && selectedExpert) {
     const ExpertProfile = (await import('../models/ExpertProfile.js')).default
     const { expertMatchesCategoryType } = await import('../utils/expertMatch.js')
     const profile = await ExpertProfile.findOne({
@@ -57,7 +98,7 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
     }
   }
 
-  const amount = getPlanAmount(plan)
+  const amount = planDoc.pricePaise
   const attachments = await uploadFiles(req.files, 'replyfy/questions')
 
   const question = await Question.create({
@@ -67,11 +108,13 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
     category,
     expertType: resolvedExpertType || undefined,
     priority: priority || 'standard',
-    plan,
-    selectedExpert: planRequiresExpertSelection(plan) ? selectedExpert : undefined,
+    plan: planDoc.slug,
+    selectedExpert: requiresExpert ? selectedExpert : undefined,
     attachments,
+    links: questionLinks,
     status: 'pending_payment',
     amount,
+    mentorPointsPaise: planDoc.mentorPointsPaise || 0,
   })
 
   res.status(201).json({ success: true, question })
@@ -97,7 +140,7 @@ export const createPaymentOrder = asyncHandler(async (req, res) => {
   if (alreadyPaid) throw new ApiError(400, 'Question already paid')
 
   // Always price from the plan table so coupons cannot stack on a reduced amount.
-  const planAmount = getPlanAmount(question.plan)
+  const planAmount = await getPlanAmount(question.plan)
   let payableAmount = planAmount
   let discountAmount = 0
   let appliedCouponCode = ''
@@ -335,7 +378,7 @@ export const getMyQuestions = asyncHandler(async (req, res) => {
     const answer = answerByQuestion.get(String(q._id))
     const answered = q.status === 'completed' && Boolean(answer?.content)
     doc.answered = answered
-    doc.answerPreview = answered ? previewWords(answer.content, 5) : ''
+    doc.answerPreview = answered ? previewWords(answer.content, 24) : ''
     return doc
   })
 

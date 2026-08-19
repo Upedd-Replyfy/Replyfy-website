@@ -18,7 +18,8 @@ import {
 } from 'lucide-react'
 import DashboardLayout from '../../layouts/DashboardLayout'
 import { userApi } from '../../services/api'
-import { PLANS, QUESTION_STATUS } from '../../constants'
+import { QUESTION_STATUS, planDisplayName } from '../../constants'
+import { usePlans } from '../../hooks/useCatalog'
 import { formatDistanceToNow } from '../../utils/date'
 
 function formatAmount(paise) {
@@ -118,11 +119,12 @@ function DetailRow({ label, value, mono = false }) {
 }
 
 function PaymentDetailModal({ payment, open, onClose }) {
+  const { data: plans } = usePlans()
   if (!payment) return null
 
   const status = getStatus(payment)
   const StatusIcon = status.icon
-  const planName = PLANS[payment.plan]?.name || payment.plan
+  const planName = planDisplayName(payment.plan, plans)
   const title = payment.question?.title || `${planName || 'Question'} payment`
   const original = payment.originalAmount ?? payment.amount
   const discount = payment.discountAmount || 0
@@ -270,9 +272,10 @@ function PaymentDetailModal({ payment, open, onClose }) {
 }
 
 function PaymentCard({ payment, index, onOpen }) {
+  const { data: plans } = usePlans()
   const status = getStatus(payment)
   const StatusIcon = status.icon
-  const planName = PLANS[payment.plan]?.name || payment.plan
+  const planName = planDisplayName(payment.plan, plans)
   const title = payment.question?.title || `${planName || 'Question'} payment`
   const isPending = ['created', 'pending'].includes(String(payment.status || '').toLowerCase())
 

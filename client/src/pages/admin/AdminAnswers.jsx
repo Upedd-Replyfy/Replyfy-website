@@ -89,6 +89,9 @@ function AnswerCard({ answer, onOpen }) {
                 {formatMoney(question.amount)}
               </span>
             )}
+            {question.mentorPointsPaise > 0 && (
+              <AdminBadge tone="success">{question.mentorPointsPaise / 100} pts</AdminBadge>
+            )}
             {fileCount > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
                 <Paperclip size={11} />

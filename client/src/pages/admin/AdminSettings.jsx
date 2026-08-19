@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FolderTree, Tags, UserPlus, Bell, CreditCard, Users, Wallet, Settings2 } from 'lucide-react'
+import { FolderTree, Tags, UserPlus, Bell, CreditCard, Users, Wallet, Settings2, IndianRupee } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 
 const sections = [
@@ -25,6 +25,7 @@ const sections = [
     items: [
       { to: '/admin/payments', icon: CreditCard, label: 'Payments', desc: 'View transactions' },
       { to: '/admin/withdrawals', icon: Wallet, label: 'Withdrawals', desc: 'Review mentor payouts' },
+      { to: '/admin/pricing', icon: IndianRupee, label: 'Pricing', desc: 'Plans and mentor points' },
       { to: '/admin/notifications', icon: Bell, label: 'Notifications', desc: 'Send user messages' },
     ],
   },

@@ -19,7 +19,8 @@ import { ApiError, asyncHandler } from '../utils/ApiError.js'
 import { assignExpertToQuestion, findAvailableExpert } from '../services/assignmentService.js'
 import { createNotification } from '../services/notificationService.js'
 import { logAudit } from '../services/auditService.js'
-import { planRequiresExpertSelection } from '../constants/pricing.js'
+import { planRequiresExpertSelection } from '../services/planService.js'
+import { creditMentorPointsForQuestion } from '../services/walletService.js'
 import ExpertType from '../models/ExpertType.js'
 import { slugify } from '../utils/slug.js'
 import { resolveIdList, mergeCategoryIdsWithTypes } from '../utils/expertMatch.js'
@@ -859,8 +860,9 @@ export const approveQuestion = asyncHandler(async (req, res) => {
 
   let expertId = overrideExpertId || question.selectedExpert
   const isAdminOverride = Boolean(overrideExpertId)
+  const requiresExpert = await planRequiresExpertSelection(question.plan)
 
-  if (!expertId && question.plan === 'basic') {
+  if (!expertId && !requiresExpert) {
     const expert = await findAvailableExpert(question.category, question.expertType)
     if (!expert) throw new ApiError(400, 'No available mentor for this category')
     expertId = expert.user._id
@@ -874,7 +876,7 @@ export const approveQuestion = asyncHandler(async (req, res) => {
     assignedBy: req.user._id,
     assignmentType: isAdminOverride
       ? 'manual'
-      : planRequiresExpertSelection(question.plan)
+      : requiresExpert
         ? 'user_selected'
         : 'auto',
     relaxAvailability: isAdminOverride,
@@ -971,6 +973,21 @@ export const approveAnswer = asyncHandler(async (req, res) => {
 
   question.status = 'completed'
   await question.save()
+
+  const { creditAmount } = await creditMentorPointsForQuestion({
+    question,
+    expertId: answer.expert,
+  })
+  if (creditAmount > 0) {
+    const points = creditAmount / 100
+    await createNotification({
+      userId: answer.expert,
+      type: 'wallet_credited',
+      title: 'Points credited',
+      message: `${points} pts credited for answering "${question.title}".`,
+      link: '/expert/wallet',
+    })
+  }
 
   const profile = await ExpertProfile.findOne({ user: answer.expert })
   if (profile) {

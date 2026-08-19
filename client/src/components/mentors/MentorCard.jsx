@@ -7,12 +7,13 @@ import {
   CalendarCheck,
   Heart,
   MessageSquare,
-  MonitorPlay,
   Star,
   Trophy,
+  Users,
   Video,
 } from 'lucide-react'
-import { PLANS } from '../../constants'
+import { pickMentorCtaPlans } from '../../constants'
+import { usePlans } from '../../hooks/useCatalog'
 import { formatRupee } from '../../utils/currency'
 
 function avatarUrl(expert) {
@@ -45,12 +46,14 @@ export default function MentorCard({
   bookmarked = false,
   onToggleFavorite,
   onToggleBookmark,
+  showMentorType = true,
 }) {
   const [hovered, setHovered] = useState(false)
   const showReviews = expert.profileVisibility?.reviews !== false
   const rating = showReviews ? Number(expert.averageRating) || 0 : 0
   const reviews = showReviews ? expert.totalRatings || expert.reviewCount || 0 : 0
   const answers = expert.completedAnswers || 0
+  const responseHrs = expert.responseTime || 12
   const rawExperience =
     expert.profileVisibility?.experience === false
       ? 'Private'
@@ -59,11 +62,11 @@ export default function MentorCard({
   const available = expert.availability === 'available' || expert.isAvailable
   const isTop = expert.isVerified || rating >= 4.5
 
-  const expertType = expert.expertType?.name || expert.expertTypes?.[0]?.name || 'Mentor'
+  const expertType = expert.expertType?.name || expert.expertTypes?.[0]?.name || ''
   const category = expert.category?.name || expert.categories?.[0]?.name || ''
 
-  const queryPlan = PLANS.mentor
-  const callPlan = PLANS.expert_call
+  const { data: plans } = usePlans()
+  const { queryPlan, callPlan } = pickMentorCtaPlans(plans)
 
   return (
     <motion.article
@@ -89,7 +92,7 @@ export default function MentorCard({
             <img
               src={avatarUrl(expert)}
               alt={expert.name || 'Mentor'}
-              className="h-20 w-20 sm:h-24 sm:w-24 rounded-xl object-cover ring-1 ring-border/80 shadow-sm transition-transform duration-200 group-hover/avatar:scale-[1.02]"
+              className="h-28 w-28 sm:h-32 sm:w-32 rounded-xl object-cover ring-1 ring-border/80 shadow-sm transition-transform duration-200 group-hover/avatar:scale-[1.02]"
             />
 
             {available && (
@@ -120,16 +123,16 @@ export default function MentorCard({
 
                 {/* Mentor Type & Category Badges */}
                 <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                  {expertType && (
+                  {showMentorType && expertType ? (
                     <span className="inline-flex items-center rounded-md border border-border bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-ink">
                       {expertType}
                     </span>
-                  )}
-                  {category && (
+                  ) : null}
+                  {category ? (
                     <span className="inline-flex items-center rounded-md border border-border/80 bg-surface/70 px-1.5 py-0.5 text-[10px] font-semibold text-muted">
                       {category}
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -180,20 +183,20 @@ export default function MentorCard({
             )}
 
             {/* Experience, Sessions & Avg Response */}
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[11px] text-muted">
+            <div className="flex flex-col gap-1 text-[11px] text-muted">
               {expert.profileVisibility?.experience !== false && (
-                <span className="inline-flex items-center gap-1 font-semibold text-ink">
-                  <Briefcase size={11} className="text-muted-light shrink-0" />
+                <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
+                  <Briefcase size={12} className="text-muted-light shrink-0" />
                   {experienceLabel}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 font-medium text-muted">
-                <MonitorPlay size={11} className="text-muted-light shrink-0" />
-                {answers.toLocaleString('en-IN')} Sessions
+              <span className="inline-flex items-center gap-1.5 font-medium text-ink">
+                <Users size={12} className="text-muted-light shrink-0" />
+                {answers.toLocaleString('en-IN')} mentee engagements
               </span>
-              <span className="inline-flex items-center gap-1 font-medium text-muted">
-                <CalendarCheck size={11} className="text-muted-light shrink-0" />
-                {available ? '99%' : '—'} Avg.
+              <span className="inline-flex items-center gap-1.5 font-medium text-ink">
+                <CalendarCheck size={12} className="text-muted-light shrink-0" />
+                ~{responseHrs}h avg response
               </span>
             </div>
 
@@ -206,8 +209,9 @@ export default function MentorCard({
           </div>
         </div>
 
-        {/* Action Cards (Query & 1:1 Call) */}
-        <div className="mt-3 grid grid-cols-2 gap-1.5">
+        {(queryPlan || callPlan) && (
+        <div className={`mt-3 grid gap-1.5 ${queryPlan && callPlan ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {queryPlan ? (
           <button
             type="button"
             onClick={() => onAsk?.(expert, queryPlan.id)}
@@ -226,7 +230,9 @@ export default function MentorCard({
               {formatRupee(queryPlan.pricePaise)}
             </span>
           </button>
+          ) : null}
 
+          {callPlan ? (
           <button
             type="button"
             onClick={() => onAsk?.(expert, callPlan.id)}
@@ -238,14 +244,16 @@ export default function MentorCard({
                 1:1 Call
               </span>
               <p className="mt-0.5 line-clamp-1 text-[11px] font-semibold text-ink">
-                Live mentor session
+                {callPlan.name}
               </p>
             </div>
             <span className="mt-1.5 inline-flex w-fit items-center rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-bold text-ink">
               {formatRupee(callPlan.pricePaise)}
             </span>
           </button>
+          ) : null}
         </div>
+        )}
 
         {/* View Profile Button */}
         <motion.button
@@ -270,7 +278,7 @@ export function MentorCardSkeleton() {
   return (
     <div className="h-[230px] animate-pulse rounded-2xl border border-border bg-card p-3.5 sm:p-4">
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-xl bg-surface" />
+        <div className="h-28 w-28 sm:h-32 sm:w-32 shrink-0 rounded-xl bg-surface" />
         <div className="flex-1 space-y-2 pt-1">
           <div className="h-3.5 w-32 rounded bg-surface" />
           <div className="flex gap-1.5">

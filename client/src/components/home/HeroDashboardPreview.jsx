@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ArrowUp, Paperclip, Moon, Sun, X } from 'lucide-react'
+import { Sparkles, ArrowUp, Paperclip, Link2, Moon, Sun, X } from 'lucide-react'
 import { getQuestionPlaceholder } from '../../utils/questionPrompts'
 import { clearQuestionDraft, loadQuestionDraft, saveQuestionDraft } from '../../utils/questionDraft'
 import Auth from '../../pages/Auth'
@@ -204,16 +204,14 @@ function DesktopDashboardBody(props) {
 
           <div className="mt-2 flex shrink-0 items-center justify-between gap-3 border-t border-border pt-2">
             <div className="flex flex-wrap items-center gap-3">
-              <Paperclip size={15} className="shrink-0 text-muted" />
-              {['PDF', 'Files', 'Links'].map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  className="text-xs font-medium text-muted transition hover:text-ink"
-                >
-                  {label}
-                </button>
-              ))}
+              <button type="button" className="inline-flex items-center gap-1.5 text-xs font-medium text-muted transition hover:text-ink">
+                <Paperclip size={15} className="shrink-0" />
+                Files
+              </button>
+              <button type="button" className="inline-flex items-center gap-1.5 text-xs font-medium text-muted transition hover:text-ink">
+                <Link2 size={15} className="shrink-0" />
+                Links
+              </button>
             </div>
             <button
               type="button"
@@ -352,13 +350,15 @@ function MobileAppScreen({
         />
 
         <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border px-2 py-2">
-          <div className="flex items-center gap-2">
-            <Paperclip size={13} className="text-muted" />
-            {['PDF', 'Files', 'Links'].map((label) => (
-              <button key={label} type="button" className="text-[10px] font-medium text-muted">
-                {label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2.5">
+            <button type="button" className="inline-flex items-center gap-1 text-[10px] font-medium text-muted">
+              <Paperclip size={13} />
+              Files
+            </button>
+            <button type="button" className="inline-flex items-center gap-1 text-[10px] font-medium text-muted">
+              <Link2 size={13} />
+              Links
+            </button>
           </div>
           <button
             type="button"

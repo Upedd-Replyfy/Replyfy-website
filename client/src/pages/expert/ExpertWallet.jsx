@@ -55,7 +55,7 @@ export default function ExpertWallet() {
     <div className="space-y-8">
       <ExpertPageHeader
         title="Points Wallet"
-        description="Track your points balance, redeem earnings, and review transaction history."
+        description="Points are added when an admin approves your answer. Each plan has its own point amount."
       />
 
       <div className="grid gap-4 sm:grid-cols-3">

@@ -9,7 +9,7 @@ const icons = {
 }
 
 export default function HomePricingCard({ plan, selected = false, onSelect }) {
-  const Icon = icons[plan.id]
+  const Icon = icons[plan.id] || Zap
   const isPopular = plan.popular
 
   return (
@@ -75,7 +75,7 @@ export default function HomePricingCard({ plan, selected = false, onSelect }) {
       </p>
 
       <ul className="mt-5 flex-1 space-y-2.5">
-        {plan.features.map((feature, index) => (
+        {(plan.features || []).map((feature, index) => (
           <motion.li
             key={feature}
             initial={{ opacity: 0, x: -8 }}

@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tag, X, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { PLANS, planRequiresExpertSelection } from '../../constants'
+import { planRequiresExpertSelection, resolvePlan } from '../../constants'
 import { userApi } from '../../services/api'
 
 import { formatRupeeAmount } from '../../utils/currency'
 
 export default function PaymentStep({
   plan,
+  plans,
   category,
   expertType,
   mentorTypesEnabled = true,
@@ -21,7 +22,9 @@ export default function PaymentStep({
   const [couponInput, setCouponInput] = useState('')
   const [applying, setApplying] = useState(false)
 
-  const originalAmount = PLANS[plan].pricePaise
+  const selected = resolvePlan(plan, plans)
+  const originalAmount = selected?.pricePaise || 0
+  const needsMentor = planRequiresExpertSelection(plan, plans)
   const discountAmount = appliedCoupon?.discountAmount ?? 0
   const finalAmount = appliedCoupon?.finalAmount ?? originalAmount
 
@@ -66,7 +69,7 @@ export default function PaymentStep({
         <div className="space-y-4 p-6 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Plan</span>
-            <span className="font-medium text-ink">{PLANS[plan].name}</span>
+            <span className="font-medium text-ink">{selected?.name || plan}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">Category</span>
@@ -75,23 +78,18 @@ export default function PaymentStep({
           {mentorTypesEnabled ? (
             <div className="flex justify-between">
               <span className="text-muted">Mentor type</span>
-              <span className="font-medium text-ink">{expertType?.name}</span>
+              <span className="font-medium text-ink">{expertType?.name || 'Any'}</span>
             </div>
           ) : null}
-          {planRequiresExpertSelection(plan) && selectedExpert && (
+          {needsMentor && selectedExpert && (
             <div className="flex justify-between">
               <span className="text-muted">Mentor</span>
               <span className="font-medium text-ink">{selectedExpert.name}</span>
             </div>
           )}
-          {plan === 'basic' && (
+          {!needsMentor && (
             <p className="rounded-xl bg-surface px-4 py-3 text-xs text-muted-light">
               We&apos;ll choose the best available mentor after admin approval.
-            </p>
-          )}
-          {plan === 'expert_call' && (
-            <p className="rounded-xl bg-surface px-4 py-3 text-xs text-muted-light">
-              Includes a 20-minute live call with your chosen mentor.
             </p>
           )}
 

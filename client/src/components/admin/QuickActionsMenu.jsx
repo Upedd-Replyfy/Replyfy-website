@@ -9,6 +9,7 @@ import {
   Wallet,
   FolderTree,
   Tags,
+  IndianRupee,
 } from 'lucide-react'
 
 const actions = [
@@ -18,6 +19,7 @@ const actions = [
   { label: 'Process Withdrawals', icon: Wallet, to: '/admin/withdrawals' },
   { label: 'Manage Categories', icon: FolderTree, to: '/admin/categories' },
   { label: 'Mentor Types', icon: Tags, to: '/admin/expert-types' },
+  { label: 'Manage Pricing', icon: IndianRupee, to: '/admin/pricing' },
 ]
 
 export default function QuickActionsMenu({ onRegisterExpert }) {

@@ -7,6 +7,7 @@ import {
   getPlatformStats,
   getPlatformSettings,
 } from '../controllers/publicController.js'
+import { listPublicPlans } from '../controllers/planController.js'
 
 const router = Router()
 
@@ -16,5 +17,6 @@ router.get('/experts', getExperts)
 router.get('/experts/:id', getExpertById)
 router.get('/stats', getPlatformStats)
 router.get('/settings', getPlatformSettings)
+router.get('/plans', listPublicPlans)
 
 export default router

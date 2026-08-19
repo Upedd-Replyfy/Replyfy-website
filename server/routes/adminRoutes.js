@@ -39,6 +39,12 @@ import {
   getAllNotifications,
   sendNotification,
 } from '../controllers/adminController.js'
+import {
+  listAdminPlans,
+  createPlan,
+  updatePlan,
+  deletePlan,
+} from '../controllers/planController.js'
 
 const router = Router()
 
@@ -85,6 +91,11 @@ router.get('/expert-types', getExpertTypes)
 router.post('/expert-types', [body('name').notEmpty(), body('category').notEmpty()], validate, createExpertType)
 router.put('/expert-types/:id', updateExpertType)
 router.delete('/expert-types/:id', deleteExpertType)
+
+router.get('/plans', listAdminPlans)
+router.post('/plans', body('name').notEmpty(), validate, createPlan)
+router.put('/plans/:id', updatePlan)
+router.delete('/plans/:id', deletePlan)
 
 router.get('/questions/pending', getPendingQuestions)
 router.get('/questions', getAllQuestions)

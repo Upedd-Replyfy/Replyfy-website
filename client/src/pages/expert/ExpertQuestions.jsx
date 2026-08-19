@@ -30,17 +30,18 @@ export default function ExpertQuestions() {
       />
 
       {isLoading ? (
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-44 animate-pulse rounded-2xl border border-border bg-card sm:h-48" />
+            <div key={i} className="h-40 animate-pulse rounded-2xl border border-border bg-card" />
           ))}
         </div>
       ) : questions.length ? (
         <ExpertPanel
           title="Your assignments"
           subtitle="Tap a card to preview details, then open to answer"
+          noPadding
         >
-          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
+          <div className="grid items-stretch gap-3 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-3">
             {questions.map((q) => (
               <ExpertUserCard key={q._id} question={q} onOpen={setPreview} />
             ))}

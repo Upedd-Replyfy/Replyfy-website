@@ -1,5 +1,5 @@
 import { userApi } from '../services/api'
-import { PLANS } from '../constants'
+import { resolvePlan } from '../constants'
 
 function loadRazorpayScript() {
   return new Promise((resolve, reject) => {
@@ -50,7 +50,7 @@ export async function payForQuestion(question, { couponCode, planName } = {}) {
 
   const label =
     planName ||
-    PLANS[question?.plan]?.name ||
+    resolvePlan(question?.plan)?.name ||
     'Question'
 
   return new Promise((resolve, reject) => {

@@ -12,6 +12,7 @@ import {
   getPlatformStats,
   getPlatformSettings,
 } from '../controllers/publicController.js'
+import { listPublicPlans } from '../controllers/planController.js'
 
 const router = Router()
 
@@ -20,6 +21,7 @@ router.get('/expert-types', getExpertTypes)
 router.get('/experts', getExperts)
 router.get('/stats', getPlatformStats)
 router.get('/settings', getPlatformSettings)
+router.get('/plans', listPublicPlans)
 
 router.use('/auth', authRoutes)
 router.use('/public', publicRoutes)

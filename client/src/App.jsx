@@ -23,6 +23,7 @@ import ExpertLayout from './layouts/ExpertLayout'
 import ExpertDashboard from './pages/expert/ExpertDashboard'
 import ExpertQuestions from './pages/expert/ExpertQuestions'
 import ExpertQuestionDetail from './pages/expert/ExpertQuestionDetail'
+import ExpertHistory from './pages/expert/ExpertHistory'
 import ExpertWallet from './pages/expert/ExpertWallet'
 import ExpertSettings from './pages/expert/ExpertSettings'
 import AdminLayout from './layouts/AdminLayout'
@@ -38,6 +39,7 @@ import AdminPayments from './pages/admin/AdminPayments'
 import AdminWithdrawals from './pages/admin/AdminWithdrawals'
 import AdminSettings from './pages/admin/AdminSettings'
 import AdminNotifications from './pages/admin/AdminNotifications'
+import AdminPricing from './pages/admin/AdminPricing'
 import { ProtectedRoute, GuestRoute } from './routes/ProtectedRoute'
 import { ROLES } from './constants'
 
@@ -76,6 +78,7 @@ export default function App() {
             <Route index element={<ExpertDashboard />} />
             <Route path="questions" element={<ExpertQuestions />} />
             <Route path="questions/:id" element={<ExpertQuestionDetail />} />
+            <Route path="history" element={<ExpertHistory />} />
             <Route path="wallet" element={<ExpertWallet />} />
             <Route path="settings" element={<ExpertSettings />} />
           </Route>
@@ -94,6 +97,7 @@ export default function App() {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="expert-types" element={<AdminExpertTypes />} />
             <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="pricing" element={<AdminPricing />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Route>

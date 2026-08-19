@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import { PLAN_IDS } from '../constants/pricing.js'
 
 const attachmentSchema = new mongoose.Schema(
   {
@@ -20,10 +19,11 @@ const questionSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
     expertType: { type: mongoose.Schema.Types.ObjectId, ref: 'ExpertType' },
     priority: { type: String, enum: ['standard', 'priority', 'urgent'], default: 'standard' },
-    plan: { type: String, enum: PLAN_IDS, required: true },
+    plan: { type: String, required: true, trim: true, lowercase: true },
     selectedExpert: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     assignedExpert: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     attachments: [attachmentSchema],
+    links: [{ type: String, trim: true }],
     status: {
       type: String,
       enum: [
@@ -50,6 +50,9 @@ const questionSchema = new mongoose.Schema(
     discountAmount: { type: Number, default: 0 },
     couponCode: { type: String, default: '' },
     isRated: { type: Boolean, default: false },
+    mentorPointsPaise: { type: Number, default: 0, min: 0 },
+    pointsCredited: { type: Boolean, default: false },
+    pointsCreditedAt: Date,
   },
   { timestamps: true }
 )

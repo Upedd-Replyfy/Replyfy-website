@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Paperclip,
   FileText,
+  Link2,
   Image as ImageIcon,
   File,
   Archive,
@@ -196,6 +197,27 @@ export function QuestionCard({ question }) {
             Question files
           </p>
           <AttachmentGallery files={attachments} label="Question files" />
+        </div>
+      )}
+      {(question?.links || []).length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            Links
+          </p>
+          <div className="flex flex-col gap-2">
+            {question.links.map((url) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 truncate rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+              >
+                <Link2 size={14} />
+                <span className="truncate">{url}</span>
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </motion.section>

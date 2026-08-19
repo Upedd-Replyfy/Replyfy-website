@@ -1,6 +1,6 @@
 import Coupon from '../models/Coupon.js'
 import { ApiError } from '../utils/ApiError.js'
-import { getPlanAmount } from '../constants/pricing.js'
+import { getPlanAmount } from './planService.js'
 
 const DEFAULT_COUPONS = [
   {
@@ -65,7 +65,7 @@ export async function validateCoupon({ code, plan, amountPaise }) {
     throw new ApiError(400, 'This coupon is not valid for the selected plan')
   }
 
-  const originalAmount = amountPaise ?? getPlanAmount(plan)
+  const originalAmount = amountPaise ?? (await getPlanAmount(plan))
 
   if (originalAmount < coupon.minAmount) {
     throw new ApiError(

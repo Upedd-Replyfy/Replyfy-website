@@ -11,6 +11,7 @@ import {
   Settings,
   FolderTree,
   Tags,
+  IndianRupee,
 } from 'lucide-react'
 
 export const ADMIN_NAV_GROUPS = [
@@ -58,8 +59,9 @@ export const ADMIN_NAV_GROUPS = [
     id: 'system',
     label: 'System',
     items: [
-      { to: '/admin/notifications', label: 'Notifications', icon: Bell },
-      { to: '/admin/settings', label: 'Settings', icon: Settings },
+        { to: '/admin/notifications', label: 'Notifications', icon: Bell },
+        { to: '/admin/pricing', label: 'Pricing', icon: IndianRupee },
+        { to: '/admin/settings', label: 'Settings', icon: Settings },
     ],
   },
 ]

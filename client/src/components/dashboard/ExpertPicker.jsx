@@ -64,7 +64,7 @@ export default function ExpertPicker({
         <div className="mt-8">
           <EmptyState
             title="No mentors available"
-            message="No verified mentors match this category and type right now. Try a different mentor type or check back later."
+            message="No verified mentors match this filter right now. Try All types, another category, or check back later."
           />
         </div>
       )}

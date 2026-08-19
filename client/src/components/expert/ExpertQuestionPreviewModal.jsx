@@ -2,18 +2,10 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Mail, Calendar, FolderOpen, CreditCard, ArrowRight, BadgeCheck } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'
+import UserAvatar from '../ui/UserAvatar'
 
 function formatMoney(amount) {
   return `₹${(amount || 0) / 100}`
-}
-
-function initials(name = '?') {
-  return String(name)
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || '?'
 }
 
 function InfoRow({ label, value }) {
@@ -68,17 +60,7 @@ export default function ExpertQuestionPreviewModal({ open, question, onClose }) 
               </div>
 
               <div className="flex items-center gap-4">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt=""
-                    className="h-16 w-16 rounded-2xl object-cover shadow-md ring-2 ring-white"
-                  />
-                ) : (
-                  <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-violet-500 text-lg font-bold text-white shadow-md ring-2 ring-white">
-                    {initials(name)}
-                  </span>
-                )}
+                <UserAvatar src={user.avatar} name={name} size="xl" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <h2 className="truncate text-xl font-bold tracking-tight text-ink">{name}</h2>

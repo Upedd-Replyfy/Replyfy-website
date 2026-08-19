@@ -288,15 +288,17 @@ function CategoryPills({ categories, selectedId, onSelect, loading }) {
     )
   }
 
+  const pills = [{ _id: null, name: 'All' }, ...categories]
+
   return (
     <div className="mb-3 flex flex-wrap gap-2">
-      {categories.map((cat) => {
-        const active = selectedId === cat._id
+      {pills.map((cat) => {
+        const active = selectedId == null ? cat._id == null : selectedId === cat._id
         return (
           <button
-            key={cat._id}
+            key={cat._id || 'all'}
             type="button"
-            onClick={() => onSelect(cat)}
+            onClick={() => onSelect(cat._id)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition duration-200 hover:scale-[1.03] active:scale-[0.98] ${
               active
                 ? 'bg-gradient-to-r from-sky-500 to-violet-600 text-white shadow-[0_8px_20px_rgba(99,102,241,0.28)]'
@@ -322,9 +324,7 @@ function MentorTypeSegment({ expertTypes, selectedId, onSelect, loading }) {
     )
   }
 
-  if (!expertTypes.length) {
-    return <p className="mb-3 text-xs text-[#9CA3AF]">No mentor types for this category</p>
-  }
+  const pills = [{ _id: null, name: 'All' }, ...expertTypes]
 
   return (
     <div className="mb-3">
@@ -332,13 +332,13 @@ function MentorTypeSegment({ expertTypes, selectedId, onSelect, loading }) {
         Mentor type
       </p>
       <div className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-1">
-        {expertTypes.map((type) => {
-          const active = selectedId === type._id
+        {pills.map((type) => {
+          const active = selectedId == null ? type._id == null : selectedId === type._id
           return (
             <button
-              key={type._id}
+              key={type._id || 'all'}
               type="button"
-              onClick={() => onSelect(type)}
+              onClick={() => onSelect(type._id)}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition duration-200 ${
                 active
                   ? 'bg-violet-100 text-violet-800 shadow-sm'
@@ -364,50 +364,39 @@ export default function DisplayMentors() {
 
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
   const { data: platformSettings } = usePlatformSettings()
-  const mentorTypesEnabled = platformSettings?.mentorTypesEnabled !== false
+  const mentorTypesEnabled = Boolean(platformSettings?.mentorTypesEnabled)
   const { data: expertTypes = [], isLoading: expertTypesLoading } = useExpertTypes(
     categoryId,
     mentorTypesEnabled
   )
 
   const expertParams = useMemo(
-    () =>
-      categoryId
-        ? {
-            category: categoryId,
-            expertType: mentorTypesEnabled ? expertTypeId || undefined : undefined,
-            availability: 'available',
-            search: search.trim() || undefined,
-            limit: 48,
-            sort,
-          }
-        : null,
+    () => ({
+      category: categoryId || undefined,
+      expertType: mentorTypesEnabled && expertTypeId ? expertTypeId : undefined,
+      availability: 'available',
+      search: search.trim() || undefined,
+      limit: 48,
+      sort,
+    }),
     [categoryId, expertTypeId, search, sort, mentorTypesEnabled]
   )
 
-  const { data, isLoading } = useExperts(expertParams, !!expertParams)
+  const { data, isLoading } = useExperts(expertParams)
   const mentors = data?.experts || []
-
-  useEffect(() => {
-    if (categories.length && !categoryId) {
-      setCategoryId(categories[0]._id)
-    }
-  }, [categories, categoryId])
 
   useEffect(() => {
     if (!mentorTypesEnabled) {
       setExpertTypeId(null)
       return
     }
-    if (!expertTypes.length) {
+    if (expertTypeId && expertTypes.length && !expertTypes.some((t) => t._id === expertTypeId)) {
       setExpertTypeId(null)
-      return
     }
-    setExpertTypeId((prev) => (expertTypes.some((t) => t._id === prev) ? prev : expertTypes[0]._id))
-  }, [expertTypes, mentorTypesEnabled])
+  }, [expertTypes, mentorTypesEnabled, expertTypeId])
 
-  const handleCategoryChange = (cat) => {
-    setCategoryId(cat._id)
+  const handleCategoryChange = (id) => {
+    setCategoryId(id)
     setExpertTypeId(null)
   }
 
@@ -487,7 +476,7 @@ export default function DisplayMentors() {
             <MentorTypeSegment
               expertTypes={expertTypes}
               selectedId={expertTypeId}
-              onSelect={(type) => setExpertTypeId(type._id)}
+              onSelect={setExpertTypeId}
               loading={expertTypesLoading}
             />
           ) : null}
@@ -564,6 +553,7 @@ export default function DisplayMentors() {
                   index={index}
                   onAsk={handleAsk}
                   onOpen={setSelectedMentor}
+                  showMentorType={mentorTypesEnabled}
                 />
               ))}
             </div>
@@ -576,6 +566,7 @@ export default function DisplayMentors() {
         forceLight
         open={!!selectedMentor}
         mentor={selectedMentor}
+        showMentorType={mentorTypesEnabled}
         onClose={() => setSelectedMentor(null)}
         onAsk={(_mentor, planId) => {
           setSelectedMentor(null)

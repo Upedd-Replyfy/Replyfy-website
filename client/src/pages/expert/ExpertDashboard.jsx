@@ -169,7 +169,7 @@ export default function ExpertDashboard() {
                 ))}
               </div>
             ) : questions.length ? (
-              <div className="grid gap-3 p-4 sm:grid-cols-2">
+              <div className="grid items-stretch gap-3 p-4 sm:grid-cols-2">
                 {questions.map((q) => (
                   <ExpertUserCard key={q._id} question={q} onOpen={setPreview} />
                 ))}
@@ -186,6 +186,10 @@ export default function ExpertDashboard() {
         <div className="space-y-6">
           <ExpertPanel title="Quick Actions">
             <div className="space-y-3">
+              <Link to="/expert/history" className={listLinkClass}>
+                Solved answer history
+                <ArrowRight size={18} className="text-muted" />
+              </Link>
               <Link to="/expert/questions" className={listLinkClass}>
                 View all questions
                 <ArrowRight size={18} className="text-muted" />

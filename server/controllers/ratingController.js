@@ -2,9 +2,6 @@ import Rating from '../models/Rating.js'
 import Question from '../models/Question.js'
 import ExpertProfile from '../models/ExpertProfile.js'
 import { ApiError, asyncHandler } from '../utils/ApiError.js'
-import { creditExpertWallet } from '../services/walletService.js'
-import { createNotification } from '../services/notificationService.js'
-import User from '../models/User.js'
 
 export const submitRating = asyncHandler(async (req, res) => {
   const { questionId, stars, comment } = req.body
@@ -44,23 +41,6 @@ export const submitRating = asyncHandler(async (req, res) => {
     profile.totalRatings = total
     await profile.save()
   }
-
-  const { creditAmount } = await creditExpertWallet({
-    expertId: question.assignedExpert,
-    amount: question.amount,
-    questionId: question._id,
-    description: 'Earnings from rated question',
-  })
-
-  const expert = await User.findById(question.assignedExpert)
-  await createNotification({
-    userId: question.assignedExpert,
-    type: 'wallet_credited',
-    title: 'Wallet Credited',
-    message: `₹${creditAmount / 100} credited to your wallet after rating.`,
-    link: '/expert/wallet',
-    email: expert?.email,
-  })
 
   res.status(201).json({ success: true, rating })
 })

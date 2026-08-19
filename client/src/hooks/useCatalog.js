@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { catalogApi } from '../services/api'
+import { PLANS } from '../constants'
 
 export function useCategories() {
   return useQuery({
@@ -12,9 +13,9 @@ export function useCategories() {
 
 export function useExpertTypes(categoryId, enabled = true) {
   return useQuery({
-    queryKey: ['expert-types', categoryId],
-    queryFn: () => catalogApi.getExpertTypes(categoryId),
-    enabled: !!categoryId && enabled,
+    queryKey: ['expert-types', categoryId || 'all'],
+    queryFn: () => catalogApi.getExpertTypes(categoryId || undefined),
+    enabled,
     staleTime: 5 * 60 * 1000,
     select: (data) => data.expertTypes || [],
   })
@@ -24,9 +25,9 @@ export function usePlatformSettings() {
   return useQuery({
     queryKey: ['platform-settings'],
     queryFn: catalogApi.getSettings,
-    staleTime: 60 * 1000,
+    staleTime: 15 * 1000,
     select: (data) => ({
-      mentorTypesEnabled: data?.settings?.mentorTypesEnabled !== false,
+      mentorTypesEnabled: data?.settings?.mentorTypesEnabled === true,
     }),
   })
 }
@@ -49,5 +50,19 @@ export function usePlatformStats() {
     queryFn: catalogApi.getStats,
     staleTime: 10 * 60 * 1000,
     select: (data) => data.stats,
+  })
+}
+
+export function usePlans() {
+  return useQuery({
+    queryKey: ['plans'],
+    queryFn: catalogApi.getPlans,
+    staleTime: 30 * 1000,
+    placeholderData: { plans: Object.values(PLANS) },
+    select: (data) => {
+      const list = data?.plans
+      if (Array.isArray(list) && list.length) return list
+      return Object.values(PLANS)
+    },
   })
 }

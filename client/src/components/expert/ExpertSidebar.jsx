@@ -1,11 +1,20 @@
 import { NavLink } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { LogOut } from 'lucide-react'
 import Logo from '../ui/Logo'
+import UserAvatar from '../ui/UserAvatar'
 import { useAuth } from '../../context/AuthContext'
+import { expertApi } from '../../services/api'
 import { EXPERT_NAV } from './expertNav'
 
 export default function ExpertSidebar({ onNavigate }) {
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
+  const { data } = useQuery({
+    queryKey: ['expert-profile'],
+    queryFn: expertApi.getProfile,
+    staleTime: 60_000,
+  })
+  const photo = data?.profile?.profilePhoto || data?.profile?.avatar || user?.avatar
 
   const handleSignOut = async () => {
     onNavigate?.()
@@ -32,7 +41,7 @@ export default function ExpertSidebar({ onNavigate }) {
                 className={({ isActive }) =>
                   `flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-medium transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-sky-500/15 to-violet-500/10 text-ink shadow-[inset_0_0_0_1px_rgba(56,189,248,0.2)]'
+                      ? 'bg-surface text-ink ring-1 ring-border'
                       : 'text-muted hover:bg-surface hover:text-ink'
                   }`
                 }
@@ -44,11 +53,18 @@ export default function ExpertSidebar({ onNavigate }) {
           })}
         </nav>
 
-        <div className="mt-auto border-t border-border pt-4">
+        <div className="mt-auto space-y-3 border-t border-border pt-4">
+          <div className="flex items-center gap-3 px-2">
+            <UserAvatar src={photo} name={user?.name} size="sm" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-ink">{user?.name || 'Mentor'}</p>
+              <p className="truncate text-[11px] text-muted">{user?.email || 'Mentor account'}</p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex min-h-11 w-full items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-medium text-red-400/90 transition hover:bg-red-500/10 hover:text-red-300"
+            className="flex min-h-11 w-full items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-medium text-red-500/90 transition hover:bg-red-500/10 hover:text-red-500"
           >
             <LogOut size={20} strokeWidth={1.75} />
             Sign out

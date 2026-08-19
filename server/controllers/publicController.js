@@ -44,6 +44,14 @@ export const getExpertTypes = asyncHandler(async (req, res) => {
   res.json({ success: true, expertTypes, mentorTypesEnabled: true })
 })
 
+function stripMentorTypes(expert) {
+  return {
+    ...expert,
+    expertType: null,
+    expertTypes: [],
+  }
+}
+
 export const getExperts = asyncHandler(async (req, res) => {
   const {
     category,
@@ -60,10 +68,11 @@ export const getExperts = asyncHandler(async (req, res) => {
     limit = 12,
   } = req.query
 
+  const mentorTypesEnabled = await isMentorTypesEnabled()
   const query = { status: 'active' }
 
-  if (category || expertType || type) {
-    const typeId = expertType || type
+  if (category || (mentorTypesEnabled && (expertType || type))) {
+    const typeId = mentorTypesEnabled ? expertType || type : null
     const and = []
     if (category) {
       and.push({ $or: [{ category }, { categories: category }] })
@@ -124,10 +133,15 @@ export const getExperts = asyncHandler(async (req, res) => {
   const start = (Number(page) - 1) * Number(limit)
   const paginated = profiles.slice(start, start + Number(limit))
   const profileVisibility = await getMentorProfileVisibilitySettings()
+  const experts = paginated.map((p) => {
+    const formatted = formatExpert({ ...p, profileVisibility })
+    return mentorTypesEnabled ? formatted : stripMentorTypes(formatted)
+  })
 
   res.json({
     success: true,
-    experts: paginated.map((p) => formatExpert({ ...p, profileVisibility })),
+    experts,
+    mentorTypesEnabled,
     pagination: {
       page: Number(page),
       limit: Number(limit),
@@ -157,6 +171,7 @@ export const getExpertById = asyncHandler(async (req, res) => {
   if (!profile) return res.status(404).json({ success: false, message: 'Mentor not found' })
 
   const profileVisibility = await getMentorProfileVisibilitySettings()
+  const mentorTypesEnabled = await isMentorTypesEnabled()
   const ratings =
     profileVisibility.reviews === false
       ? []
@@ -165,10 +180,13 @@ export const getExpertById = asyncHandler(async (req, res) => {
           .sort({ createdAt: -1 })
           .limit(10)
 
+  const expert = formatExpert({ ...normalizeExpertDoc(profile), profileVisibility })
+
   res.json({
     success: true,
-    expert: formatExpert({ ...normalizeExpertDoc(profile), profileVisibility }),
+    expert: mentorTypesEnabled ? expert : stripMentorTypes(expert),
     ratings,
+    mentorTypesEnabled,
   })
 })
 

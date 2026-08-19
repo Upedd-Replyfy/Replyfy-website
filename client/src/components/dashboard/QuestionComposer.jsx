@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 import {
   ArrowUp,
   Sparkles,
   X,
   FileText,
+  FileImage,
   Upload,
   Loader2,
   Link2,
@@ -15,12 +17,60 @@ import SuggestionCarousel from './SuggestionCarousel'
 import { useAuth } from '../../context/AuthContext'
 import { getQuestionPlaceholder } from '../../utils/questionPrompts'
 
-const FILE_TYPES = [
-  { id: 'pdf', label: 'PDF', accept: '.pdf' },
-  { id: 'files', label: 'Files', accept: '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.zip,.png,.jpg,.jpeg' },
-]
+const FILE_ACCEPT =
+  'image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt'
+
+const ALLOWED_EXT = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+  'gif',
+  'pdf',
+  'doc',
+  'docx',
+  'ppt',
+  'pptx',
+  'xls',
+  'xlsx',
+  'csv',
+  'txt',
+])
 
 const MAX_QUESTION_LENGTH = 2000
+const MAX_FILES = 5
+
+function isImageFile(file) {
+  return file?.type?.startsWith('image/') || /\.(jpe?g|png|webp|gif)$/i.test(file?.name || '')
+}
+
+function LinkChips({ links, onRemove }) {
+  if (!links.length) return null
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {links.map((url, index) => (
+        <span
+          key={`${url}-${index}`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-ink"
+        >
+          <Link2 size={12} />
+          <span className="max-w-[160px] truncate">{url}</span>
+          <button type="button" onClick={() => onRemove(index)} className="text-muted">
+            <X size={12} />
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+function isAllowedFile(file) {
+  const ext = String(file?.name || '')
+    .split('.')
+    .pop()
+    ?.toLowerCase()
+  if (ALLOWED_EXT.has(ext)) return true
+  return Boolean(file?.type && (file.type.startsWith('image/') || file.type === 'application/pdf'))
+}
 
 export default function QuestionComposer({
   categories,
@@ -46,21 +96,46 @@ export default function QuestionComposer({
   const { user } = useAuth()
   const fileInputRef = useRef(null)
   const linkInputRef = useRef(null)
-  const [activeFileType, setActiveFileType] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const [linkOpen, setLinkOpen] = useState(false)
   const [linkDraft, setLinkDraft] = useState('')
 
   const placeholder = getQuestionPlaceholder(selectedCategory, selectedExpertType)
 
+  useEffect(() => {
+    if (!linkOpen) return undefined
+    const frame = window.requestAnimationFrame(() => linkInputRef.current?.focus())
+    return () => window.cancelAnimationFrame(frame)
+  }, [linkOpen])
+
   const addFiles = (incoming) => {
-    if (incoming.length) onFilesChange([...files, ...incoming])
+    const selected = Array.from(incoming || [])
+    if (!selected.length) return
+
+    const valid = []
+    let rejected = false
+    for (const file of selected) {
+      if (!isAllowedFile(file)) {
+        rejected = true
+        continue
+      }
+      valid.push(file)
+    }
+    if (rejected) toast.error('Use images, PDF, or Word/Excel/PowerPoint files')
+
+    const remaining = Math.max(0, MAX_FILES - files.length)
+    if (!remaining) {
+      toast.error(`You can attach up to ${MAX_FILES} files`)
+      return
+    }
+    const next = valid.slice(0, remaining)
+    if (valid.length > remaining) toast.error(`You can attach up to ${MAX_FILES} files`)
+    if (next.length) onFilesChange([...files, ...next])
   }
 
   const handleFileSelect = (e) => {
-    addFiles(Array.from(e.target.files || []))
+    addFiles(e.target.files)
     e.target.value = ''
-    setActiveFileType(null)
   }
 
   const handleDrop = (e) => {
@@ -71,10 +146,7 @@ export default function QuestionComposer({
 
   const removeFile = (index) => onFilesChange(files.filter((_, i) => i !== index))
 
-  const openFilePicker = (type) => {
-    setActiveFileType(type)
-    setTimeout(() => fileInputRef.current?.click(), 0)
-  }
+  const openFilePicker = () => fileInputRef.current?.click()
 
   const addLink = () => {
     const url = linkDraft.trim()
@@ -82,17 +154,22 @@ export default function QuestionComposer({
     const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`
     try {
       new URL(normalized)
-      onLinksChange?.([...links, normalized])
-      setLinkDraft('')
-      setLinkOpen(false)
     } catch {
-      setLinkDraft(url)
+      toast.error('Enter a valid link')
+      return
     }
+    if (links.some((existing) => existing.toLowerCase() === normalized.toLowerCase())) {
+      toast.error('That link is already added')
+      return
+    }
+    onLinksChange?.([...links, normalized])
+    setLinkDraft('')
+    setTimeout(() => linkInputRef.current?.focus(), 50)
   }
 
   const removeLink = (index) => onLinksChange?.(links.filter((_, i) => i !== index))
 
-  const canSubmit = query.trim() && categoryId && (!mentorTypesEnabled || expertTypeId)
+  const canSubmit = Boolean(query.trim() && categoryId)
   const firstName = user?.name?.split(' ')[0] || 'there'
 
   return (
@@ -176,7 +253,7 @@ export default function QuestionComposer({
           </div>
 
           <AnimatePresence>
-            {(files.length > 0 || links.length > 0) && (
+            {files.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -189,95 +266,95 @@ export default function QuestionComposer({
                       key={`${file.name}-${index}`}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-ink"
                     >
-                      <FileText size={12} />
+                      {isImageFile(file) ? <FileImage size={12} /> : <FileText size={12} />}
                       <span className="max-w-[120px] truncate">{file.name}</span>
                       <button type="button" onClick={() => removeFile(index)} className="text-muted">
                         <X size={12} />
                       </button>
                     </span>
                   ))}
-                  {links.map((url, index) => (
-                    <span
-                      key={`${url}-${index}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs text-ink"
-                    >
-                      <Link2 size={12} />
-                      <span className="max-w-[140px] truncate">{url}</span>
-                      <button type="button" onClick={() => removeLink(index)} className="text-muted">
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <AnimatePresence>
-            {linkOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-3 overflow-hidden"
-              >
-                <div className="flex gap-2">
-                  <input
-                    ref={linkInputRef}
-                    type="url"
-                    value={linkDraft}
-                    onChange={(e) => setLinkDraft(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addLink())}
-                    placeholder="https://..."
-                    className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs focus:border-charcoal focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={addLink}
-                    className="rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-fg"
-                  >
-                    Add
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {linkOpen ? (
+            <div className="relative z-10 mt-3">
+              <div className="flex items-center gap-2">
+                <input
+                  ref={linkInputRef}
+                  type="text"
+                  inputMode="url"
+                  autoComplete="off"
+                  value={linkDraft}
+                  onChange={(e) => setLinkDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      addLink()
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault()
+                      setLinkDraft('')
+                      setLinkOpen(false)
+                    }
+                  }}
+                  placeholder="https://example.com"
+                  className="h-11 min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 text-sm text-ink placeholder:text-muted-light focus:border-charcoal focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={addLink}
+                  className="h-11 shrink-0 rounded-lg bg-primary px-4 text-sm font-medium text-primary-fg"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLinkDraft('')
+                    setLinkOpen(false)
+                  }}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-muted transition-colors hover:bg-card hover:text-ink"
+                  aria-label="Close links"
+                  title="Close"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
               <input
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
-                accept={
-                  activeFileType
-                    ? FILE_TYPES.find((f) => f.id === activeFileType)?.accept
-                    : FILE_TYPES.find((f) => f.id === 'files')?.accept
-                }
+                accept={FILE_ACCEPT}
                 onChange={handleFileSelect}
                 multiple
               />
-              <Paperclip size={15} className="shrink-0 text-muted" />
-              {FILE_TYPES.map((ft) => (
-                <button
-                  key={ft.id}
-                  type="button"
-                  onClick={() => openFilePicker(ft.id)}
-                  className="text-xs font-medium text-muted transition-colors hover:text-ink"
-                >
-                  {ft.label}
-                </button>
-              ))}
               <button
                 type="button"
-                onClick={() => {
-                  setLinkOpen(true)
-                  setTimeout(() => linkInputRef.current?.focus(), 50)
-                }}
-                className="text-xs font-medium text-muted transition-colors hover:text-ink"
+                onClick={openFilePicker}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted transition-colors hover:text-ink"
               >
+                <Paperclip size={15} className="shrink-0" />
+                Files
+              </button>
+              <button
+                type="button"
+                onClick={() => setLinkOpen((open) => !open)}
+                className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-ink ${
+                  linkOpen ? 'text-ink' : 'text-muted'
+                }`}
+              >
+                <Link2 size={15} className="shrink-0" />
                 Links
               </button>
+              <LinkChips links={links} onRemove={removeLink} />
             </div>
 
             <motion.button

@@ -1,8 +1,9 @@
-import { LayoutDashboard, HelpCircle, Wallet, Settings } from 'lucide-react'
+import { LayoutDashboard, HelpCircle, History, Wallet, Settings } from 'lucide-react'
 
 export const EXPERT_NAV = [
   { to: '/expert', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/expert/questions', label: 'Questions', icon: HelpCircle },
+  { to: '/expert/history', label: 'History', icon: History },
   { to: '/expert/wallet', label: 'Points', icon: Wallet },
   { to: '/expert/settings', label: 'Settings', icon: Settings },
 ]

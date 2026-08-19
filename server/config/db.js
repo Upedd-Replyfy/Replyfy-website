@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { env } from './env.js'
 import { ensureDefaultCoupons } from '../services/couponService.js'
+import { ensureDefaultPlans } from '../services/planService.js'
 import { logger } from '../utils/logger.js'
 import ExpertProfile from '../models/ExpertProfile.js'
 
@@ -71,6 +72,7 @@ export async function connectDB() {
     await repairExpertProfileIndexes()
     await backfillExpertCatalogArrays()
     await ensureDefaultCoupons()
+    await ensureDefaultPlans()
   } catch (err) {
     logger.error('MongoDB connection failed', err)
     throw err

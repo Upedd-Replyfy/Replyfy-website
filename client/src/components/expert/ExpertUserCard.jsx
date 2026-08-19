@@ -1,15 +1,7 @@
 import { motion } from 'framer-motion'
-import { Calendar, ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Calendar } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'
-
-function initials(name = '?') {
-  return String(name)
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || '?'
-}
+import UserAvatar from '../ui/UserAvatar'
 
 function formatMoney(amount) {
   return `₹${(amount || 0) / 100}`
@@ -27,84 +19,91 @@ function timeAgo(date) {
   return new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
 }
 
-/**
- * Professional user/request card for mentor assignment lists.
- * Click opens preview popup (handled by parent).
- */
+function formatDate(date) {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 export default function ExpertUserCard({ question, onOpen }) {
   const user = question.user || {}
   const name = user.name || 'User'
+  const solved = question.status === 'completed'
 
   return (
     <motion.button
       type="button"
-      whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.99 }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.995 }}
       onClick={() => onOpen(question)}
-      className="group relative flex w-full flex-col rounded-2xl border border-border bg-card p-5 text-left shadow-[var(--shadow-luxury-sm)] transition-all duration-200 hover:border-sky-500/30 hover:shadow-[0_12px_32px_rgba(14,165,233,0.1)]"
+      className="group flex h-full w-full flex-col rounded-2xl border border-border bg-card p-4 text-left shadow-[var(--shadow-luxury-sm)] transition-all duration-200 hover:border-sky-500/25 hover:shadow-[0_10px_28px_rgba(15,23,42,0.08)]"
     >
-      <div className="flex items-start gap-3.5">
-        {user.avatar ? (
-          <img
-            src={user.avatar}
-            alt=""
-            className="h-12 w-12 shrink-0 rounded-2xl object-cover ring-2 ring-white/80 shadow-sm"
-          />
-        ) : (
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-violet-500 text-sm font-bold text-white shadow-sm ring-2 ring-white/80">
-            {initials(name)}
-          </span>
-        )}
-
+      <div className="flex items-center gap-3">
+        <UserAvatar src={user.avatar} name={name} size="lg" />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate text-base font-bold tracking-tight text-ink">{name}</p>
-              <p className="mt-0.5 truncate text-xs text-muted">{user.email || 'No email'}</p>
-            </div>
-            <span className="shrink-0 text-[10px] font-medium text-muted">{timeAgo(question.createdAt)}</span>
+            <p className="truncate text-[15px] font-semibold tracking-tight text-ink">{name}</p>
+            <span className="shrink-0 pt-0.5 text-[11px] font-medium text-muted">
+              {timeAgo(question.updatedAt || question.createdAt)}
+            </span>
           </div>
+          <p className="mt-0.5 truncate text-[12px] text-muted">{user.email || 'No email'}</p>
         </div>
       </div>
 
-      <p className="mt-4 line-clamp-2 text-sm font-semibold leading-snug text-ink/90">
+      <h3 className="mt-3.5 line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-ink">
         {question.title}
-      </p>
+      </h3>
 
-      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-        {question.category?.name && (
-          <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-violet-600 dark:text-violet-300">
-            {question.category.name}
-          </span>
-        )}
-        {question.plan && (
-          <span className="rounded-full border border-border bg-surface px-2.5 py-0.5 text-[11px] font-semibold capitalize text-muted">
-            {question.plan}
-          </span>
-        )}
-        {question.amount != null && (
-          <span className="rounded-full border border-border bg-surface px-2.5 py-0.5 text-[11px] font-bold text-ink">
-            {formatMoney(question.amount)}
-          </span>
-        )}
-        <StatusBadge status={question.status} />
-      </div>
+      {question.answerPreview ? (
+        <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-muted">
+          {question.answerPreview}
+        </p>
+      ) : question.description ? (
+        <p className="mt-1.5 line-clamp-2 text-[12px] leading-relaxed text-muted">
+          {question.description}
+        </p>
+      ) : (
+        <div className="mt-1.5 flex-1" />
+      )}
 
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted">
-          <Calendar size={12} />
-          {question.deadline
-            ? `Due ${new Date(question.deadline).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}`
-            : 'No deadline'}
-        </span>
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-600 opacity-0 transition group-hover:opacity-100 dark:text-sky-400">
-          View card
-          <ArrowUpRight size={12} />
-        </span>
+      <div className="mt-auto pt-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {question.category?.name ? (
+            <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] font-semibold text-muted">
+              {question.category.name}
+            </span>
+          ) : null}
+          {question.plan ? (
+            <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] font-semibold capitalize text-muted">
+              {question.plan}
+            </span>
+          ) : null}
+          {question.amount != null ? (
+            <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] font-bold text-ink">
+              {formatMoney(question.amount)}
+            </span>
+          ) : null}
+          <StatusBadge status={question.status} />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between border-t border-border/80 pt-2.5">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted">
+            <Calendar size={12} />
+            {solved
+              ? `Solved ${formatDate(question.updatedAt || question.createdAt)}`
+              : question.deadline
+                ? `Due ${formatDate(question.deadline)}`
+                : 'No deadline'}
+          </span>
+          <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-sky-600 opacity-0 transition group-hover:opacity-100 dark:text-sky-400">
+            Open
+            <ArrowUpRight size={12} />
+          </span>
+        </div>
       </div>
     </motion.button>
   )

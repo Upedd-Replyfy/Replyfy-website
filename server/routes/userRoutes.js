@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { PLAN_IDS } from '../constants/pricing.js'
 import { body } from 'express-validator'
 import { protect, authorize } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
@@ -29,7 +28,13 @@ router.post(
     body('description').trim().notEmpty().withMessage('Description is required'),
     body('category').notEmpty().withMessage('Category is required'),
     body('expertType').optional({ values: 'falsy' }).isString().withMessage('Invalid mentor type'),
-    body('plan').isIn(PLAN_IDS).withMessage('Invalid plan'),
+    body('plan')
+      .trim()
+      .notEmpty()
+      .withMessage('Plan is required')
+      .isLength({ max: 64 })
+      .matches(/^[a-z0-9_-]+$/)
+      .withMessage('Invalid plan'),
   ],
   validate,
   initiateQuestion
@@ -38,7 +43,14 @@ router.post(
 router.post(
   '/payments/validate-coupon',
   paymentLimiter,
-  [body('code').trim().notEmpty(), body('plan').isIn(PLAN_IDS)],
+  [
+    body('code').trim().notEmpty(),
+    body('plan')
+      .trim()
+      .notEmpty()
+      .isLength({ max: 64 })
+      .matches(/^[a-z0-9_-]+$/),
+  ],
   validate,
   validateCouponCode
 )

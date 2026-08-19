@@ -5,8 +5,9 @@ import { useAuth } from '../../context/AuthContext'
 import { useShellTheme } from '../../context/ShellThemeContext'
 import { expertApi } from '../../services/api'
 import NotificationBell from '../shared/NotificationBell'
+import UserAvatar from '../ui/UserAvatar'
 
-function PremiumAvailabilitySwitch({
+function AvailabilitySwitch({
   checked,
   onChange,
   disabled,
@@ -14,26 +15,7 @@ function PremiumAvailabilitySwitch({
   subtitleOn,
   subtitleOff,
   icon: Icon,
-  tone = 'emerald',
 }) {
-  const tones = {
-    emerald: {
-      on: 'border-emerald-400/40 bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 shadow-[0_0_24px_-6px_rgba(16,185,129,0.45)]',
-      iconOn: 'bg-emerald-500 text-white shadow-[0_4px_14px_rgba(16,185,129,0.45)]',
-      trackOn: 'bg-emerald-500',
-      labelOn: 'text-emerald-500',
-      ring: 'focus-visible:ring-emerald-400/40',
-    },
-    sky: {
-      on: 'border-sky-400/40 bg-gradient-to-br from-sky-500/20 to-violet-500/5 shadow-[0_0_24px_-6px_rgba(56,189,248,0.4)]',
-      iconOn: 'bg-sky-500 text-white shadow-[0_4px_14px_rgba(56,189,248,0.45)]',
-      trackOn: 'bg-sky-500',
-      labelOn: 'text-sky-500',
-      ring: 'focus-visible:ring-sky-400/40',
-    },
-  }
-  const t = tones[tone] || tones.emerald
-
   return (
     <button
       type="button"
@@ -42,38 +24,36 @@ function PremiumAvailabilitySwitch({
       aria-label={`${title}: ${checked ? 'on' : 'off'}. Tap to ${checked ? 'turn off' : 'turn on'}.`}
       disabled={disabled}
       onClick={onChange}
-      className={`group flex min-h-[52px] min-w-0 flex-1 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-all duration-200 disabled:opacity-55 sm:min-w-[168px] sm:flex-none sm:px-3.5 ${
+      className={`group flex min-h-[48px] min-w-0 flex-1 items-center gap-3 rounded-xl border bg-card px-3 py-2 text-left transition-all duration-200 disabled:opacity-55 sm:min-w-[180px] sm:flex-none sm:px-3.5 ${
         checked
-          ? t.on
-          : 'border-border bg-surface/80 text-muted hover:border-sky-400/25 hover:bg-card'
-      } ${t.ring} outline-none focus-visible:ring-2`}
+          ? 'border-border shadow-[var(--shadow-luxury-sm)]'
+          : 'border-border hover:bg-surface'
+      } outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30`}
     >
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
-          checked ? t.iconOn : 'bg-card text-muted ring-1 ring-border'
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-border ${
+          checked ? 'bg-ink text-card' : 'bg-surface text-muted'
         }`}
       >
-        <Icon size={18} strokeWidth={2} />
+        <Icon size={16} strokeWidth={2} />
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className={`block text-[13px] font-semibold leading-tight ${checked ? 'text-ink' : 'text-ink/80'}`}>
-          {title}
-        </span>
-        <span className={`mt-0.5 block text-[11px] font-medium leading-tight ${checked ? t.labelOn : 'text-muted'}`}>
+        <span className="block text-[13px] font-semibold leading-tight text-ink">{title}</span>
+        <span className={`mt-0.5 block text-[11px] font-medium leading-tight ${checked ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted'}`}>
           {checked ? subtitleOn : subtitleOff}
         </span>
       </span>
 
       <span
-        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-          checked ? t.trackOn : 'bg-muted-light/35'
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+          checked ? 'bg-emerald-500' : 'bg-muted-light/40'
         }`}
         aria-hidden
       >
         <span
-          className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
-            checked ? 'translate-x-[1.35rem]' : 'translate-x-0.5'
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            checked ? 'translate-x-[1.25rem]' : 'translate-x-0.5'
           }`}
         />
       </span>
@@ -85,6 +65,12 @@ export default function ExpertTopbar({ onMenuOpen }) {
   const queryClient = useQueryClient()
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useShellTheme()
+  const { data: profileData } = useQuery({
+    queryKey: ['expert-profile'],
+    queryFn: expertApi.getProfile,
+    staleTime: 60_000,
+  })
+  const photo = profileData?.profile?.profilePhoto || profileData?.profile?.avatar || user?.avatar
 
   const { data, isLoading } = useQuery({
     queryKey: ['expert-availability'],
@@ -126,7 +112,7 @@ export default function ExpertTopbar({ onMenuOpen }) {
     <header className="expert-topbar sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur-xl">
       <div className="flex flex-col gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={onMenuOpen}
@@ -135,12 +121,10 @@ export default function ExpertTopbar({ onMenuOpen }) {
             >
               <Menu size={20} />
             </button>
+            <UserAvatar src={photo} name={user?.name} size="md" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink sm:text-base">
-                Welcome back,{' '}
-                <span className="bg-gradient-to-r from-sky-500 to-violet-500 bg-clip-text text-transparent">
-                  {firstName}
-                </span>
+                Welcome back, {firstName}
               </p>
               <p className="hidden text-xs text-muted sm:block">Manage your mentor availability</p>
             </div>
@@ -172,14 +156,13 @@ export default function ExpertTopbar({ onMenuOpen }) {
         </div>
 
         <div className="flex gap-2.5 sm:gap-3">
-          <PremiumAvailabilitySwitch
+          <AvailabilitySwitch
             checked={isAvailable}
             disabled={busy}
             title="Questions"
             subtitleOn="Accepting new asks"
             subtitleOff="Not accepting asks"
             icon={HelpCircle}
-            tone="emerald"
             onChange={() => {
               if (busy) return
               availabilityMutation.mutate({
@@ -188,14 +171,13 @@ export default function ExpertTopbar({ onMenuOpen }) {
             }}
           />
 
-          <PremiumAvailabilitySwitch
+          <AvailabilitySwitch
             checked={isVideoCallAvailable}
             disabled={busy}
             title="Video calls"
             subtitleOn="Open for calls"
             subtitleOff="Calls paused"
             icon={Video}
-            tone="sky"
             onChange={() => {
               if (busy) return
               availabilityMutation.mutate({ videoCallAvailable: !isVideoCallAvailable })

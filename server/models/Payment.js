@@ -1,11 +1,10 @@
 import mongoose from 'mongoose'
-import { PLAN_IDS } from '../constants/pricing.js'
 
 const paymentSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     question: { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
-    plan: { type: String, enum: PLAN_IDS, required: true },
+    plan: { type: String, required: true, trim: true, lowercase: true },
     amount: { type: Number, required: true },
     originalAmount: { type: Number },
     discountAmount: { type: Number, default: 0 },

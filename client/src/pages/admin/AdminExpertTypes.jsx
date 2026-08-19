@@ -254,7 +254,7 @@ export default function AdminExpertTypes() {
           <p className="text-sm font-semibold text-ink">Mentor type feature</p>
           <p className="mt-0.5 text-xs text-muted">
             {mentorTypesEnabled
-              ? 'Users must pick a mentor type when asking questions and filtering mentors.'
+              ? 'Users can optionally pick a mentor type when asking questions and filtering mentors.'
               : 'Disabled globally — users proceed with category only on ask flow and mentor filters.'}
           </p>
         </div>

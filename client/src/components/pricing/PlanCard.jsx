@@ -7,7 +7,7 @@ const icons = {
 }
 
 export default function PlanCard({ plan, active = false, onClick, className = '', dark = false }) {
-  const Icon = icons[plan.id]
+  const Icon = icons[plan.id] || Zap
   const Tag = onClick ? 'button' : 'div'
   const isPopular = plan.popular
 
@@ -54,7 +54,7 @@ export default function PlanCard({ plan, active = false, onClick, className = ''
                 : 'bg-surface text-ink'
           }`}
         >
-          {Icon && <Icon size={18} />}
+          {Icon ? <Icon size={18} /> : null}
         </span>
         <div>
           <p
@@ -95,7 +95,7 @@ export default function PlanCard({ plan, active = false, onClick, className = ''
         ₹{plan.price}
       </p>
       <ul className="mt-5 space-y-2.5">
-        {plan.features.map((f) => (
+        {(plan.features || []).map((f) => (
           <li
             key={f}
             className={`flex items-start gap-2 text-sm ${
