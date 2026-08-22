@@ -12,6 +12,7 @@ import {
   FolderTree,
   Tags,
   IndianRupee,
+  BookOpen,
 } from 'lucide-react'
 
 export const ADMIN_NAV_GROUPS = [
@@ -53,6 +54,7 @@ export const ADMIN_NAV_GROUPS = [
     items: [
       { to: '/admin/categories', label: 'Categories', icon: FolderTree },
       { to: '/admin/expert-types', label: 'Mentor Types', icon: Tags },
+      { to: '/admin/blogs', label: 'Blog', icon: BookOpen },
     ],
   },
   {

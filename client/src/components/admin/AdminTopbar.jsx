@@ -28,6 +28,7 @@ const searchRoutes = [
   { label: 'Mentor Types', path: '/admin/expert-types' },
   { label: 'Notifications', path: '/admin/notifications' },
   { label: 'Pricing', path: '/admin/pricing' },
+  { label: 'Blog', path: '/admin/blogs' },
   { label: 'Settings', path: '/admin/settings' },
 ]
 

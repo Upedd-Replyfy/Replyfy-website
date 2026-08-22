@@ -45,6 +45,12 @@ import {
   updatePlan,
   deletePlan,
 } from '../controllers/planController.js'
+import {
+  listAdminBlogs,
+  createBlog,
+  updateBlog,
+  deleteBlog,
+} from '../controllers/blogController.js'
 
 const router = Router()
 
@@ -55,6 +61,14 @@ function optionalExpertPhoto(req, res, next) {
   const contentType = String(req.headers['content-type'] || '')
   if (contentType.includes('multipart/form-data')) {
     return upload.single('photo')(req, res, next)
+  }
+  return next()
+}
+
+function optionalBlogCover(req, res, next) {
+  const contentType = String(req.headers['content-type'] || '')
+  if (contentType.includes('multipart/form-data')) {
+    return upload.single('coverImage')(req, res, next)
   }
   return next()
 }
@@ -96,6 +110,11 @@ router.get('/plans', listAdminPlans)
 router.post('/plans', body('name').notEmpty(), validate, createPlan)
 router.put('/plans/:id', updatePlan)
 router.delete('/plans/:id', deletePlan)
+
+router.get('/blogs', listAdminBlogs)
+router.post('/blogs', optionalBlogCover, [body('title').notEmpty(), body('author').notEmpty(), body('content').notEmpty()], validate, createBlog)
+router.put('/blogs/:id', optionalBlogCover, updateBlog)
+router.delete('/blogs/:id', deleteBlog)
 
 router.get('/questions/pending', getPendingQuestions)
 router.get('/questions', getAllQuestions)

@@ -8,6 +8,7 @@ import {
   getPlatformSettings,
 } from '../controllers/publicController.js'
 import { listPublicPlans } from '../controllers/planController.js'
+import { listPublicBlogs, getPublicBlog } from '../controllers/blogController.js'
 
 const router = Router()
 
@@ -18,5 +19,7 @@ router.get('/experts/:id', getExpertById)
 router.get('/stats', getPlatformStats)
 router.get('/settings', getPlatformSettings)
 router.get('/plans', listPublicPlans)
+router.get('/blogs', listPublicBlogs)
+router.get('/blogs/:slug', getPublicBlog)
 
 export default router

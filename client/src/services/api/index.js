@@ -18,6 +18,8 @@ export const catalogApi = {
   getStats: () => api.get('/stats'),
   getSettings: () => api.get('/settings'),
   getPlans: () => api.get('/plans'),
+  getBlogs: () => api.get('/blogs'),
+  getBlog: (slug) => api.get(`/blogs/${slug}`),
 }
 
 export const userApi = {
@@ -91,6 +93,10 @@ export const adminApi = {
   createPlan: (data) => api.post('/admin/plans', data),
   updatePlan: (id, data) => api.put(`/admin/plans/${id}`, data),
   deletePlan: (id) => api.delete(`/admin/plans/${id}`),
+  getBlogs: () => api.get('/admin/blogs'),
+  createBlog: (data) => api.post('/admin/blogs', data),
+  updateBlog: (id, data) => api.put(`/admin/blogs/${id}`, data),
+  deleteBlog: (id) => api.delete(`/admin/blogs/${id}`),
 }
 
 export const notificationApi = {

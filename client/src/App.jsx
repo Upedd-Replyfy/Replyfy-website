@@ -11,6 +11,8 @@ import Privacy from './pages/info/Privacy'
 import Terms from './pages/info/Terms'
 import Refund from './pages/info/Refund'
 import Legal from './pages/info/Legal'
+import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 import Dashboard from './pages/Dashboard'
 import AskQuestion from './pages/user/AskQuestion'
 import UserQuestions from './pages/user/UserQuestions'
@@ -40,6 +42,7 @@ import AdminWithdrawals from './pages/admin/AdminWithdrawals'
 import AdminSettings from './pages/admin/AdminSettings'
 import AdminNotifications from './pages/admin/AdminNotifications'
 import AdminPricing from './pages/admin/AdminPricing'
+import AdminBlogs from './pages/admin/AdminBlogs'
 import { ProtectedRoute, GuestRoute } from './routes/ProtectedRoute'
 import { ROLES } from './constants'
 
@@ -58,6 +61,8 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/refund" element={<Refund />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
         </Route>
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
@@ -98,6 +103,7 @@ export default function App() {
             <Route path="expert-types" element={<AdminExpertTypes />} />
             <Route path="notifications" element={<AdminNotifications />} />
             <Route path="pricing" element={<AdminPricing />} />
+            <Route path="blogs" element={<AdminBlogs />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Route>

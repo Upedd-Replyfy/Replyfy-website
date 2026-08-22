@@ -12,12 +12,13 @@ const LIGHT_PATHS = new Set([
   '/privacy',
   '/terms',
   '/refund',
+  '/blog',
 ])
 
 export default function MarketingShell() {
   const [authMode, setAuthMode] = useState(null)
   const { pathname } = useLocation()
-  const light = LIGHT_PATHS.has(pathname)
+  const light = LIGHT_PATHS.has(pathname) || pathname.startsWith('/blog')
 
   return (
     <div className={`min-h-screen ${light ? 'bg-[#F8FAFC]' : 'bg-[#272927]'}`}>
