@@ -166,8 +166,20 @@ export default function Footer({ onAuthOpen, theme = 'dark' }) {
           <p className={`text-[11px] ${light ? 'text-slate-400' : 'text-white/35'}`}>
             &copy; {new Date().getFullYear()} Replyfy. All rights reserved.
           </p>
-          <p className={`text-[11px] ${light ? 'text-slate-400' : 'text-white/35'}`}>
-            Built for people who need real answers.
+          <p className={`text-[13px] ${light ? 'text-slate-400' : 'text-white/35'}`}>
+            Developed by{' '}
+            <a
+              href="https://www.linkedin.com/in/sahil-bhagat-3a65b0299/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={
+                light
+                  ? 'font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline'
+                  : 'font-medium text-white/55 underline-offset-2 hover:text-white hover:underline'
+              }
+            >
+              Sahil Bhagat
+            </a>
           </p>
         </div>
       </div>
