@@ -21,6 +21,11 @@ import { createNotification } from '../services/notificationService.js'
 import { logAudit } from '../services/auditService.js'
 import { planRequiresExpertSelection } from '../services/planService.js'
 import { creditMentorPointsForQuestion } from '../services/walletService.js'
+import { isMentorCallQuestion } from '../constants/mentorCall.js'
+import {
+  scheduleMentorCallMeeting,
+  completeMentorCall,
+} from '../services/mentorCallService.js'
 import ExpertType from '../models/ExpertType.js'
 import { slugify } from '../utils/slug.js'
 import { resolveIdList, mergeCategoryIdsWithTypes } from '../utils/expertMatch.js'
@@ -817,7 +822,11 @@ export const updateCategory = asyncHandler(async (req, res) => {
 })
 
 export const getPendingQuestions = asyncHandler(async (req, res) => {
-  const questions = await Question.find({ status: 'pending_admin_review' })
+  const { serviceType } = req.query
+  const query = { status: 'pending_admin_review' }
+  if (serviceType) query.serviceType = String(serviceType)
+
+  const questions = await Question.find(query)
     .populate('user', 'name email')
     .populate('category', 'name')
     .populate('selectedExpert', 'name')
@@ -829,13 +838,15 @@ export const getPendingQuestions = asyncHandler(async (req, res) => {
 const ADMIN_HIDDEN_QUESTION_STATUSES = ['pending_payment', 'cancelled']
 
 export const getAllQuestions = asyncHandler(async (req, res) => {
-  const { status, page = 1, limit = 20 } = req.query
+  const { status, serviceType, meetingStatus, page = 1, limit = 20 } = req.query
   const query = {
     status: { $nin: ADMIN_HIDDEN_QUESTION_STATUSES },
   }
   if (status && !ADMIN_HIDDEN_QUESTION_STATUSES.includes(String(status))) {
     query.status = String(status)
   }
+  if (serviceType) query.serviceType = String(serviceType)
+  if (meetingStatus) query.meetingStatus = String(meetingStatus)
 
   const [questions, total] = await Promise.all([
     Question.find(query)
@@ -843,6 +854,7 @@ export const getAllQuestions = asyncHandler(async (req, res) => {
       .populate('category', 'name')
       .populate('expertType', 'name')
       .populate('assignedExpert', 'name')
+      .populate('selectedExpert', 'name')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit)),
@@ -861,6 +873,7 @@ export const approveQuestion = asyncHandler(async (req, res) => {
   let expertId = overrideExpertId || question.selectedExpert
   const isAdminOverride = Boolean(overrideExpertId)
   const requiresExpert = await planRequiresExpertSelection(question.plan)
+  const mentorCall = isMentorCallQuestion(question)
 
   if (!expertId && !requiresExpert) {
     const expert = await findAvailableExpert(question.category, question.expertType)
@@ -884,14 +897,20 @@ export const approveQuestion = asyncHandler(async (req, res) => {
 
   question.adminReviewedBy = req.user._id
   question.adminReviewedAt = new Date()
+  if (mentorCall) {
+    question.adminApprovalStatus = 'approved'
+    question.mentorRequestStatus = 'sent'
+  }
   await question.save()
 
   const expertUser = await User.findById(expertId)
   await createNotification({
     userId: question.user._id,
     type: 'question_approved',
-    title: 'Question Approved',
-    message: 'Your question has been approved and assigned to a mentor.',
+    title: mentorCall ? 'Mentor Call Approved' : 'Question Approved',
+    message: mentorCall
+      ? 'Your mentor call request has been approved. We will share meeting details once scheduled.'
+      : 'Your question has been approved and assigned to a mentor.',
     link: `/dashboard/questions/${question._id}`,
     email: question.user.email,
   })
@@ -899,8 +918,10 @@ export const approveQuestion = asyncHandler(async (req, res) => {
   await createNotification({
     userId: expertId,
     type: 'expert_assigned',
-    title: 'New Question Assigned',
-    message: `You have been assigned: "${question.title}"`,
+    title: mentorCall ? 'New Mentor Call Request' : 'New Question Assigned',
+    message: mentorCall
+      ? `Provide availability for: "${question.title}"`
+      : `You have been assigned: "${question.title}"`,
     link: `/expert/questions/${question._id}`,
     email: expertUser?.email,
   })
@@ -919,15 +940,71 @@ export const rejectQuestion = asyncHandler(async (req, res) => {
   question.rejectionReason = reason || 'Rejected by admin'
   question.adminReviewedBy = req.user._id
   question.adminReviewedAt = new Date()
+  if (isMentorCallQuestion(question)) {
+    question.adminApprovalStatus = 'rejected'
+    question.meetingStatus = 'cancelled'
+  }
   await question.save()
 
   await createNotification({
     userId: question.user._id,
     type: 'question_rejected',
-    title: 'Question Rejected',
+    title: isMentorCallQuestion(question) ? 'Mentor Call Rejected' : 'Question Rejected',
     message: question.rejectionReason,
     link: `/dashboard/questions/${question._id}`,
     email: question.user.email,
+  })
+
+  res.json({ success: true, question })
+})
+
+export const scheduleMentorCall = asyncHandler(async (req, res) => {
+  const {
+    meetingDate,
+    meetingTime,
+    meetingLink,
+    meetingDurationMinutes,
+    forceNotify,
+  } = req.body
+
+  const question = await scheduleMentorCallMeeting({
+    questionId: req.params.id,
+    adminUserId: req.user._id,
+    meetingDate,
+    meetingTime,
+    meetingLink,
+    meetingDurationMinutes,
+    forceNotify: forceNotify === true || forceNotify === 'true',
+  })
+
+  res.json({ success: true, question })
+})
+
+export const completeMentorCallRequest = asyncHandler(async (req, res) => {
+  const question = await completeMentorCall({
+    questionId: req.params.id,
+    adminUserId: req.user._id,
+  })
+  res.json({ success: true, question })
+})
+
+export const retryMentorCallNotifications = asyncHandler(async (req, res) => {
+  const existing = await Question.findById(req.params.id)
+  if (!existing || !isMentorCallQuestion(existing)) {
+    throw new ApiError(404, 'Mentor Call request not found')
+  }
+  if (existing.meetingStatus !== 'scheduled') {
+    throw new ApiError(400, 'Meeting must be scheduled before retrying notifications')
+  }
+
+  const question = await scheduleMentorCallMeeting({
+    questionId: existing._id,
+    adminUserId: req.user._id,
+    meetingDate: existing.meetingDate,
+    meetingTime: existing.meetingTime,
+    meetingLink: existing.meetingLink,
+    meetingDurationMinutes: existing.meetingDurationMinutes,
+    forceNotify: true,
   })
 
   res.json({ success: true, question })
@@ -945,6 +1022,13 @@ export const assignExpertManual = asyncHandler(async (req, res) => {
     assignmentType: 'manual',
     relaxAvailability: true,
   })
+
+  if (isMentorCallQuestion(question)) {
+    question.mentorRequestStatus = 'sent'
+    question.adminApprovalStatus =
+      question.adminApprovalStatus === 'rejected' ? 'rejected' : 'approved'
+    await question.save()
+  }
 
   res.json({ success: true, question })
 })

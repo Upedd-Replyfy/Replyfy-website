@@ -16,6 +16,7 @@ import {
   getRatings,
   getAvailability,
   updateAvailability,
+  submitCallAvailability,
 } from '../controllers/expertController.js'
 
 /** Multer only for multipart; JSON create/update must keep array fields intact. */
@@ -36,6 +37,7 @@ router.get('/questions', getAssignedQuestions)
 router.get('/questions/:id', getQuestionDetail)
 router.patch('/questions/:id/start', startQuestion)
 router.post('/questions/:id/answer', upload.array('files', 5), body('content').trim().notEmpty(), validate, submitAnswer)
+router.post('/questions/:id/availability', submitCallAvailability)
 router.get('/profile', getExpertProfile)
 router.put('/profile', optionalExpertPhoto, updateExpertProfile)
 router.get('/wallet', getWallet)

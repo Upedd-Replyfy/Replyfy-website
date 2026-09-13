@@ -38,6 +38,9 @@ import {
   rejectWithdrawal,
   getAllNotifications,
   sendNotification,
+  scheduleMentorCall,
+  completeMentorCallRequest,
+  retryMentorCallNotifications,
 } from '../controllers/adminController.js'
 import {
   listAdminPlans,
@@ -121,6 +124,18 @@ router.get('/questions', getAllQuestions)
 router.post('/questions/:id/approve', approveQuestion)
 router.post('/questions/:id/reject', body('reason').optional(), validate, rejectQuestion)
 router.post('/questions/:id/assign', body('expertId').notEmpty(), validate, assignExpertManual)
+router.post(
+  '/questions/:id/schedule-meeting',
+  [
+    body('meetingDate').notEmpty(),
+    body('meetingTime').notEmpty(),
+    body('meetingLink').notEmpty(),
+  ],
+  validate,
+  scheduleMentorCall
+)
+router.post('/questions/:id/complete-meeting', completeMentorCallRequest)
+router.post('/questions/:id/retry-meeting-notifications', retryMentorCallNotifications)
 
 router.get('/answers/pending', getPendingAnswers)
 router.post('/answers/:id/approve', approveAnswer)

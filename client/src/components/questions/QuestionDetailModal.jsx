@@ -20,11 +20,18 @@ import {
   Trash2,
   Trophy,
   User2,
+  Video,
   X,
 } from 'lucide-react'
 import { catalogApi, userApi } from '../../services/api'
 import StatusBadge from '../ui/StatusBadge'
-import { QUESTION_STATUS, planDisplayName, resolvePlan } from '../../constants'
+import {
+  QUESTION_STATUS,
+  planDisplayName,
+  resolvePlan,
+  isMentorCallQuestion,
+  MENTOR_CALL_DURATION_MINUTES,
+} from '../../constants'
 import { usePlans } from '../../hooks/useCatalog'
 import { isQuestionSaved, toggleSavedQuestion } from '../../utils/savedAnswers'
 import { payForQuestion } from '../../utils/payForQuestion'
@@ -738,6 +745,78 @@ export default function QuestionDetailModal({ questionId, open, onClose }) {
                         </div>
                       </div>
                     </section>
+
+                    {isMentorCallQuestion(question) ? (
+                      <section className="rounded-[18px] border border-sky-500/25 bg-sky-500/5 px-4 py-4 sm:px-5">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-sky-500">
+                          {question.meetingStatus === 'scheduled'
+                            ? 'Upcoming Mentor Call'
+                            : question.meetingStatus === 'completed'
+                              ? 'Mentor Call Completed'
+                              : 'Mentor Call Request'}
+                        </p>
+                        <dl className="mt-3 space-y-2 text-sm">
+                          <div className="flex justify-between gap-3">
+                            <dt className="text-muted">Mentor</dt>
+                            <dd className="font-semibold text-ink">
+                              {question.assignedExpert?.name ||
+                                question.selectedExpert?.name ||
+                                'To be assigned'}
+                            </dd>
+                          </div>
+                          {question.meetingStatus === 'scheduled' ||
+                          question.meetingStatus === 'completed' ? (
+                            <>
+                              <div className="flex justify-between gap-3">
+                                <dt className="text-muted">Date</dt>
+                                <dd className="font-semibold text-ink">
+                                  {question.meetingDate
+                                    ? new Date(question.meetingDate).toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric',
+                                      })
+                                    : '—'}
+                                </dd>
+                              </div>
+                              <div className="flex justify-between gap-3">
+                                <dt className="text-muted">Time</dt>
+                                <dd className="font-semibold text-ink">
+                                  {question.meetingTime || '—'}
+                                </dd>
+                              </div>
+                              <div className="flex justify-between gap-3">
+                                <dt className="text-muted">Duration</dt>
+                                <dd className="font-semibold text-ink">
+                                  {question.meetingDurationMinutes || MENTOR_CALL_DURATION_MINUTES}{' '}
+                                  minutes
+                                </dd>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-xs text-muted">
+                              {question.adminApprovalStatus === 'rejected'
+                                ? 'This request was rejected.'
+                                : question.adminApprovalStatus === 'pending' ||
+                                    question.status === 'pending_admin_review'
+                                  ? 'Pending admin approval. You will receive meeting details by email once scheduled.'
+                                  : 'Our team is coordinating with your mentor. Meeting details will appear here once scheduled.'}
+                            </p>
+                          )}
+                        </dl>
+                        {question.meetingStatus === 'scheduled' && question.meetingLink ? (
+                          <a
+                            href={question.meetingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-card transition hover:opacity-90 sm:w-auto"
+                          >
+                            <Video size={16} />
+                            Join Meeting
+                          </a>
+                        ) : null}
+                      </section>
+                    ) : null}
 
                     {answer ? (
                       <section className="flex max-h-[320px] flex-col overflow-hidden rounded-[18px] border border-border bg-card sm:max-h-[380px]">

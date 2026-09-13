@@ -60,6 +60,21 @@ export function planRequiresExpertSelection(plan, plans) {
   return plan === 'mentor' || plan === 'expert_call'
 }
 
+export const MENTOR_CALL_PLAN_ID = 'expert_call'
+export const MENTOR_CALL_DURATION_MINUTES = 20
+
+export function isMentorCallPlan(planId, plans) {
+  const found = resolvePlan(planId, plans)
+  if (found?.id === MENTOR_CALL_PLAN_ID || found?.slug === MENTOR_CALL_PLAN_ID) return true
+  return String(planId || '') === MENTOR_CALL_PLAN_ID
+}
+
+export function isMentorCallQuestion(question, plans) {
+  if (!question) return false
+  if (question.serviceType === 'mentor_call') return true
+  return isMentorCallPlan(question.plan, plans)
+}
+
 export function planDisplayName(planId, plans) {
   return resolvePlan(planId, plans)?.name || String(planId || '').replace(/_/g, ' ')
 }
@@ -98,4 +113,19 @@ export const QUESTION_STATUS = {
   waiting_admin_review: 'Answer Under Review',
   completed: 'Completed',
   cancelled: 'Cancelled',
+}
+
+export const MENTOR_CALL_MEETING_STATUS = {
+  not_scheduled: 'Waiting for Scheduling',
+  scheduled: 'Scheduled',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  not_applicable: '—',
+}
+
+export const MENTOR_CALL_APPROVAL_STATUS = {
+  pending: 'Pending Approval',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  not_applicable: '—',
 }

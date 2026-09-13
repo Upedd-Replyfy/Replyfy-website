@@ -18,6 +18,8 @@ import {
   CircleHelp,
   BadgeCheck,
   MessageSquareWarning,
+  Phone,
+  Calendar,
 } from 'lucide-react'
 import AdminPageHeader from '../../components/admin/AdminPageHeader'
 import AdminModal from '../../components/admin/AdminModal'
@@ -28,10 +30,13 @@ import AssignExpertModal from '../../components/admin/AssignExpertModal'
 import RejectReasonModal from '../../components/admin/RejectReasonModal'
 import ConfirmActionModal from '../../components/admin/ConfirmActionModal'
 import MentorAssignPanel from '../../components/admin/MentorAssignPanel'
+import ScheduleMeetingModal from '../../components/admin/ScheduleMeetingModal'
 import { adminApi } from '../../services/api'
+import { isMentorCallQuestion } from '../../constants'
 
 const tabs = [
   { id: 'pending', label: 'Pending Review' },
+  { id: 'mentor_calls', label: 'Mentor Calls' },
   { id: 'all', label: 'All Questions' },
 ]
 
@@ -76,11 +81,16 @@ function formatMoney(amount) {
   return `₹${(amount || 0) / 100}`
 }
 
-function InfoRow({ label, value }) {
+function InfoRow({ label, value, action }) {
   return (
     <div className="flex items-start justify-between gap-3 py-2 sm:gap-4">
       <dt className="shrink-0 text-xs font-medium text-slate-400">{label}</dt>
-      <dd className="min-w-0 max-w-[70%] break-words text-right text-xs font-semibold text-slate-800">{value ?? '—'}</dd>
+      <dd className="min-w-0 max-w-[70%] break-words text-right text-xs font-semibold text-slate-800">
+        <span className="inline-flex flex-wrap items-center justify-end gap-2">
+          <span>{value ?? '—'}</span>
+          {action}
+        </span>
+      </dd>
     </div>
   )
 }
@@ -160,14 +170,21 @@ function QuestionDetailModal({
   onReject,
   onAssignModal,
   onRequestChanges,
+  onSchedule,
   approveLoading,
 }) {
   const navigate = useNavigate()
   if (!question) return null
 
+  const mentorCall = isMentorCallQuestion(question)
   const canReview = question.status === 'pending_admin_review'
-  const canReassign = question.status === 'assigned'
-  const assignMode = canReassign ? 'assign' : 'approve'
+  const canReassign = ['assigned', 'in_progress'].includes(question.status)
+  const canSchedule =
+    mentorCall &&
+    ['approved'].includes(question.adminApprovalStatus) &&
+    ['sent', 'responded'].includes(question.mentorRequestStatus) &&
+    question.meetingStatus !== 'completed'
+  const assignMode = question.status === 'assigned' || question.status === 'in_progress' ? 'assign' : 'approve'
   const user = question.user || {}
   const tags = question.tags || []
 
@@ -188,7 +205,7 @@ function QuestionDetailModal({
                 loading={approveLoading}
                 onClick={onApprove}
               >
-                Auto assign
+                {mentorCall ? 'Approve & send to mentor' : 'Auto assign'}
               </AdminButton>
               <AdminButton variant="soft" icon={UserPlus} onClick={onAssignModal}>
                 Assign mentor
@@ -204,6 +221,11 @@ function QuestionDetailModal({
           {canReassign && (
             <AdminButton variant="soft" icon={UserPlus} onClick={onAssignModal}>
               Reassign mentor
+            </AdminButton>
+          )}
+          {canSchedule && (
+            <AdminButton variant="success" icon={Calendar} onClick={onSchedule}>
+              Schedule meeting
             </AdminButton>
           )}
           <AdminButton
@@ -228,6 +250,11 @@ function QuestionDetailModal({
           <AdminBadge tone={statusTone(question.status)} dot>
             {formatStatus(question.status)}
           </AdminBadge>
+          {mentorCall ? (
+            <AdminBadge tone="violet" className="inline-flex items-center gap-1">
+              <Phone size={10} /> Mentor Call
+            </AdminBadge>
+          ) : null}
           <AdminBadge tone="neutral" className="capitalize">
             {question.priority || 'standard'}
           </AdminBadge>
@@ -245,17 +272,58 @@ function QuestionDetailModal({
             </div>
             <dl className="mt-3 divide-y divide-border border-t border-border">
               <InfoRow label="Email" value={user.email} />
-              <InfoRow label="Phone" value={user.phone || '—'} />
+              <InfoRow
+                label="WhatsApp"
+                value={question.whatsappNumber || user.phone || '—'}
+                action={
+                  question.whatsappNumber ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(question.whatsappNumber)
+                          toast.success('WhatsApp number copied')
+                        } catch {
+                          toast.error('Could not copy number')
+                        }
+                      }}
+                      className="rounded-md border border-border bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      Copy
+                    </button>
+                  ) : null
+                }
+              />
             </dl>
           </Section>
 
           <Section title="Plan details">
             <dl className="divide-y divide-border">
+              <InfoRow
+                label="Service"
+                value={mentorCall ? 'Mentor Call' : 'Written Answer'}
+              />
               <InfoRow label="Plan" value={<span className="capitalize">{question.plan || '—'}</span>} />
               <InfoRow label="Price" value={formatMoney(question.amount)} />
               <InfoRow label="Priority" value={<span className="capitalize">{question.priority || 'standard'}</span>} />
               <InfoRow label="Category" value={question.category?.name} />
               <InfoRow label="Mentor type" value={question.expertType?.name} />
+              {mentorCall ? (
+                <>
+                  <InfoRow
+                    label="Approval"
+                    value={formatStatus(question.adminApprovalStatus)}
+                  />
+                  <InfoRow
+                    label="Mentor request"
+                    value={formatStatus(question.mentorRequestStatus)}
+                  />
+                  <InfoRow
+                    label="Meeting"
+                    value={formatStatus(question.meetingStatus)}
+                  />
+                </>
+              ) : null}
               <InfoRow
                 label="Created"
                 value={question.createdAt ? new Date(question.createdAt).toLocaleString('en-IN') : '—'}
@@ -373,6 +441,7 @@ export default function AdminQuestions() {
   const [rejectQuestion, setRejectQuestion] = useState(null)
   const [rejectTitle, setRejectTitle] = useState('Reject Question')
   const [confirmApprove, setConfirmApprove] = useState(false)
+  const [scheduleQuestion, setScheduleQuestion] = useState(null)
 
   const { data: pendingData, isLoading: pendingLoading } = useQuery({
     queryKey: ['admin-pending-questions'],
@@ -381,13 +450,20 @@ export default function AdminQuestions() {
 
   const { data: allData, isLoading: allLoading } = useQuery({
     queryKey: ['admin-questions'],
-    queryFn: () => adminApi.getQuestions({ limit: 50 }),
+    queryFn: () => adminApi.getQuestions({ limit: 100 }),
     enabled: tab === 'all',
+  })
+
+  const { data: mentorCallData, isLoading: mentorCallLoading } = useQuery({
+    queryKey: ['admin-mentor-calls'],
+    queryFn: () => adminApi.getQuestions({ limit: 100, serviceType: 'mentor_call' }),
+    enabled: tab === 'mentor_calls',
   })
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-pending-questions'] })
     queryClient.invalidateQueries({ queryKey: ['admin-questions'] })
+    queryClient.invalidateQueries({ queryKey: ['admin-mentor-calls'] })
     queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
   }
 
@@ -413,8 +489,14 @@ export default function AdminQuestions() {
     onError: (err) => toast.error(err.message),
   })
 
-  const source = tab === 'pending' ? pendingData?.questions || [] : allData?.questions || []
-  const isLoading = tab === 'pending' ? pendingLoading : allLoading
+  const source =
+    tab === 'pending'
+      ? pendingData?.questions || []
+      : tab === 'mentor_calls'
+        ? mentorCallData?.questions || []
+        : allData?.questions || []
+  const isLoading =
+    tab === 'pending' ? pendingLoading : tab === 'mentor_calls' ? mentorCallLoading : allLoading
   const pendingCount = pendingData?.questions?.length || 0
 
   const categories = useMemo(() => {
@@ -618,6 +700,16 @@ export default function AdminQuestions() {
           setRejectQuestion(detailQuestion)
         }}
         onAssignModal={openAssignModal}
+        onSchedule={() => {
+          setScheduleQuestion(detailQuestion)
+          setDetailQuestion(null)
+        }}
+      />
+
+      <ScheduleMeetingModal
+        open={!!scheduleQuestion}
+        question={scheduleQuestion}
+        onClose={() => setScheduleQuestion(null)}
       />
 
       <AssignExpertModal
@@ -638,9 +730,17 @@ export default function AdminQuestions() {
       <ConfirmActionModal
         open={confirmApprove}
         onClose={() => setConfirmApprove(false)}
-        title="Auto assign?"
-        description="This will approve the question and auto-assign the best available mentor."
-        confirmLabel="Auto assign"
+        title={
+          isMentorCallQuestion(detailQuestion)
+            ? 'Approve Mentor Call?'
+            : 'Auto assign?'
+        }
+        description={
+          isMentorCallQuestion(detailQuestion)
+            ? 'This will approve the request and send it to the selected/assigned mentor for availability.'
+            : 'This will approve the question and auto-assign the best available mentor.'
+        }
+        confirmLabel={isMentorCallQuestion(detailQuestion) ? 'Approve' : 'Auto assign'}
         variant="success"
         loading={approveMutation.isPending}
         onConfirm={() => detailQuestion && approveMutation.mutate(detailQuestion._id)}

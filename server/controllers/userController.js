@@ -18,6 +18,12 @@ import {
   finalizeSuccessfulPayment,
 } from '../services/paymentCompletionService.js'
 import { isMentorTypesEnabled } from '../models/PlatformSettings.js'
+import { normalizeWhatsAppNumber } from '../utils/phone.js'
+import {
+  isMentorCallPlan,
+  serviceTypeForPlan,
+  MENTOR_CALL_DURATION_MINUTES,
+} from '../constants/mentorCall.js'
 
 function parseQuestionLinks(raw) {
   let list = []
@@ -52,7 +58,8 @@ function parseQuestionLinks(raw) {
 }
 
 export const initiateQuestion = asyncHandler(async (req, res) => {
-  const { title, description, category, expertType, priority, plan, selectedExpert, links } = req.body
+  const { title, description, category, expertType, priority, plan, selectedExpert, links, whatsappNumber } =
+    req.body
   const questionLinks = parseQuestionLinks(links)
 
   const cat = await Category.findById(category)
@@ -74,6 +81,13 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
   if (!planDoc) throw new ApiError(400, 'Invalid or inactive plan')
 
   const requiresExpert = await planRequiresExpertSelection(plan)
+  const mentorCall = isMentorCallPlan(planDoc.slug)
+  const serviceType = serviceTypeForPlan(planDoc.slug)
+
+  let normalizedWhatsApp = ''
+  if (mentorCall) {
+    normalizedWhatsApp = normalizeWhatsAppNumber(whatsappNumber)
+  }
 
   if (requiresExpert && !selectedExpert) {
     throw new ApiError(400, 'This plan requires mentor selection')
@@ -109,12 +123,19 @@ export const initiateQuestion = asyncHandler(async (req, res) => {
     expertType: resolvedExpertType || undefined,
     priority: priority || 'standard',
     plan: planDoc.slug,
+    serviceType,
     selectedExpert: requiresExpert ? selectedExpert : undefined,
     attachments,
     links: questionLinks,
+    whatsappNumber: normalizedWhatsApp,
     status: 'pending_payment',
     amount,
     mentorPointsPaise: planDoc.mentorPointsPaise || 0,
+    adminApprovalStatus: mentorCall ? 'pending' : 'not_applicable',
+    mentorRequestStatus: mentorCall ? 'pending' : 'not_applicable',
+    meetingStatus: mentorCall ? 'not_scheduled' : 'not_applicable',
+    meetingDurationMinutes: mentorCall ? MENTOR_CALL_DURATION_MINUTES : undefined,
+    emailNotificationStatus: mentorCall ? 'pending' : 'not_required',
   })
 
   res.status(201).json({ success: true, question })

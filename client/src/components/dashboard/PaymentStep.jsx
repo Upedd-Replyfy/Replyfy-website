@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Tag, X, Loader2 } from 'lucide-react'
+import { Tag, X, Loader2, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { planRequiresExpertSelection, resolvePlan } from '../../constants'
+import {
+  isMentorCallPlan,
+  MENTOR_CALL_DURATION_MINUTES,
+  planRequiresExpertSelection,
+  resolvePlan,
+} from '../../constants'
 import { userApi } from '../../services/api'
-
 import { formatRupeeAmount } from '../../utils/currency'
+import { normalizeWhatsAppNumberClient } from '../../utils/phone'
 
 export default function PaymentStep({
   plan,
@@ -18,13 +23,19 @@ export default function PaymentStep({
   appliedCoupon,
   onCouponChange,
   onPay,
+  whatsappLocal = '',
+  onWhatsappLocalChange,
+  whatsappCountryCode = '+91',
+  onWhatsappCountryCodeChange,
 }) {
   const [couponInput, setCouponInput] = useState('')
   const [applying, setApplying] = useState(false)
+  const [whatsappError, setWhatsappError] = useState('')
 
   const selected = resolvePlan(plan, plans)
   const originalAmount = selected?.pricePaise || 0
   const needsMentor = planRequiresExpertSelection(plan, plans)
+  const mentorCall = isMentorCallPlan(plan, plans)
   const discountAmount = appliedCoupon?.discountAmount ?? 0
   const finalAmount = appliedCoupon?.finalAmount ?? originalAmount
 
@@ -49,6 +60,22 @@ export default function PaymentStep({
     setCouponInput('')
   }
 
+  const handlePayClick = () => {
+    if (mentorCall) {
+      const full = `${whatsappCountryCode || '+91'}${String(whatsappLocal || '').replace(/\D/g, '')}`
+      const result = normalizeWhatsAppNumberClient(full)
+      if (!result.ok) {
+        setWhatsappError(result.error)
+        toast.error(result.error)
+        return
+      }
+      setWhatsappError('')
+      onPay?.(result.value)
+      return
+    }
+    onPay?.()
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -57,8 +84,28 @@ export default function PaymentStep({
     >
       <h2 className="text-2xl font-semibold text-ink">Review & pay</h2>
       <p className="mt-2 text-sm text-muted">
-        Your question will be submitted for admin review after payment.
+        {mentorCall
+          ? 'Your mentor call request will be reviewed by our team after payment. Meeting time is scheduled by admin — you do not pick a slot here.'
+          : 'Your question will be submitted for admin review after payment.'}
       </p>
+
+      {mentorCall ? (
+        <div className="mt-6 rounded-2xl border border-sky-500/20 bg-sky-500/10 px-5 py-4">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400">
+              <Phone size={18} />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-ink">Mentor Call — ₹{formatRupeeAmount(originalAmount)}</p>
+              <ul className="mt-2 space-y-1 text-sm text-muted">
+                <li>{MENTOR_CALL_DURATION_MINUTES}-minute live call with mentor</li>
+                <li>Deep personalised guidance</li>
+                <li>Mentor chosen according to your selection / assignment workflow</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="luxury-card mt-8 overflow-hidden">
         <div className="border-b border-border bg-surface px-6 py-4">
@@ -92,6 +139,49 @@ export default function PaymentStep({
               We&apos;ll choose the best available mentor after admin approval.
             </p>
           )}
+
+          {mentorCall ? (
+            <div className="rounded-xl border border-border bg-surface/60 p-4">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-light">
+                WhatsApp number <span className="text-rose-400">*</span>
+              </label>
+              <p className="mt-1 text-xs text-muted">
+                Required for Mentor Call. Our team uses this number to contact you manually.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <select
+                  value={whatsappCountryCode}
+                  onChange={(e) => onWhatsappCountryCodeChange?.(e.target.value)}
+                  disabled={paying}
+                  className="h-11 w-[96px] shrink-0 rounded-xl border border-border bg-card px-2 text-sm text-ink outline-none focus:border-charcoal disabled:opacity-50"
+                >
+                  <option value="+91">+91</option>
+                  <option value="+1">+1</option>
+                  <option value="+44">+44</option>
+                  <option value="+971">+971</option>
+                </select>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={whatsappLocal}
+                  onChange={(e) => {
+                    onWhatsappLocalChange?.(e.target.value.replace(/[^\d]/g, '').slice(0, 12))
+                    setWhatsappError('')
+                  }}
+                  placeholder="9876543210"
+                  disabled={paying}
+                  className="h-11 min-w-0 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-ink placeholder:text-muted-light outline-none focus:border-charcoal disabled:opacity-50"
+                />
+              </div>
+              {whatsappError ? (
+                <p className="mt-2 text-xs text-rose-400">{whatsappError}</p>
+              ) : (
+                <p className="mt-2 text-[11px] text-muted-light">
+                  Example: Country +91 · Number 9876543210 → stored as +919876543210
+                </p>
+              )}
+            </div>
+          ) : null}
 
           <div className="border-t border-border pt-4">
             {appliedCoupon ? (
@@ -156,11 +246,15 @@ export default function PaymentStep({
         <div className="border-t border-border p-6">
           <button
             type="button"
-            onClick={onPay}
+            onClick={handlePayClick}
             disabled={paying}
             className="btn-primary w-full rounded-2xl py-3.5 text-sm font-semibold disabled:opacity-50"
           >
-            {paying ? 'Processing...' : 'Pay & Submit Question'}
+            {paying
+              ? 'Processing...'
+              : mentorCall
+                ? 'Pay & Submit Mentor Call'
+                : 'Pay & Submit Question'}
           </button>
         </div>
       </div>

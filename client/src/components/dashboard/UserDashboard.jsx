@@ -12,7 +12,7 @@ import StepProgress from './StepProgress'
 import RecommendedExperts from './RecommendedExperts'
 import RecentQuestions from './RecentQuestions'
 import { userApi } from '../../services/api'
-import { PLANS, planRequiresExpertSelection, resolvePlan } from '../../constants'
+import { PLANS, isMentorCallPlan, planRequiresExpertSelection, resolvePlan } from '../../constants'
 import { useCategories, useExpertTypes, useExperts, usePlatformSettings, usePlans } from '../../hooks/useCatalog'
 import { clearQuestionDraft, loadQuestionDraft, namesMatch } from '../../utils/questionDraft'
 import { payForQuestion } from '../../utils/payForQuestion'
@@ -72,6 +72,8 @@ export default function UserDashboard() {
   const [selectedExpert, setSelectedExpert] = useState(null)
   const [paying, setPaying] = useState(false)
   const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const [whatsappLocal, setWhatsappLocal] = useState('')
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState('+91')
   const pendingDraftRef = useRef(null)
   const draftHydratedRef = useRef(false)
   const draftInitRef = useRef(false)
@@ -271,7 +273,7 @@ export default function UserDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handlePayment = async () => {
+  const handlePayment = async (normalizedWhatsApp) => {
     if (paying) return
     setPaying(true)
     try {
@@ -282,6 +284,12 @@ export default function UserDashboard() {
       }
       if (!categoryId) {
         toast.error('Missing category')
+        return
+      }
+
+      const mentorCall = isMentorCallPlan(plan, plans)
+      if (mentorCall && !normalizedWhatsApp) {
+        toast.error('WhatsApp number is required for Mentor Call')
         return
       }
 
@@ -300,6 +308,9 @@ export default function UserDashboard() {
       if (needsMentor && selectedExpert) {
         formData.append('selectedExpert', selectedExpert.userId)
       }
+      if (mentorCall && normalizedWhatsApp) {
+        formData.append('whatsappNumber', normalizedWhatsApp)
+      }
       files.forEach((f) => formData.append('files', f))
 
       const { question } = await userApi.createQuestion(formData)
@@ -308,7 +319,14 @@ export default function UserDashboard() {
         planName: resolvePlan(plan, plans)?.name,
       })
 
-      toast.success(result.mode === 'dev' ? 'Question submitted successfully' : 'Payment successful!')
+      if (mentorCall) {
+        toast.success(
+          'Your mentor call request has been submitted successfully. Our team will review your request and coordinate with a mentor. You will receive the meeting details via email once scheduled.',
+          { duration: 8000 }
+        )
+      } else {
+        toast.success(result.mode === 'dev' ? 'Question submitted successfully' : 'Payment successful!')
+      }
       await refetchQuestions()
       navigate(`/dashboard/questions/${question._id}`)
     } catch (err) {
@@ -364,6 +382,10 @@ export default function UserDashboard() {
               appliedCoupon={appliedCoupon}
               onCouponChange={setAppliedCoupon}
               onPay={handlePayment}
+              whatsappLocal={whatsappLocal}
+              onWhatsappLocalChange={setWhatsappLocal}
+              whatsappCountryCode={whatsappCountryCode}
+              onWhatsappCountryCodeChange={setWhatsappCountryCode}
             />
           )}
         </div>

@@ -41,6 +41,7 @@ export const expertApi = {
   getQuestion: (id) => api.get(`/expert/questions/${id}`),
   startQuestion: (id) => api.patch(`/expert/questions/${id}/start`),
   submitAnswer: (id, formData) => api.post(`/expert/questions/${id}/answer`, formData),
+  submitCallAvailability: (id, data) => api.post(`/expert/questions/${id}/availability`, data),
   getWallet: () => api.get('/expert/wallet'),
   withdraw: (data) => api.post('/expert/wallet/withdraw', data),
   getRatings: () => api.get('/expert/ratings'),
@@ -80,6 +81,10 @@ export const adminApi = {
     api.post(`/admin/questions/${id}/approve`, expertId ? { expertId } : {}),
   rejectQuestion: (id, reason) => api.post(`/admin/questions/${id}/reject`, { reason }),
   assignExpert: (id, expertId) => api.post(`/admin/questions/${id}/assign`, { expertId }),
+  scheduleMentorCall: (id, data) => api.post(`/admin/questions/${id}/schedule-meeting`, data),
+  completeMentorCall: (id) => api.post(`/admin/questions/${id}/complete-meeting`),
+  retryMentorCallNotifications: (id) =>
+    api.post(`/admin/questions/${id}/retry-meeting-notifications`),
   getPendingAnswers: () => api.get('/admin/answers/pending'),
   approveAnswer: (id) => api.post(`/admin/answers/${id}/approve`),
   rejectAnswer: (id, reason) => api.post(`/admin/answers/${id}/reject`, { reason }),

@@ -18,6 +18,7 @@ import {
 import StatusBadge from '../../components/ui/StatusBadge'
 import UserAvatar from '../../components/ui/UserAvatar'
 import { expertApi } from '../../services/api'
+import { isMentorCallQuestion, MENTOR_CALL_DURATION_MINUTES } from '../../constants'
 
 function formatMoney(amount) {
   return `₹${(amount || 0) / 100}`
@@ -28,6 +29,9 @@ export default function ExpertQuestionDetail() {
   const queryClient = useQueryClient()
   const [content, setContent] = useState('')
   const [files, setFiles] = useState([])
+  const [slotLabel, setSlotLabel] = useState('')
+  const [slots, setSlots] = useState([])
+  const [timelineNote, setTimelineNote] = useState('')
 
   const { data, isLoading } = useQuery({
     queryKey: ['expert-question', id],
@@ -61,6 +65,23 @@ export default function ExpertQuestionDetail() {
     onError: (err) => toast.error(err.message),
   })
 
+  const availabilityMutation = useMutation({
+    mutationFn: () =>
+      expertApi.submitCallAvailability(id, {
+        slots,
+        timelineNote,
+      }),
+    onSuccess: () => {
+      toast.success('Availability submitted to admin')
+      queryClient.invalidateQueries({ queryKey: ['expert-question', id] })
+      queryClient.invalidateQueries({ queryKey: ['expert-questions'] })
+      setSlots([])
+      setTimelineNote('')
+      setSlotLabel('')
+    },
+    onError: (err) => toast.error(err.message),
+  })
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3 lg:h-[calc(100dvh-8rem)]">
@@ -74,7 +95,13 @@ export default function ExpertQuestionDetail() {
   }
 
   const { question, answer } = data || {}
-  const canSubmit = ['assigned', 'in_progress'].includes(question?.status)
+  const mentorCall = isMentorCallQuestion(question)
+  const canSubmit = !mentorCall && ['assigned', 'in_progress'].includes(question?.status)
+  const canProvideAvailability =
+    mentorCall &&
+    ['assigned', 'in_progress'].includes(question?.status) &&
+    question?.meetingStatus !== 'scheduled' &&
+    question?.meetingStatus !== 'completed'
   const answerPending = answer?.status === 'pending_review'
   const answerRejected = answer?.status === 'rejected'
   const answerApproved = answer?.status === 'approved' || question?.status === 'completed'
@@ -84,6 +111,13 @@ export default function ExpertQuestionDetail() {
 
   const removeFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const addSlot = () => {
+    const label = slotLabel.trim()
+    if (!label) return toast.error('Enter an available date/time')
+    setSlots((prev) => [...prev, { label }])
+    setSlotLabel('')
   }
 
   return (
@@ -154,6 +188,11 @@ export default function ExpertQuestionDetail() {
                 <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/80 px-2.5 py-1 text-xs font-medium capitalize text-muted">
                   <CreditCard size={12} />
                   {question.plan} · {formatMoney(question.amount)}
+                </span>
+              )}
+              {mentorCall && (
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-xs font-medium text-sky-600">
+                  Mentor Call · {question?.meetingDurationMinutes || MENTOR_CALL_DURATION_MINUTES} min
                 </span>
               )}
               {user.name && (
@@ -233,8 +272,136 @@ export default function ExpertQuestionDetail() {
           </div>
         </section>
 
-        {/* Panel 2 — Answer */}
+        {/* Panel 2 — Answer or Mentor Call availability */}
         <section className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-luxury-sm)] lg:min-h-0 lg:h-full">
+          {mentorCall ? (
+            <>
+              <div className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                  <Calendar size={12} />
+                  Mentor Call request
+                </p>
+                <h2 className="mt-1.5 text-base font-bold tracking-tight text-ink sm:text-lg">
+                  Provide availability
+                </h2>
+                <p className="mt-1 text-sm text-muted">
+                  Duration: {question?.meetingDurationMinutes || MENTOR_CALL_DURATION_MINUTES} minutes.
+                  Share possible dates/times — admin will finalize the meeting.
+                </p>
+              </div>
+
+              <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-5 lg:min-h-0">
+                {question?.mentorRequestStatus === 'responded' ? (
+                  <div className="mb-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3.5 text-sm text-emerald-700 dark:text-emerald-200">
+                    Availability submitted. Waiting for admin to schedule the meeting.
+                    {(question.mentorAvailability?.slots || []).length > 0 && (
+                      <ul className="mt-2 space-y-1 text-xs">
+                        {question.mentorAvailability.slots.map((s, i) => (
+                          <li key={i}>• {s.label || [s.date, s.time].filter(Boolean).join(' – ')}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {question.mentorAvailability?.timelineNote ? (
+                      <p className="mt-2 text-xs">{question.mentorAvailability.timelineNote}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {question?.meetingStatus === 'scheduled' || question?.meetingStatus === 'completed' ? (
+                  <div className="rounded-xl border border-border bg-surface/50 p-4 text-sm">
+                    <p className="font-semibold text-ink">
+                      Meeting {question.meetingStatus === 'completed' ? 'completed' : 'scheduled'}
+                    </p>
+                    <p className="mt-2 text-muted">
+                      {question.meetingDate
+                        ? new Date(question.meetingDate).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })
+                        : '—'}{' '}
+                      · {question.meetingTime || '—'}
+                    </p>
+                    {question.meetingLink ? (
+                      <a
+                        href={question.meetingLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-3 inline-flex text-sky-600 hover:underline"
+                      >
+                        Open meeting link
+                      </a>
+                    ) : null}
+                  </div>
+                ) : canProvideAvailability ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-semibold text-ink">Add available time</label>
+                      <div className="mt-2 flex gap-2">
+                        <input
+                          value={slotLabel}
+                          onChange={(e) => setSlotLabel(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSlot())}
+                          placeholder="e.g. 12 September – 4:00 PM"
+                          className="h-11 min-w-0 flex-1 rounded-xl border border-border bg-surface px-3 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={addSlot}
+                          className="rounded-xl border border-border bg-card px-4 text-sm font-semibold"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      {slots.length > 0 && (
+                        <ul className="mt-2 space-y-1">
+                          {slots.map((s, i) => (
+                            <li
+                              key={`${s.label}-${i}`}
+                              className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                            >
+                              <span>{s.label}</span>
+                              <button
+                                type="button"
+                                onClick={() => setSlots((prev) => prev.filter((_, idx) => idx !== i))}
+                                className="text-muted hover:text-ink"
+                              >
+                                <X size={14} />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-ink">
+                        Timeline note (optional)
+                      </label>
+                      <textarea
+                        value={timelineNote}
+                        onChange={(e) => setTimelineNote(e.target.value)}
+                        placeholder="Or describe your general availability…"
+                        className="mt-2 min-h-[100px] w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => availabilityMutation.mutate()}
+                      disabled={
+                        availabilityMutation.isPending || (!slots.length && !timelineNote.trim())
+                      }
+                      className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-violet-500 px-5 py-3.5 text-sm font-semibold text-white disabled:opacity-40"
+                    >
+                      {availabilityMutation.isPending ? 'Submitting…' : 'Submit availability'}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted">This Mentor Call is no longer open for availability.</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
           <div className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
             <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
               <PenLine size={12} />
@@ -335,6 +502,8 @@ export default function ExpertQuestionDetail() {
                 {submitMutation.isPending ? 'Submitting…' : 'Submit for review'}
               </button>
             </div>
+          )}
+            </>
           )}
         </section>
       </div>

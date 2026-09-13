@@ -14,6 +14,8 @@ import User from '../models/User.js'
 import { resolveIdList, mergeCategoryIdsWithTypes } from '../utils/expertMatch.js'
 import { applyProfileDetails } from '../utils/profileDetails.js'
 import { formatExpert } from '../utils/formatExpert.js'
+import { isMentorCallQuestion } from '../constants/mentorCall.js'
+import { submitMentorAvailability } from '../services/mentorCallService.js'
 
 export const getDashboard = asyncHandler(async (req, res) => {
   const expertId = req.user._id
@@ -122,6 +124,13 @@ export const submitAnswer = asyncHandler(async (req, res) => {
   })
   if (!question) throw new ApiError(404, 'Question not found or not actionable')
 
+  if (isMentorCallQuestion(question)) {
+    throw new ApiError(
+      400,
+      'Mentor Call requests use availability submission, not written answers'
+    )
+  }
+
   const existing = await Answer.findOne({ question: question._id })
   if (existing && existing.status !== 'rejected') {
     throw new ApiError(400, 'Answer already submitted')
@@ -169,6 +178,17 @@ export const submitAnswer = asyncHandler(async (req, res) => {
   })
 
   res.json({ success: true, answer })
+})
+
+export const submitCallAvailability = asyncHandler(async (req, res) => {
+  const { slots, timelineNote } = req.body
+  const question = await submitMentorAvailability({
+    questionId: req.params.id,
+    expertUserId: req.user._id,
+    slots,
+    timelineNote,
+  })
+  res.json({ success: true, question })
 })
 
 export const getExpertProfile = asyncHandler(async (req, res) => {
