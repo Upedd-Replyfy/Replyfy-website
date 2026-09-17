@@ -2,8 +2,8 @@ import Plan from '../models/Plan.js'
 import { ApiError, asyncHandler } from '../utils/ApiError.js'
 import { slugify } from '../utils/slug.js'
 import {
-  ensureDefaultPlans,
   formatPlanPublic,
+  getActivePlans,
   getAllPlans,
   invalidatePlanCache,
 } from '../services/planService.js'
@@ -157,8 +157,8 @@ export const deletePlan = asyncHandler(async (req, res) => {
 })
 
 export const listPublicPlans = asyncHandler(async (req, res) => {
-  await ensureDefaultPlans()
-  const plans = await Plan.find({ isActive: true }).sort({ sortOrder: 1, name: 1 })
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
+  const plans = await getActivePlans()
   res.json({
     success: true,
     plans: plans.map((plan) => formatPlanPublic(plan)),

@@ -1,9 +1,21 @@
 import { env } from './env.js'
 
-const configuredOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map((url) => url.trim())
-  .filter(Boolean)
+const defaultProductionOrigins = [
+  'https://replyfy.org',
+  'https://www.replyfy.org',
+  'http://localhost:5173',
+  'http://localhost:3000',
+]
+
+const configuredOrigins = Array.from(
+  new Set([
+    ...defaultProductionOrigins,
+    ...(process.env.CLIENT_URL || '')
+      .split(',')
+      .map((url) => url.trim())
+      .filter(Boolean),
+  ])
+)
 
 function isLocalhostOrigin(origin) {
   try {

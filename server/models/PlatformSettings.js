@@ -31,18 +31,36 @@ const platformSettingsSchema = new mongoose.Schema(
 
 const PlatformSettings = mongoose.model('PlatformSettings', platformSettingsSchema)
 
+let settingsCache = { at: 0, doc: null }
+const CACHE_MS = 60_000
+
+export function invalidatePlatformSettingsCache() {
+  settingsCache = { at: 0, doc: null }
+}
+
 export async function getPlatformSettingsDoc() {
-  return PlatformSettings.findOneAndUpdate(
-    { key: 'platform' },
-    {
-      $setOnInsert: {
-        key: 'platform',
-        mentorProfileVisibility: DEFAULT_MENTOR_PROFILE_VISIBILITY,
-        mentorTypesEnabled: true,
+  const now = Date.now()
+  if (settingsCache.doc && now - settingsCache.at < CACHE_MS) {
+    return settingsCache.doc
+  }
+
+  let doc = await PlatformSettings.findOne({ key: 'platform' }).lean()
+  if (!doc) {
+    doc = await PlatformSettings.findOneAndUpdate(
+      { key: 'platform' },
+      {
+        $setOnInsert: {
+          key: 'platform',
+          mentorProfileVisibility: DEFAULT_MENTOR_PROFILE_VISIBILITY,
+          mentorTypesEnabled: true,
+        },
       },
-    },
-    { new: true, upsert: true }
-  ).lean()
+      { new: true, upsert: true }
+    ).lean()
+  }
+
+  settingsCache = { at: now, doc }
+  return doc
 }
 
 export async function getMentorProfileVisibilitySettings() {

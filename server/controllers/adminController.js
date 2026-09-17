@@ -5,6 +5,7 @@ import ExpertProfile from '../models/ExpertProfile.js'
 import PlatformSettings, {
   DEFAULT_MENTOR_PROFILE_VISIBILITY,
   getMentorProfileVisibilitySettings,
+  invalidatePlatformSettingsCache,
   isMentorTypesEnabled,
 } from '../models/PlatformSettings.js'
 import Category from '../models/Category.js'
@@ -458,6 +459,7 @@ export const updateMentorProfileVisibility = asyncHandler(async (req, res) => {
     ),
     ExpertProfile.updateMany({}, { $set: { profileVisibility } }),
   ])
+  invalidatePlatformSettingsCache()
 
   res.json({
     success: true,
@@ -482,6 +484,7 @@ export const updateMentorTypesSetting = asyncHandler(async (req, res) => {
     { $set: { mentorTypesEnabled: enabled } },
     { upsert: true, new: true }
   )
+  invalidatePlatformSettingsCache()
 
   res.json({
     success: true,

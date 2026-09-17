@@ -20,13 +20,16 @@ function normalizeExpertDoc(profile) {
 }
 
 export const getCategories = asyncHandler(async (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   const categories = await Category.find({ isActive: true })
     .select('name slug description placeholder suggestions icon sortOrder')
     .sort({ sortOrder: 1, name: 1 })
+    .lean()
   res.json({ success: true, categories })
 })
 
 export const getExpertTypes = asyncHandler(async (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   const mentorTypesEnabled = await isMentorTypesEnabled()
   if (!mentorTypesEnabled) {
     return res.json({ success: true, expertTypes: [], mentorTypesEnabled: false })
@@ -40,6 +43,7 @@ export const getExpertTypes = asyncHandler(async (req, res) => {
     .select('name slug description placeholder suggestions category sortOrder')
     .populate('category', 'name slug')
     .sort({ sortOrder: 1, name: 1 })
+    .lean()
 
   res.json({ success: true, expertTypes, mentorTypesEnabled: true })
 })
@@ -111,7 +115,7 @@ export const getExperts = asyncHandler(async (req, res) => {
     .sort(sortMap[sort] || sortMap.rating)
     .lean()
 
-  profiles = profiles.filter((p) => p.user?.isActive).map(normalizeExpertDoc)
+  profiles = profiles.filter((p) => p.user && p.user.isActive !== false).map(normalizeExpertDoc)
 
   if (search) {
     const s = search.toLowerCase()
@@ -138,6 +142,7 @@ export const getExperts = asyncHandler(async (req, res) => {
     return mentorTypesEnabled ? formatted : stripMentorTypes(formatted)
   })
 
+  res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=30')
   res.json({
     success: true,
     experts,
@@ -191,6 +196,7 @@ export const getExpertById = asyncHandler(async (req, res) => {
 })
 
 export const getPlatformStats = asyncHandler(async (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   const [expertCount, answerCount, avgResponse, mentorTypesEnabled] = await Promise.all([
     ExpertProfile.countDocuments({ status: 'active', availability: 'available' }),
     ExpertProfile.aggregate([{ $group: { _id: null, total: { $sum: '$completedAnswers' } } }]),
@@ -210,6 +216,7 @@ export const getPlatformStats = asyncHandler(async (req, res) => {
 })
 
 export const getPlatformSettings = asyncHandler(async (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   const mentorTypesEnabled = await isMentorTypesEnabled()
   res.json({ success: true, settings: { mentorTypesEnabled } })
 })

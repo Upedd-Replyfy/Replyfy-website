@@ -1,8 +1,10 @@
 import axios from 'axios'
 
 // In dev, Vite proxies /api → http://localhost:5000 (works on any localhost port).
-// Override with VITE_API_URL in .env for production or a remote API.
-const API_BASE = import.meta.env.VITE_API_URL || '/api'
+// Uses VITE_API_URL in .env, falling back to production hostinger API if in production.
+const API_BASE =
+  import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://api.replyfy.org/api' : '/api')
+
 
 const api = axios.create({
   baseURL: API_BASE,
